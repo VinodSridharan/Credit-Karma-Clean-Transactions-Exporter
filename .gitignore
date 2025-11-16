@@ -184,6 +184,13 @@ docs/
 # Exclude scripts folder (all files in scripts/ folder)
 scripts/
 
+# Exclude publishing/development scripts
+PUBLISH_COMMANDS.ps1
+README_PUBLISH.md
+COMMIT_MESSAGE.md
+GITHUB_UPLOAD_FINAL.md
+PUBLISH_TO_GITHUB.md
+
 # ============================================================================
 # Screenshots & Images - KEEP (Visible on GitHub)
 # ============================================================================
