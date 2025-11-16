@@ -1,0 +1,208 @@
+# Chrome Extension - CreditKarmaTxDownloader
+# Git Ignore File
+# Keep only: Core extension files, MANUAL_RECOVERY_SCRIPT.js, and README.md
+
+# ============================================================================
+# Operating System Files
+# ============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# Editor & IDE Files
+# ============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# Development & Build Files
+# ============================================================================
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+dist/
+build/
+*.zip
+*.crx
+*.pem
+
+# ============================================================================
+# Chrome Extension Specific
+# ============================================================================
+
+# Extension build files
+*.crx
+*.pem
+*.zip
+
+# Extension packaging
+packed/
+build/
+
+# ============================================================================
+# Testing & Coverage
+# ============================================================================
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Testing
+*.test.js
+*.spec.js
+
+# ============================================================================
+# Environment & Config
+# ============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Config files with sensitive data
+config.local.js
+secrets.json
+credentials.json
+
+# ============================================================================
+# Temporary Files
+# ============================================================================
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# Cache
+.cache/
+*.cache
+
+# ============================================================================
+# Download Files (CSV exports)
+# ============================================================================
+
+# CSV export files (user downloads)
+*.csv
+downloads/
+exports/
+output/
+
+# ============================================================================
+# Personal & Backup Files
+# ============================================================================
+
+# Personal notes
+notes.txt
+todo.txt
+personal.md
+
+# Backup folders
+backup/
+backups/
+old/
+archive/
+
+# Vault folders (backup/archive)
+VAULT-*/
+
+# ============================================================================
+# Documentation Files - EXCLUDE ALL EXCEPT README.md
+# ============================================================================
+
+# Exclude all markdown files first
+*.md
+
+# Then explicitly KEEP only README.md (at root)
+!README.md
+
+# Exclude documentation folder (all files in docs/ folder)
+docs/
+
+# ============================================================================
+# Internal Development Tools & Scripts
+# ============================================================================
+
+# Exclude scripts folder (all files in scripts/ folder)
+scripts/
+
+# ============================================================================
+# Screenshots & Images - KEEP (Visible on GitHub)
+# ============================================================================
+# Screenshots folder is NOT excluded - screenshots will be visible for README.md
+# screenshots/ folder is intentionally tracked (for use in documentation)
+
+# ============================================================================
+# Files to KEEP (Tracked - Visible on GitHub)
+# ============================================================================
+# Core Extension Files (explicitly tracked - not in .gitignore):
+# - manifest.json
+# - content.js
+# - popup.js
+# - popup.html
+# - popup.css
+# - background.js
+# - icon.png
+# - MANUAL_RECOVERY_SCRIPT.js
+# - README.md
+# - .gitignore (this file)
+# - screenshots/ folder (extension-popup.png, extension-popup-preset.png, notifications-modal.png)
+# Note: LICENSE file already exists in GitHub repository
