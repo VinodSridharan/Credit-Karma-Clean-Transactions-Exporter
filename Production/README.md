@@ -253,10 +253,10 @@ Exported CSV includes:
 
 This extension represents a significant enhancement over the original project:
 
-- **Original Developer**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
-  - Provided the foundational extraction logic
+- **Inspiration & Base Repository**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
+  - The foundation version provided inspiration for this entire development work
 
-- **Enhanced Version Developer**: Vinod Sridharan, BI Professional
+- **JavaScript Extension Developer**: Vinod Sridharan, BI Professional
   - Added dual boundary checking for 100% accuracy
   - Implemented strict boundary capture (start AND end dates)
   - Enhanced multi-format date parsing (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
