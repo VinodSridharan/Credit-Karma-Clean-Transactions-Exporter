@@ -110,6 +110,31 @@ All presets have been thoroughly tested and work perfectly with test data:
 **Progress Notifications:**
 <img src="Runtime Notifications.png" alt="Runtime Notifications" width="800" />
 
+**Understanding "Total Found" vs "In Range":**
+
+The progress indicator shows two different counts:
+- **Total Found (e.g., 367)**: All transactions discovered during scrolling
+- **In Range (e.g., 58)**: Transactions that fall within your selected date range
+
+**Why are these numbers different?**
+
+This is **completely normal** and expected behavior! The extension uses **scroll boundary checking** to ensure complete extraction:
+
+1. **The extension scrolls through ALL visible transactions** on the page to find the oldest and newest dates
+2. **During scrolling**, it discovers many transactions outside your selected date range
+3. **After scrolling completes**, it filters transactions to only include those within your exact date range
+
+**Example from screenshot above:**
+- **367 total transactions found**: All transactions discovered while scrolling (includes dates before/after your range)
+- **58 in range**: Only transactions within your selected date range (e.g., Nov 1-14)
+
+This dual-counting approach ensures:
+- ✅ **Complete boundary checking** - The extension knows exactly when it has scrolled past your start date
+- ✅ **No missed transactions** - By scrolling through all visible transactions, nothing is missed
+- ✅ **Accurate filtering** - Only transactions in your exact date range are exported
+
+**The final exported CSV will contain ONLY the "In Range" count (58 transactions in the example above).**
+
 **Maximum Range:**
 
 - **Verified**: 3 years (1,082 days)
@@ -169,10 +194,16 @@ All presets have been thoroughly tested and work perfectly with test data:
 **Extension errors page showing warnings?**
 
 - **"Only X transactions in range out of Y total found"** - This is **NORMAL** and **NOT an error** ✅
-  - The extension finds ALL transactions on the page, then filters to your selected date range
-  - For short ranges (e.g., "This Month"), it's normal to have many transactions outside the range
-  - Example: If you select Nov 1-14 and the page has 305 total transactions, only 52 might be in that range - this is correct!
-  - **You can safely ignore this warning** - it's just informational
+  - **This is due to scroll boundary checking** - The extension must scroll through all transactions to determine date boundaries
+  - During scrolling, it discovers many transactions outside your selected date range (this is expected)
+  - After scrolling completes, it filters to only include transactions within your exact date range
+  - **Example from screenshot**: If you see "367 total found, 58 in range" - this means:
+    - The extension scrolled and found 367 total transactions on the page
+    - Only 58 of those transactions fall within your selected date range
+    - The exported CSV will contain exactly 58 transactions (the "in range" count)
+  - For short ranges (e.g., "This Month" or a 2-week window), it's normal to have many transactions outside the range
+  - **You can safely ignore this message** - it's just informational to show the filtering process
+  - See the screenshot above in "Understanding 'Total Found' vs 'In Range'" section for visual explanation
 - Other warnings are usually informational too - check the console (F12) for details
 
 **No transactions found for older date ranges?**
@@ -309,15 +340,24 @@ This extension includes the following files:
 
 ### Screenshots
 - `Extension UI.png` - Extension popup interface (embedded in Quick Start section)
+  - **Dimensions**: 241x400 pixels
+  - **File size**: 37.53 KB
+  - ✅ Updated with optimized resolution
 - `Runtime Notifications.png` - Progress notifications (embedded in Export section)
+  - **Dimensions**: 600x307 pixels
+  - **File size**: 60.13 KB
+  - ✅ Updated with optimized resolution
 - `Export Notification.png` - Export completion notification (embedded below)
+  - **Dimensions**: 300x279 pixels
+  - **File size**: 46.02 KB
+  - ✅ Updated with optimized resolution
 
 **Export Completion:**
 <img src="Export Notification.png" alt="Export Notification" width="800" />
 
 **Total**: 11 files (7 core extension files + 2 documentation files + 3 screenshots)
 
-**Note:** Screenshots are embedded inline in this README. If images appear grainy, higher resolution versions can be provided by replacing the PNG files with higher resolution images (recommended: 1200x800 pixels or higher).
+**Note:** Screenshots are embedded inline in this README with `width="800"` attribute for proper display (HTML scaling). All screenshots have been updated and optimized for better quality while maintaining reasonable file sizes for faster loading. Actual pixel dimensions are listed above for each screenshot.
 
 ---
 
