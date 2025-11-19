@@ -1,3 +1,15 @@
+# Keep only Production folder visible on GitHub
+# Everything else is excluded
+
+# Allow Production folder and .gitignore
+!Production/
+!.gitignore
+
+# Exclude all root-level files and folders
+/*
+!/Production
+!/.gitignore
+
 # Backup/Archive Folders
 VAULT-*/
 
@@ -34,3 +46,27 @@ desktop.ini
 # Excel Files
 *.xlsx
 *.xls
+
+# Development/Staging folders (not for GitHub)
+Staging/
+REFERENCE_AND_ACCURACY/
+CK_TX_Downloader_JavaScript/
+
+# Development documentation files (not for GitHub)
+*.md
+!Production/README.md
+
+# Root-level extension files (use Production folder instead)
+background.js
+content.js
+popup.js
+popup.html
+popup.css
+manifest.json
+icon.png
+README.md
+LICENSE
+MANUAL_RECOVERY_SCRIPT.js
+
+# Development/Testing folders
+screenshots/
