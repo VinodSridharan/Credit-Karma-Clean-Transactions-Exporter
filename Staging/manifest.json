@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "CreditKarmaTxDownloader",
-    "version": "3.0.1",
-    "description": "Export Credit Karma transactions to CSV with 100% accuracy",
+    "name": "YourConnectedAccountsTx",
+    "version": "2.0",
+    "description": "Professional Chrome extension to export Credit Karma transactions with precise date boundaries and advanced features.",
     "permissions": ["activeTab", "scripting", "tabs"],
     "action": {
       "default_popup": "popup.html",
