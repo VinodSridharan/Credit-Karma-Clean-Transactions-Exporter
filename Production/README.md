@@ -253,9 +253,6 @@ Exported CSV includes:
 
 This extension represents a significant enhancement over the original project:
 
-- **Inspiration & Base Repository**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
-  - The foundation version provided inspiration for this entire development work
-
 - **JavaScript Extension Developer**: Vinod Sridharan, BI Professional
   - Added dual boundary checking for 100% accuracy
   - Implemented strict boundary capture (start AND end dates)
@@ -279,6 +276,11 @@ This extension represents a significant enhancement over the original project:
 - ✅ **Enhanced Deduplication** - Composite key (date + description + amount + transaction type) ensures accurate transaction handling
 - ✅ **Smart Duplicate Detection** - Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
 - ✅ **Multi-Format Parsing** - Handles Credit Karma's changing date formats
+
+**Acknowledgments:**
+
+- **Inspiration & Base Repository**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
+  - We gratefully acknowledge that the foundation version provided valuable inspiration for this entire development work.
 
 ---
 
