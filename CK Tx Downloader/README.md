@@ -25,7 +25,7 @@
 1. Open Chrome → `chrome://extensions/`
 2. Turn on "Developer mode" (top right)
 3. Click "Load unpacked"
-4. Select the `Production` folder (this folder contains all extension files)
+4. Select the `CK Tx Downloader` folder (this folder contains all extension files)
 
 ### 2. Use Extension
 
@@ -39,6 +39,9 @@
 8. Enable **"Strict boundaries"** checkbox
 9. Click **"Export"**
 10. Wait - CSV downloads automatically
+
+**Extension UI:**
+<img src="Extension UI.png" alt="Extension UI" width="800" />
 
 **Don't touch the page while exporting!**
 
@@ -103,6 +106,9 @@ All presets have been thoroughly tested and work perfectly with test data:
 - Don't touch the page - let it run automatically
 - You can switch tabs or minimize browser
 - Don't scroll manually or click anything
+
+**Progress Notifications:**
+<img src="Runtime Notifications.png" alt="Runtime Notifications" width="800" />
 
 **Maximum Range:**
 
@@ -302,11 +308,16 @@ This extension includes the following files:
 - `LICENSE` - MIT License
 
 ### Screenshots
-- `Screenshots/Extension UI.png` - Extension popup interface
-- `Screenshots/Runtime Notifications.png` - Progress notifications
-- `Screenshots/Export Notification.png` - Export completion notification
+- `Extension UI.png` - Extension popup interface (embedded in Quick Start section)
+- `Runtime Notifications.png` - Progress notifications (embedded in Export section)
+- `Export Notification.png` - Export completion notification (embedded below)
+
+**Export Completion:**
+<img src="Export Notification.png" alt="Export Notification" width="800" />
 
 **Total**: 11 files (7 core extension files + 2 documentation files + 3 screenshots)
+
+**Note:** Screenshots are embedded inline in this README. If images appear grainy, higher resolution versions can be provided by replacing the PNG files with higher resolution images (recommended: 1200x800 pixels or higher).
 
 ---
 

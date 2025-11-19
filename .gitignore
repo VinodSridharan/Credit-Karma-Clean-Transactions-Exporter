@@ -1,13 +1,13 @@
-# Keep only Production folder visible on GitHub
+# Keep only CK Tx Downloader folder visible on GitHub
 # Everything else is excluded
 
-# Allow Production folder and .gitignore
-!Production/
+# Allow CK Tx Downloader folder and .gitignore
+!"CK Tx Downloader/"
 !.gitignore
 
 # Exclude all root-level files and folders
 /*
-!/Production
+!"CK Tx Downloader"
 !/.gitignore
 
 # Backup/Archive Folders
@@ -54,9 +54,9 @@ CK_TX_Downloader_JavaScript/
 
 # Development documentation files (not for GitHub)
 *.md
-!Production/README.md
+!"CK Tx Downloader/README.md"
 
-# Root-level extension files (use Production folder instead)
+# Root-level extension files (use CK Tx Downloader folder instead)
 background.js
 content.js
 popup.js
