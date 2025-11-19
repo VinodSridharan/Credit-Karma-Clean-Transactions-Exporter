@@ -1,392 +1,12 @@
 # CreditKarmaTxDownloader
 
-> **Professional Chrome Extension** - Export Credit Karma transactions to CSV with 100% accuracy
-
-**🔗 [View on GitHub](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)** - *Star ⭐ if you find this useful!*
-
-**Why This Extension?**
-
-- ✅ **100% Accurate** - Dual boundary checking ensures complete transaction capture (no missed transactions)
-- ✅ **Fully Automatic** - Hands-free operation, no manual scrolling needed
-- ✅ **PRISTINE Status** - 4 out of 5 presets verified with 100% complete extraction
-- ✅ **3 Years of Data** - Export up to 3 years of transaction history (verified working range)
-- ✅ **Tested & Verified** - All presets tested and working perfectly
-- ✅ **Browser Compatible** - Works with Chrome and Chromium-based browsers
-
-**Version**: 3.0.1  
-**Last Updated**: November 18, 2025
-
----
-
-## Quick Start
-
-### 1. Install Extension
-
-1. Open Chrome → `chrome://extensions/`
-2. Turn on "Developer mode" (top right)
-3. Click "Load unpacked"
-4. Select the `CK Tx Downloader` folder (this folder contains all extension files)
-
-### 2. Use Extension
-
-1. Click extension icon to navigate to Credit Karma login page
-2. Log in to Credit Karma
-3. Click extension icon again
-4. Click **"First, click here to Go to the Tx Page"**
-5. Click the refresh button to ensure fresh page state
-6. Click extension icon again
-7. Select a preset or enter dates (format: `YYYY-MM-DD`)
-8. Enable **"Strict boundaries"** checkbox
-9. Click **"Export"**
-10. Wait - CSV downloads automatically
-
-**Extension UI:**
-<img src="Extension UI.png" alt="Extension UI" width="800" />
-
-**Don't touch the page while exporting!**
-
-**Best Practice:** Log out soon after download completes. If logged out by Credit Karma during extraction, clear downloads folder for fresh login.
-
----
-
-## Date Presets
-
-- **This Month** - Current month (e.g., Nov 1-14)
-- **Last Month** - Previous full month (e.g., Oct 1-31)
-- **Last Year** - Previous full year (e.g., Jan 1 - Dec 31, 2024)
-- **Last 2 Years** - Nov 19, 2023 - Nov 18, 2025
-- **Last 3 Years** - Nov 1, 2022 - Nov 18, 2025 (maximum verified range)
-
-**Custom ranges**: Up to 3 years maximum (verified working limit)
-
----
-
-## Test Results - Verified & Working! ✅
-
-All presets have been thoroughly tested and work perfectly with test data:
-
-- Developed composite key deduplication (date + description + amount + transaction type) - Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
-
-| Preset | Results | Time | Accuracy | Status |
-|--------|---------|------|----------|--------|
-| **This Month** | 52 transactions | ~3 minutes | 100% ✅ | ✅ PRISTINE |
-| **Last Month** | 133 transactions | ~2.5 minutes | 100% ✅ | ✅ PRISTINE |
-| **Last Year** | 738 transactions | ~15-25 minutes | 97%+ ✅ | ✅ Working |
-| **Last 2 Years** | 2,286 transactions | ~18 minutes | 100% ✅ | ✅ PRISTINE |
-| **Last 3 Years** | 2,865 transactions | ~23 minutes | 100% ✅ | ✅ PRISTINE |
-
-**PRISTINE Status**: Verified 100% complete extraction with all boundary dates captured.
-
-**What makes this special?**
-
-- ✅ **Zero manual work** - Fully automatic scrolling and extraction
-- ✅ **Complete coverage** - All transactions in date range captured
-- ✅ **Strict boundaries** - Only exports transactions within exact date range
-- ✅ **Production ready** - Tested with real data, ready for daily use
-- ✅ **4 PRISTINE Presets** - 80% of presets verified with perfect extraction
-
----
-
-## Important Notes
-
-**Before Every Export:**
-
-- Click the refresh button on transactions page to ensure fresh page state
-
-**Strict Boundaries:**
-
-- ✅ Check "Strict boundaries" option
-- Only exports transactions within exact date range
-
-**During Export:**
-
-- **Status indicators** show progress:
-  - **Top center**: Shows export status and max scrolls planned
-  - **Bottom left**: Shows real-time progress (Scroll: X / MAX | Found: Y | In range: Z)
-- Don't touch the page - let it run automatically
-- You can switch tabs or minimize browser
-- Don't scroll manually or click anything
-
-**Progress Notifications:**
-<img src="Runtime Notifications.png" alt="Runtime Notifications" width="800" />
-
-**Understanding "Total Found" vs "In Range":**
-
-The progress indicator shows two different counts:
-- **Total Found (e.g., 367)**: All transactions discovered during scrolling
-- **In Range (e.g., 58)**: Transactions that fall within your selected date range
-
-**Why are these numbers different?**
-
-This is **completely normal** and expected behavior! The extension uses **scroll boundary checking** to ensure complete extraction:
-
-1. **The extension scrolls through ALL visible transactions** on the page to find the oldest and newest dates
-2. **During scrolling**, it discovers many transactions outside your selected date range
-3. **After scrolling completes**, it filters transactions to only include those within your exact date range
-
-**Example from screenshot above:**
-- **367 total transactions found**: All transactions discovered while scrolling (includes dates before/after your range)
-- **58 in range**: Only transactions within your selected date range (e.g., Nov 1-14)
-
-This dual-counting approach ensures:
-- ✅ **Complete boundary checking** - The extension knows exactly when it has scrolled past your start date
-- ✅ **No missed transactions** - By scrolling through all visible transactions, nothing is missed
-- ✅ **Accurate filtering** - Only transactions in your exact date range are exported
-
-**The final exported CSV will contain ONLY the "In Range" count (58 transactions in the example above).**
-
-**Maximum Range:**
-
-- **Verified**: 3 years (1,082 days)
-- All provided presets work successfully within this range
-- For longer ranges, use multiple extractions and combine
-
-**Long Date Range Warnings:**
-
-- Long date ranges (2+ years) may cause session timeouts or logout
-- If extension stops scrolling or gets logged out, try shorter ranges (e.g., 1 year: 2024)
-- For single year extractions use Presets or use date range (e.g., 2023, 2024).
-- Best practice: Log out soon after download completes
-
-**Known Limitations:**
-
-- **Credit Karma may change its website structure, UI, or tools** - This is expected and may cause unknown issues or the extension to stop working
-- If the extension stops working after previously working fine, Credit Karma may have updated their website
-- Check the GitHub repository for updates or report issues if the extension becomes incompatible with Credit Karma's latest changes
-
----
-
-## Troubleshooting
-
-**Extension not showing?**
-
-- Go to `chrome://extensions/`, find "CreditKarmaTxDownloader", pin it
-
-**"Content Script Not Loaded" error?**
-
-- Click refresh button on transactions page, wait for it to load, try again
-
-**Export taking a long time?**
-
-- This is normal! Large ranges take 15-30 minutes. Don't interrupt.
-- Single year (2024): ~15-25 minutes
-- Last 2 Years: ~18 minutes
-- Last 3 Years: ~23 minutes
-
-**Missing some dates?**
-
-- Check if transactions exist in Credit Karma for those dates
-- Verify date range does not exceed 3 years
-
-**Got logged out during export?**
-
-- Long date ranges (2+ years) may cause session timeouts or automatic logout
-- If logged out by Credit Karma, clear downloads folder for fresh login and try again
-- For very long extractions (>30 minutes), consider splitting into smaller ranges (e.g., single year: 2022, 2023, 2024)
-- Best practice: Log out soon after download completes
-
-**Extension stops scrolling for long date ranges?**
-
-- Long date ranges (2+ years) may stop scrolling due to session timeouts
-- Try shorter ranges (e.g., single year: 2024)
-- For historical data, use single year extractions (e.g., 2022, 2023, 2024) and combine results
-
-**Extension errors page showing warnings?**
-
-- **"Only X transactions in range out of Y total found"** - This is **NORMAL** and **NOT an error** ✅
-  - **This is due to scroll boundary checking** - The extension must scroll through all transactions to determine date boundaries
-  - During scrolling, it discovers many transactions outside your selected date range (this is expected)
-  - After scrolling completes, it filters to only include transactions within your exact date range
-  - **Example from screenshot**: If you see "367 total found, 58 in range" - this means:
-    - The extension scrolled and found 367 total transactions on the page
-    - Only 58 of those transactions fall within your selected date range
-    - The exported CSV will contain exactly 58 transactions (the "in range" count)
-  - For short ranges (e.g., "This Month" or a 2-week window), it's normal to have many transactions outside the range
-  - **You can safely ignore this message** - it's just informational to show the filtering process
-  - See the screenshot above in "Understanding 'Total Found' vs 'In Range'" section for visual explanation
-- Other warnings are usually informational too - check the console (F12) for details
-
-**No transactions found for older date ranges?**
-
-- Verify the date range does not exceed 3 years (maximum verified working range)
-- For 2023 or earlier, use direct single year extractions (e.g., 2022, 2023) if needed
-- Extension may need to scroll backward for very old dates - wait for completion
-
-**Unexpected issues or extension not working?**
-
-- **Credit Karma may change its website structure, UI, or tools** - This is expected and may cause the extension to stop working
-- If the extension suddenly stops working after previously working fine, Credit Karma may have updated their website
-- Check the GitHub repository for updates or report issues
-- Consider using shorter date ranges or manual extraction if the extension is incompatible with Credit Karma's latest changes
-
----
-
-## CSV Format
-
-Exported CSV includes:
-
-- Date (MM/DD/YYYY format)
-- Description
-- Amount
-- Category
-- Transaction Type (credit/debit)
-- Status (Posted/Pending)
-- Account Name (empty)
-- Labels (empty)
-- Notes (empty)
-
----
-
-## Why This Extension is Awesome
-
-### 🎯 **Professional Quality**
-
-- Built with production-grade code (~2,200+ lines)
-- Comprehensive error handling and recovery
-- Smart scrolling algorithms optimized for Credit Karma
-- Extensive testing with real transaction data
-- PRISTINE status tracking for verified accuracy
-
-### ⚡ **Performance**
-
-- **Fast**: Last Month exports in ~2.5 minutes (133 transactions)
-- **Efficient**: Optimized scrolling to minimize page load times
-- **Smart**: Auto-stops when date range boundaries are reached
-- **Reliable**: Tested with ranges from 1 month to 3 years
-- **Verified**: 100% success rate for all provided presets
-
-### 🛡️ **Data Safety**
-
-- Strict boundaries ensure data accuracy
-- Complete transaction history captured
-- Enhanced deduplication with composite key (date + description + amount + transaction type)
-- Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
-- Multi-format date parsing handles Credit Karma's changing formats
-
-### 💡 **User-Friendly**
-
-- One-click presets for common ranges (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)
-- Visual progress indicators
-- Clear export summary with statistics
-- Simple installation and setup
-
----
-
-## Tips
-
-1. **Start with "Last Month"** ⭐ - Fastest and most reliable (tested: 133 transactions in 2m 35s, ✅ PRISTINE)
-2. **For recent data, use "This Month"** - Most accurate for current month (52 transactions in 2m 58s, ✅ PRISTINE)
-3. **For full year data, use "Last Year"** - Complete year extraction (738 transactions, ~15-25m, ✅ Working)
-4. **For historical data, use single year extractions** - Most reliable (e.g., 2022: ~15-25m, 2023: ~15-25m, 2024: ~15-25m)
-5. **For longer ranges, use "Last 2 Years" or "Last 3 Years"** - Maximum verified range (2,865 transactions in 22m 51s, ✅ PRISTINE)
-6. **Always check "Strict boundaries"** - Ensures exact date range (no extra transactions)
-7. **Click refresh button before every run** - Ensures fresh page state and prevents errors
-8. **Maximum 3 years** - Verified working limit, split longer ranges into multiple extractions
-9. **Best practice: Log out after download** - Prevents session issues and ensures clean state for next extraction
-
----
-
-## Credits
-
-This extension represents a significant enhancement over the original project:
-
-- **JavaScript Extension Developer**: Vinod Sridharan, BI Professional
-  - Added dual boundary checking for 100% accuracy
-  - Implemented strict boundary capture (start AND end dates)
-  - Enhanced multi-format date parsing (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
-  - Developed composite key deduplication (date + description + amount + transaction type)
-  - Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
-  - Added 5 verified date presets (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)
-  - Extended range support up to 3 years (verified working limit)
-  - Created PRISTINE status tracking framework
-  - Implemented comprehensive testing with 100% success rate
-  - Achieved 4 PRISTINE presets (80% PRISTINE rate)
-  - Professional documentation and user experience
-
-**Key Improvements:**
-
-- ✅ **100% Accuracy** - Dual boundary checking ensures no missed transactions
-- ✅ **PRISTINE Status** - 4 out of 5 presets verified with perfect extraction
-- ✅ **5 Verified Presets** - All presets tested and working (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)
-- ✅ **3-Year Support** - Verified maximum working range of 3 years
-- ✅ **Production Ready** - Thoroughly tested and verified with real data (2,865 transactions extracted successfully)
-- ✅ **Enhanced Deduplication** - Composite key (date + description + amount + transaction type) ensures accurate transaction handling
-- ✅ **Smart Duplicate Detection** - Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
-- ✅ **Multi-Format Parsing** - Handles Credit Karma's changing date formats
-
-**Acknowledgments:**
-
-- **Inspiration & Base Repository**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
-  - We gratefully acknowledge that the foundation version provided valuable inspiration for this entire development work.
-
----
-
-## Files Included
-
-This extension includes the following files:
-
-### Core Extension Files
-- `manifest.json` - Extension configuration
-- `content.js` - Main extraction logic
-- `popup.js` - User interface logic
-- `popup.html` - User interface HTML
-- `popup.css` - Styling
-- `background.js` - Background services
-- `icon.png` - Extension icon
-
-### Documentation
-- `README.md` - This file
-- `LICENSE` - MIT License
-
-### Screenshots
-- `Extension UI.png` - Extension popup interface (embedded in Quick Start section)
-  - **Dimensions**: 241x400 pixels
-  - **File size**: 37.53 KB
-  - ✅ Updated with optimized resolution
-- `Runtime Notifications.png` - Progress notifications (embedded in Export section)
-  - **Dimensions**: 600x307 pixels
-  - **File size**: 60.13 KB
-  - ✅ Updated with optimized resolution
-- `Export Notification.png` - Export completion notification (embedded below)
-  - **Dimensions**: 300x279 pixels
-  - **File size**: 46.02 KB
-  - ✅ Updated with optimized resolution
-
-**Export Completion:**
-<img src="Export Notification.png" alt="Export Notification" width="800" />
-
-**Total**: 11 files (7 core extension files + 2 documentation files + 3 screenshots)
-
-**Note:** Screenshots are embedded inline in this README with `width="800"` attribute for proper display (HTML scaling). All screenshots have been updated and optimized for better quality while maintaining reasonable file sizes for faster loading. Actual pixel dimensions are listed above for each screenshot.
-
----
-
-## License
-
-MIT License - See LICENSE file for details.
-
----
-
-*This extension is not affiliated with or endorsed by Credit Karma.*
-
-
-
-
-
-
-
-
-***
-
-# CreditKarmaTxDownloader
-
-
+![Extension Icon](icon.png)
 
 > **Professional Chrome Extension** – Empowering users with 100% accurate Credit Karma transaction exports
 
 **🔗 [View on GitHub](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)** – *Star ⭐ if you find this useful!*
 
-***
+---
 
 ## 🎯 Why This Extension Exists
 
@@ -394,7 +14,7 @@ MIT License - See LICENSE file for details.
 
 **The Solution:** CreditKarmaTxDownloader bridges this gap, empowering you to **own your data** and unlock its full potential. With one click, export clean, analysis-ready transaction data directly to CSV—ready for Power BI, Excel, or any analytics tool you choose.
 
-***
+---
 
 ## ✨ What Makes This Special
 
@@ -408,7 +28,7 @@ MIT License - See LICENSE file for details.
 **Version:** 3.0.1  
 **Last Updated:** November 18, 2025
 
-***
+---
 
 ## 🚀 Getting Started
 
@@ -422,9 +42,7 @@ MIT License - See LICENSE file for details.
 
 ### 2️⃣ Export Your Data
 
-**Extension UI:**
-<img src="Extension UI.png" alt="Extension UI" width="800" />
-
+![Extension UI](Extension UI.png)  
 *Figure 1: Main Extension UI – Select date presets, configure parameters, and launch fully automated extraction with a single click.*
 
 1. Click the extension icon → Navigate to Credit Karma
@@ -438,7 +56,7 @@ MIT License - See LICENSE file for details.
 
 **💡 Pro Tip:** Don't touch the page during export—the extension handles everything automatically!
 
-***
+---
 
 ## 📅 Date Presets (One-Click Simplicity)
 
@@ -450,7 +68,7 @@ MIT License - See LICENSE file for details.
 
 **Custom Ranges:** Up to 3 years (verified working limit)
 
-***
+---
 
 ## ✅ Verification Results – Real-World Testing
 
@@ -473,13 +91,11 @@ All presets have been rigorously tested with real transaction data:
 - **Production-ready** – Built with real data, validated for daily use
 - **High reliability** – 80% PRISTINE rate across all presets
 
-***
+---
 
 ## 📊 Export Summary & Progress Tracking
 
-**Progress Notifications:**
-<img src="Runtime Notifications.png" alt="Runtime Notifications" width="800" />
-
+![Export Summary](Export Notification.png)  
 *Figure 2: Data Export Summary – Summarizes data completeness, time, and provides instant access to exported files, ensuring accuracy and user confidence.*
 
 During export, you'll see:
@@ -494,7 +110,7 @@ This is **completely normal** behavior:
 
 **Why the difference?** The extension uses scroll boundary checking to ensure complete extraction—it scrolls through all visible transactions to find the oldest/newest dates, then filters to your exact range. This guarantees zero missed transactions!
 
-***
+---
 
 ## 🛡️ Important Notes
 
@@ -521,7 +137,7 @@ This is **completely normal** behavior:
 - **Session Timeouts:** Very long extractions (20+ minutes) may trigger logout
 - **If Issues Occur:** Check for extension updates or report issues on GitHub
 
-***
+---
 
 ## 🔧 Troubleshooting
 
@@ -534,7 +150,7 @@ This is **completely normal** behavior:
 | Got logged out during export | Try shorter ranges (e.g., single year); log out after completion |
 | "Only X in range out of Y found" warning | **This is normal!** See "Understanding Total Found vs In Range" section |
 
-***
+---
 
 ## 📄 CSV Export Format
 
@@ -547,7 +163,7 @@ Your exported CSV includes:
 - **Status** (Posted/Pending)
 - Account Name, Labels, Notes (empty fields for your customization)
 
-***
+---
 
 ## 🌟 Why This Extension Stands Out
 
@@ -575,7 +191,7 @@ Your exported CSV includes:
 - Clear export summaries with statistics
 - Simple installation—no technical expertise required
 
-***
+---
 
 ## 💼 Best Practices & Pro Tips
 
@@ -588,24 +204,20 @@ Your exported CSV includes:
 7. 🔄 **Click refresh before each run** to ensure fresh page state
 8. 🚪 **Log out after download** to prevent session issues
 
-***
+---
 
 ## 🙏 Credits & Acknowledgments
-
-This extension represents a significant evolution in Credit Karma data access, built on a foundation of innovation and community inspiration.
 
 ### **Lead Developer & AI Automation Architect**
 **Vinod Sridharan**, Business Intelligence Professional
 
 **Key Contributions:**
-- Architected dual boundary checking system for 100% accuracy
-- Implemented strict boundary capture (start AND end dates)
-- Developed multi-format date parsing (MM/DD/YYYY, abbreviated, full month names)
-- Created composite key deduplication framework
-- Designed and validated 5 date presets with rigorous testing
-- Extended range support to 3 years (verified working limit)
-- Established PRISTINE status tracking (achieved 80% PRISTINE rate)
-- Authored comprehensive documentation and user experience guidelines
+- Architected dual boundary checking system (100% accuracy)
+- Implemented composite key deduplication framework
+- Developed 5 verified date presets with rigorous testing
+- Extended support to 3 years with PRISTINE validation
+- AI-powered development workflow (OpenAI, Cursor, Copilot, Perplexity)
+- Comprehensive engineering documentation and QA framework
 
 ### **Development Approach:**
 Built using **AI-powered workflows** with collaborative coding agents:
@@ -616,9 +228,13 @@ Built using **AI-powered workflows** with collaborative coding agents:
 
 ### **Inspiration & Foundation**
 - **Original Concept:** [Chirag Bangera](https://github.com/cbangera2) – CreditKarmaExtractor
-- We gratefully acknowledge that the foundation version provided valuable inspiration for this development work
+- This project builds upon the foundational work with significant enhancements and new capabilities
 
-***
+### **Open Source Community**
+- Built with collaborative AI coding agents and community feedback
+- Grateful to all testers, contributors, and users who provided insights
+
+---
 
 ## 📦 Project Files
 
@@ -640,7 +256,29 @@ Built using **AI-powered workflows** with collaborative coding agents:
 - `Runtime Notifications.png` – Progress indicators
 - `Export Notification.png` – Export summary dialog
 
-***
+---
+
+## ⚠️ Legal Disclaimers
+
+**Important Notice:**
+- This extension is an **independent, open-source project** and is **not affiliated with, endorsed by, or sponsored by Credit Karma**.
+- This tool is provided **"as-is"** without warranty of any kind (see MIT License).
+- Users are responsible for compliance with Credit Karma's Terms of Service.
+- This extension accesses only data the user is authorized to view through their own authenticated session.
+- **No data is transmitted to third parties**—all processing occurs locally in the user's browser.
+- The developer is not liable for any account issues, service interruptions, or changes to Credit Karma's platform.
+
+**Data Privacy:**
+- All data remains on your local machine
+- No data is collected, stored, or transmitted by this extension
+- Your Credit Karma credentials are never accessed or stored
+
+**Use at Your Own Risk:**
+- Credit Karma may update their platform, breaking this extension
+- Credit Karma may prohibit use of automated tools in their Terms of Service
+- Users should review Credit Karma's TOS before using this tool
+
+---
 
 ## 📜 License
 
@@ -648,30 +286,40 @@ Built using **AI-powered workflows** with collaborative coding agents:
 
 This project is **open-source** and welcomes contributions, feedback, and collaboration.
 
-***
+---
 
-## 🤝 Get Involved
+## 🌐 Connect & Collaborate
 
-- ⭐ **Star this repo** if you find it useful
-- 🐛 **Report issues** via GitHub Issues
-- 💡 **Suggest features** or improvements
-- 🔗 **Share** with others who need Credit Karma data access
+**This project is part of my professional portfolio, showcasing AI-driven automation and full-stack development expertise.**
 
-***
+### **Developer**
+**Vinod Sridharan**  
+*Business Intelligence Professional | AI Automation Specialist | Full-Stack Developer*
 
-*This extension is not affiliated with or endorsed by Credit Karma. It is an independent tool designed to empower users with access to their own financial data.*
+📧 **Email:** [callvino@gmail.com](mailto:callvino@gmail.com)  
+💼 **LinkedIn:** [linkedin.com/in/vinod-s-6a565b1b8](https://www.linkedin.com/in/vinod-s-6a565b1b8/)  
+🐙 **GitHub:** [github.com/VinodSridharan](https://github.com/VinodSridharan)  
+📦 **Project Repository:** [Credit-Karma-Clean-Transactions-Exporter](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
 
-***
+---
 
-**Built with passion for data transparency and user empowerment. Happy exporting! 🎉**
+### **For Recruiters & Hiring Managers**
 
-***
+**This project demonstrates:**
+- ✅ **AI-Powered Development:** Rapid prototyping with OpenAI, Cursor, GitHub Copilot
+- ✅ **Full-Stack Engineering:** JavaScript, Chrome APIs, DOM manipulation, async workflows
+- ✅ **Data Pipeline Design:** Extraction, transformation, validation, export (ETL principles)
+- ✅ **Quality Assurance:** Comprehensive testing, PRISTINE status tracking, root cause analysis
+- ✅ **Technical Documentation:** Engineering logs, troubleshooting guides, user onboarding
+- ✅ **Problem-Solving:** Identified market gap (no CK export) and delivered production-ready solution
 
-## 🌐 Connect & Support
+**Technical Stack:**
+- **Languages:** JavaScript, HTML/CSS
+- **Tools:** Chrome Extension APIs, AI coding agents (OpenAI, Cursor, Copilot, Perplexity)
+- **Methodologies:** Agile iteration, test-driven development, comprehensive documentation
 
-**Developer:** Vinod Sridharan  
-**Email:** callvino@gmail.com  
-**GitHub:** [VinodSridharan](https://github.com/VinodSridharan)  
-**Project Repository:** [Credit-Karma-Clean-Transactions-Exporter](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
-
-***
+**Portfolio Highlights:**
+- 🎯 **100% data accuracy** across 3-year transaction ranges
+- ⚡ **2,800+ transactions** validated in production testing
+- 🏆 **80% PRISTINE rate** (4 of 5 presets with perfect extraction)
+- 📊 **Analysis-ready exports** for Power BI, Excel,
