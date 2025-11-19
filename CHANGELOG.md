@@ -87,5 +87,36 @@ Successfully extracted all 133 transactions from October 1-31, 2025 with 100% ac
 
 ---
 
-**Last Updated**: 2025-11-18 15:24:25  
-**Current Version**: 3.0 - Production Ready
+## Version 3.0.1 (2025-11-18) - GitHub Publishing & Code Enhancements
+
+### ✅ Major Changes
+
+**Enhanced Deduplication**:
+- ✅ Updated composite key to include transaction type (date + description + amount + transaction type)
+- ✅ Transactions with same date/description/amount but different type (credit vs debit) are now correctly identified as NOT duplicates
+- ✅ Improved accuracy for transactions that differ only by type
+
+**Documentation Updates**:
+- ✅ Updated README with best practices (log out after download, clear downloads for fresh login)
+- ✅ Added warnings about Credit Karma changing tools/UI (expected unknown issues)
+- ✅ Replaced Ctrl+F5 references with "refresh button" for clarity
+- ✅ Added guidance for single year extractions (e.g., 2022, 2023, 2024)
+- ✅ Removed pending transaction mentions from documentation
+- ✅ Refactored Credits section - Moved acknowledgments below improvements with polite wording
+
+**GitHub Publishing**:
+- ✅ Published to GitHub: `https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter`
+- ✅ LICENSE file matched with repository version
+- ✅ Complete Production folder with all extension files and screenshots published
+- ✅ All documentation files included
+
+### 🐛 Code Fixes
+
+- ✅ Enhanced `combineTransactions()` function to include `transactionType` in composite key
+- ✅ Updated deduplication logic to distinguish credit vs debit transactions correctly
+- ✅ Improved comments explaining duplicate detection logic
+
+---
+
+**Last Updated**: 2025-11-18 18:57:00  
+**Current Version**: 3.0.1 - Published to GitHub

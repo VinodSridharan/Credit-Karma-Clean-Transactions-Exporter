@@ -432,20 +432,22 @@ function extractAllTransactions() {
 
 /**
  * Enhanced deduplication using multiple identifiers
- * IMPROVED: Better duplicate detection with date+amount+description combination
+ * IMPROVED: Better duplicate detection with date+description+amount+transactionType combination
+ * Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
  */
 function combineTransactions(existingTransactions, newTransactions) {
     // Create multiple lookup sets for better duplicate detection
     const existingHashes = new Set(existingTransactions.map(t => t.hash));
     const existingDataIndices = new Set(existingTransactions.map(t => t.dataIndex));
     
-    // Create a composite key set: date|description|amount|status for additional checking
+    // Create a composite key set: date|description|amount|transactionType|status for additional checking
     const existingCompositeKeys = new Set(
         existingTransactions.map(t => {
             const date = parseTransactionDate(t.date);
             const dateStr = date ? `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}` : '';
             const statusStr = (t.status || '').toLowerCase();
-            return `${dateStr}|${t.description}|${t.amount}|${statusStr}`.toLowerCase().trim();
+            const typeStr = (t.transactionType || '').toLowerCase();
+            return `${dateStr}|${t.description}|${t.amount}|${typeStr}|${statusStr}`.toLowerCase().trim();
         })
     );
     
@@ -460,13 +462,15 @@ function combineTransactions(existingTransactions, newTransactions) {
             return false;
         }
         
-        // Check by composite key (date + description + amount + status)
+        // Check by composite key (date + description + amount + transactionType + status)
         // Note: We allow same transaction with different status (pending -> posted) as separate entries
-        // But same date+desc+amount+status is a duplicate
+        // But same date+desc+amount+type+status is a duplicate
+        // Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
         const date = parseTransactionDate(newTransaction.date);
         const dateStr = date ? `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}` : '';
         const statusStr = (newTransaction.status || '').toLowerCase();
-        const compositeKey = `${dateStr}|${newTransaction.description}|${newTransaction.amount}|${statusStr}`.toLowerCase().trim();
+        const typeStr = (newTransaction.transactionType || '').toLowerCase();
+        const compositeKey = `${dateStr}|${newTransaction.description}|${newTransaction.amount}|${typeStr}|${statusStr}`.toLowerCase().trim();
         if (existingCompositeKeys.has(compositeKey)) {
             return false;
         }

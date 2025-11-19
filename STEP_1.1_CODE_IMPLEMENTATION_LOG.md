@@ -2,12 +2,55 @@
 
 **Purpose**: Track all code implementations, verifications, and changes  
 **Created**: 2025-11-18 08:39:14  
-**Last Updated**: 2025-11-18 15:36:18  
-**Status**: ✅ Extension v3.0 Production Ready
+**Last Updated**: 2025-11-18 19:22:41  
+**Status**: ✅ Extension v3.0.1 Production Ready & Published
+
+**Folder Structure**:
+- **`CK_TX_Downloader_JavaScript/`** - Development/Testing Folder (for active development and Chrome testing)
+- **`Production/`** - Published/Shared Folder ⭐ (source of truth for GitHub publishing)
+- **`Staging/`** - Development documentation files (not for sharing)
+
+**Development Workflow**: Code changes developed in `CK_TX_Downloader_JavaScript` folder **must be synced to `Production` folder** before publishing. `Production` folder is what users download/clone from GitHub.
 
 ---
 
-## 📋 Latest Updates - Version 3.0
+## 📋 Latest Updates - Version 3.0.1
+
+### Entry #4: Version 3.0.1 - Enhanced Deduplication & GitHub Publishing
+**Timestamp**: 2025-11-18 19:22:41  
+**Action**: Enhanced deduplication with transaction type, GitHub publishing, folder structure documentation  
+**Status**: ✅ **COMPLETED**
+
+**Code Changes**:
+- Enhanced `combineTransactions()` function to include `transactionType` in composite key
+- Updated composite key: `date + description + amount + transactionType + status`
+- Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
+
+**Files Modified**:
+- `Production/content.js` - Updated deduplication logic to include transaction type
+- `Production/manifest.json` - Updated to version 3.0.1
+- `Production/README.md` - Updated with folder structure, best practices, warnings
+
+**Documentation Updates**:
+- `PROJECT_PLAN.md` - Added folder structure and development workflow
+- `PROJECT_REVIEW.md` - Added folder structure and updated status
+- `Staging/STAGING_PRODUCTION_GUIDE.md` - Updated with complete folder structure documentation
+- `STEP_1.1_CODE_IMPLEMENTATION_LOG.md` - Added folder structure notes
+
+**GitHub Publishing**:
+- ✅ Published to GitHub: `https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter`
+- ✅ Production folder contains 11 files (7 core + 1 README + 1 LICENSE + 3 screenshots)
+- ✅ All code synced from development folder to Production folder
+
+**Results**:
+- ✅ Enhanced deduplication now includes transaction type
+- ✅ Production folder ready and published to GitHub
+- ✅ Folder structure documented for developers
+- ✅ Users who download/clone from GitHub get Production folder version
+
+---
+
+## 📋 Previous Updates - Version 3.0
 
 ### Entry #3: Version 3.0 - Presets Streamlined
 **Timestamp**: 2025-11-18 15:24:25  
@@ -81,11 +124,13 @@ case 'last-3-years':
 
 ## 📊 Summary
 
-### Extension Version 3.0
+### Extension Version 3.0.1
 - ✅ **Presets**: 5 verified working presets
 - ✅ **Maximum Range**: 3 years (verified)
-- ✅ **Status**: Production Ready
+- ✅ **Status**: Production Ready & Published to GitHub
 - ✅ **Documentation**: Complete and lean
+- ✅ **Folder Structure**: Documented (CK_TX_Downloader_JavaScript = dev, Production = publish)
+- ✅ **Enhanced Deduplication**: Transaction type included in composite key
 
 ### Selenium Baseline Verification
 - ✅ **Step 1**: Dependencies Verified (2025-11-18 08:39:14)
@@ -97,5 +142,5 @@ case 'last-3-years':
 
 ---
 
-**Last Updated**: 2025-11-18 15:36:18  
-**Latest Change**: Version 3.0 - Presets Streamlined
+**Last Updated**: 2025-11-18 19:22:41  
+**Latest Change**: Version 3.0.1 - Enhanced Deduplication & GitHub Publishing

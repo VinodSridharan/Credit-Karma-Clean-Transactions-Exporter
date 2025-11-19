@@ -13,7 +13,7 @@
 - ✅ **Tested & Verified** - All presets tested and working perfectly
 - ✅ **Browser Compatible** - Works with Chrome and Chromium-based browsers
 
-**Version**: 3.0  
+**Version**: 3.0.1  
 **Last Updated**: November 18, 2025
 
 ---
@@ -25,7 +25,7 @@
 1. Open Chrome → `chrome://extensions/`
 2. Turn on "Developer mode" (top right)
 3. Click "Load unpacked"
-4. Select the `Production` folder
+4. Select the `Production` folder (this folder contains all extension files)
 
 ### 2. Use Extension
 
@@ -281,6 +281,32 @@ This extension represents a significant enhancement over the original project:
 
 - **Inspiration & Base Repository**: [Chirag Bangera](https://github.com/cbangera2) - [CreditKarmaExtractor](https://github.com/cbangera2/CreditKarmaExtractor)
   - We gratefully acknowledge that the foundation version provided valuable inspiration for this entire development work.
+
+---
+
+## Files Included
+
+This extension includes the following files:
+
+### Core Extension Files
+- `manifest.json` - Extension configuration
+- `content.js` - Main extraction logic
+- `popup.js` - User interface logic
+- `popup.html` - User interface HTML
+- `popup.css` - Styling
+- `background.js` - Background services
+- `icon.png` - Extension icon
+
+### Documentation
+- `README.md` - This file
+- `LICENSE` - MIT License
+
+### Screenshots
+- `Screenshots/Extension UI.png` - Extension popup interface
+- `Screenshots/Runtime Notifications.png` - Progress notifications
+- `Screenshots/Export Notification.png` - Export completion notification
+
+**Total**: 11 files (7 core extension files + 2 documentation files + 3 screenshots)
 
 ---
 

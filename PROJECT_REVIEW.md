@@ -1,12 +1,19 @@
 # Project Review - Credit Karma Transaction Exporter
 
-**Version**: 3.0 | **Status**: ✅ Production Ready | **Last Updated**: 2025-11-18 15:24:25
+**Version**: 3.0.1 | **Status**: ✅ Published to GitHub | **Last Updated**: 2025-11-18 18:57:00
 
 ---
 
 ## Overview
 
 Chrome extension that extracts transactions from Credit Karma with precise date filtering and exports to CSV format. Based on proven October 133 Version that successfully extracted 133 transactions from October 2025 with 100% accuracy.
+
+**Folder Structure**:
+- **`CK_TX_Downloader_JavaScript/`** - Development/Testing Folder (for active development and Chrome testing)
+- **`Production/`** - Published/Shared Folder ⭐ (source of truth for GitHub publishing)
+- **`Staging/`** - Development documentation files (not for sharing)
+
+**Development Workflow**: Code changes developed in `CK_TX_Downloader_JavaScript` folder **must be synced to `Production` folder** before publishing. `Production` folder is what users download/clone from GitHub.
 
 ---
 
@@ -16,7 +23,8 @@ Chrome extension that extracts transactions from Credit Karma with precise date 
 ✅ **Verified Presets**: 5 working presets (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)  
 ✅ **Progress Display**: Real-time updates (`Scroll: X | Found: Y | In Range: Z`)  
 ✅ **Multi-Format Date Parsing**: Handles MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025"  
-✅ **Enhanced Deduplication**: Uses composite key (date + description + amount)  
+✅ **Enhanced Deduplication**: Uses composite key (date + description + amount + transaction type)  
+✅ **Smart Duplicate Detection**: Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates  
 ✅ **CSV Export**: Standard format with MM/DD/YYYY date format  
 
 ---
@@ -147,5 +155,5 @@ Chrome extension that extracts transactions from Credit Karma with precise date 
 
 ---
 
-**Last Updated**: 2025-11-18 15:24:25  
-**Status**: ✅ Production Ready - Ready for GitHub Publishing
+**Last Updated**: 2025-11-18 19:22:41  
+**Status**: ✅ Production Ready - Version 3.0.1 Published to GitHub

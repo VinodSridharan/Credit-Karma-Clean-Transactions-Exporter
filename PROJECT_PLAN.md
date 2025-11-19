@@ -35,10 +35,15 @@ This project maintains two versions of Credit Karma transaction extractors:
 
 ## 📊 Current Status
 
-### ✅ Extension Version 3.0 (Production Ready)
+### ✅ Extension Version 3.0.1 (Production Ready & Published)
 
-**Location**: `October-133-Version-Polished/`  
-**Status**: ✅ **Production Ready**
+**Folder Structure**:
+- **`CK_TX_Downloader_JavaScript/`** - Development/Testing Folder (for active development and Chrome testing)
+- **`Production/`** - Published/Shared Folder ⭐ (source of truth for GitHub publishing)
+- **`Staging/`** - Development documentation files (not for sharing)
+
+**Location**: `October-133-Version-Polished/Production/`  
+**Status**: ✅ **Production Ready & Published to GitHub**
 
 **Verified Presets** (5 total):
 | Preset | Date Range | Transactions | Time | Status |
@@ -51,11 +56,18 @@ This project maintains two versions of Credit Karma transaction extractors:
 
 **Key Features**:
 - ✅ Multi-format date parsing (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
-- ✅ Enhanced deduplication (amount in composite key)
+- ✅ Enhanced deduplication (composite key: date + description + amount + transaction type)
+- ✅ Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
 - ✅ CSV export in MM/DD/YYYY format
 - ✅ Strict boundary capture (start AND end dates)
 - ✅ Progress display with real-time updates
 - ✅ Maximum working range: **3 years** (verified)
+
+**Development Workflow**:
+- **Develop & Test**: Use `CK_TX_Downloader_JavaScript` folder in Chrome for testing
+- **Sync to Production**: Copy updated files from `CK_TX_Downloader_JavaScript` to `Production` folder
+- **Publish**: `Production` folder is what gets published to GitHub and what users download
+- **Important**: `Production` folder must be synced with latest working code from `CK_TX_Downloader_JavaScript` before publishing
 
 **Testing Results**:
 - ✅ This Month: PRISTINE (52 transactions, Nov 2025, 2m 58s)
@@ -182,6 +194,6 @@ This project maintains two versions of Credit Karma transaction extractors:
 
 ---
 
-**Last Updated**: 2025-11-18 15:36:18  
-**Extension Status**: ✅ Production Ready - Version 3.0  
+**Last Updated**: 2025-11-18 19:22:41  
+**Extension Status**: ✅ Production Ready - Version 3.0.1 (Published to GitHub)  
 **Selenium Status**: 🔄 Verification Phase (40% Complete)
