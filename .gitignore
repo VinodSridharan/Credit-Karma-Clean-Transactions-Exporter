@@ -55,6 +55,7 @@ CK_TX_Downloader_JavaScript/
 # Development documentation files (not for GitHub)
 *.md
 !"CK Tx Downloader/README.md"
+!README.md
 
 # Root-level extension files (use CK Tx Downloader folder instead)
 background.js
@@ -64,7 +65,6 @@ popup.html
 popup.css
 manifest.json
 icon.png
-README.md
 LICENSE
 MANUAL_RECOVERY_SCRIPT.js
 
