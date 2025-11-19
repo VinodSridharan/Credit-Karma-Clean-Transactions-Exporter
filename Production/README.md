@@ -117,6 +117,12 @@ All presets have been thoroughly tested and work perfectly with test data:
 - For single year extractions use Presets or use date range (e.g., 2023, 2024).
 - Best practice: Log out soon after download completes
 
+**Known Limitations:**
+
+- **Credit Karma may change its website structure, UI, or tools** - This is expected and may cause unknown issues or the extension to stop working
+- If the extension stops working after previously working fine, Credit Karma may have updated their website
+- Check the GitHub repository for updates or report issues if the extension becomes incompatible with Credit Karma's latest changes
+
 ---
 
 ## Troubleshooting
@@ -168,6 +174,13 @@ All presets have been thoroughly tested and work perfectly with test data:
 - Verify the date range does not exceed 3 years (maximum verified working range)
 - For 2023 or earlier, use direct single year extractions (e.g., 2022, 2023) if needed
 - Extension may need to scroll backward for very old dates - wait for completion
+
+**Unexpected issues or extension not working?**
+
+- **Credit Karma may change its website structure, UI, or tools** - This is expected and may cause the extension to stop working
+- If the extension suddenly stops working after previously working fine, Credit Karma may have updated their website
+- Check the GitHub repository for updates or report issues
+- Consider using shorter date ranges or manual extraction if the extension is incompatible with Credit Karma's latest changes
 
 ---
 
