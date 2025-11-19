@@ -55,7 +55,9 @@ This project maintains two versions of Credit Karma transaction extractors:
 | **Last 3 Years** | Nov 1, 2022 - Nov 18, 2025 | 2,865 | 22-25 min | ✅ PRISTINE |
 
 **Key Features**:
-- ✅ Multi-format date parsing (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
+- ✅ **Date Format Handling**: Handled date format changes in source (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
+- ✅ **All Active Presets**: All 5 active presets provided and verified (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)
+- ✅ Multi-format date parsing (handles Credit Karma's changing date formats)
 - ✅ Enhanced deduplication (composite key: date + description + amount + transaction type)
 - ✅ Transactions with same date/description/amount but different type (credit vs debit) are NOT duplicates
 - ✅ CSV export in MM/DD/YYYY format
@@ -194,6 +196,7 @@ This project maintains two versions of Credit Karma transaction extractors:
 
 ---
 
-**Last Updated**: 2025-11-18 19:22:41  
+**Last Updated**: 2025-11-18 19:30:00  
+**Latest Commit**: "Handled date format changes in source, all active presets provided"  
 **Extension Status**: ✅ Production Ready - Version 3.0.1 (Published to GitHub)  
 **Selenium Status**: 🔄 Verification Phase (40% Complete)

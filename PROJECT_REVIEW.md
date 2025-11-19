@@ -116,12 +116,15 @@ Chrome extension that extracts transactions from Credit Karma with precise date 
 
 ## Project Status
 
-### Current Version: 3.0 - Production Ready
+### Current Version: 3.0.1 - Production Ready & Published
 
 ✅ **Extension**: Fully functional with 5 verified presets  
 ✅ **Documentation**: Complete and lean  
 ✅ **Testing**: Comprehensive with PRISTINE status tracking  
 ✅ **Maximum Range**: 3 years (verified and documented)  
+✅ **Date Format Handling**: Handled date format changes in source (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")  
+✅ **Active Presets**: All 5 active presets provided and verified (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)  
+✅ **Published to GitHub**: Version 3.0.1 available for download  
 
 ### Future Enhancements
 
@@ -155,5 +158,6 @@ Chrome extension that extracts transactions from Credit Karma with precise date 
 
 ---
 
-**Last Updated**: 2025-11-18 19:22:41  
+**Last Updated**: 2025-11-18 19:30:00  
+**Latest Commit**: "Handled date format changes in source, all active presets provided"  
 **Status**: ✅ Production Ready - Version 3.0.1 Published to GitHub

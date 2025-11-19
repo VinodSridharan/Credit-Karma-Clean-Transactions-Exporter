@@ -227,9 +227,16 @@ Three key folders in the project:
 
 ---
 
-**Last Updated**: 2025-11-18 19:22:41  
+**Last Updated**: 2025-11-18 19:30:00  
+**Latest Commit**: "Handled date format changes in source, all active presets provided"  
 **CK_TX_Downloader_JavaScript**: Development/Testing folder (latest code)  
 **Production Files**: 11 files (7 core + 1 README + 1 LICENSE + 3 screenshots)  
 **Staging Files**: Development documentation (local only, not for sharing)  
 **Status**: ✅ Production Ready - Version 3.0.1 Published to GitHub
+
+**Recent Updates**:
+- ✅ Handled date format changes in source (MM/DD/YYYY, "Nov 14, 2025", "November 14, 2025")
+- ✅ All 5 active presets provided and verified (This Month, Last Month, Last Year, Last 2 Years, Last 3 Years)
+- ✅ Enhanced deduplication with transaction type
+- ✅ Folder structure documented for developers
 
