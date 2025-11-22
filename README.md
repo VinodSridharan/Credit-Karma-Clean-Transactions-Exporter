@@ -91,7 +91,14 @@
 
 ## 🎨 Visual Demo
 
-**Visuals and workflow screenshots available upon request.**
+### Extension Interface
+![Extension UI](TxVault/Screenshots/Extension%20UI.png)
+
+### Export Notifications
+![Export Notification](TxVault/Screenshots/Export%20Notification.png)
+
+### Runtime Feedback
+![Runtime Notifications](TxVault/Screenshots/Runtime%20Notifications.png)
 
 ---
 
