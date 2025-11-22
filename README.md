@@ -57,6 +57,7 @@
 
 | Preset | Transactions | Time | Status |
 |--------|-------------|------|--------|
+| **This Week** | *Testing in progress* | *Pending verification* | 🚀 New |
 | **This Month** | 52 | 2m 58s | ✅ PRISTINE |
 | **Last Month** | 133 | 2m 35s | ✅ PRISTINE |
 | **Last Year** | 738 | ~15-25m | ✅ Verified |
@@ -91,13 +92,13 @@
 ## 🎨 Visual Demo
 
 ### Extension Interface
-![Extension UI](TxVault/Extension%20UI.png)
+![Extension UI](TxVault/Screenshots/Extension%20UI.png)
 
 ### Export Notifications
-![Export Notification](TxVault/Export%20Notification.png)
+![Export Notification](TxVault/Screenshots/Export%20Notification.png)
 
 ### Runtime Feedback
-![Runtime Notifications](TxVault/Runtime%20Notifications.png)
+![Runtime Notifications](TxVault/Screenshots/Runtime%20Notifications.png)
 
 ---
 
@@ -121,10 +122,10 @@
 
 **For detailed information, see the complete documentation:**
 
-📖 **[Full README](TxVault/README.md)** – Comprehensive guide with all details  
-🔍 **[Root Cause Analysis](TxVault/ROOT_CAUSE_ANALYSIS.md)** – Technical deep-dive into issues and solutions  
-📋 **[Changelog](TxVault/CHANGELOG.md)** – Version history and updates  
-🔧 **[Error Fixes](TxVault/ERRORS_FIXED.md)** – Common issues and resolutions
+📖 **[Enhanced README](TxVault/README.md)** – Comprehensive guide with all details, features, and technical information  
+📖 **[Basic Version README](TxVault-Basic/README.md)** – Basic comparison version with core functionality
+
+**Note:** Additional documentation (Root Cause Analysis, Changelog, Error Fixes) is available in the Enhanced version's Documentation folder for developers.
 
 ---
 
@@ -170,7 +171,7 @@ TxVault Exporter demonstrates advanced **data engineering**, **DOM automation**,
 **Built on the shoulders of giants:**
 
 - Original inspiration: [Credit Karma Transaction Extractor by Chirag Bangera](https://github.com/chiragbangera/credit-karma-transaction-exporter)
-- Major enhancements, redesign, and compliance by [Vinod Sridharan](https://www.linkedin.com/in/vinodsridharan)
+- Major enhancements, redesign, and compliance by [Vinod Sridharan](https://www.linkedin.com/in/vinod-s-6a565b1b8/)
 - Powered by Chrome Extensions API and the open-source community
 
 ---
@@ -185,9 +186,9 @@ Free to use, modify, and distribute. Perfect for personal projects, startups, an
 
 <div align="center">
 
-**Made with ❤️ by [Vinod Sridharan](https://www.linkedin.com/in/vinodsridharan)**
+**Made with ❤️ by [Vinod Sridharan](https://www.linkedin.com/in/vinod-s-6a565b1b8/)**
 
-[📧 Email](mailto:vinod.sridharan@txvault.app) • [💼 LinkedIn](https://www.linkedin.com/in/vinodsridharan) • [🐙 GitHub](https://github.com/VinodSridharan)
+[📧 Email](mailto:vinod.sridharan@txvault.app) • [💼 LinkedIn](https://www.linkedin.com/in/vinod-s-6a565b1b8/) • [🐙 GitHub](https://github.com/VinodSridharan)
 
 **⭐ If you find this project helpful, please consider giving it a star on GitHub! ⭐**
 

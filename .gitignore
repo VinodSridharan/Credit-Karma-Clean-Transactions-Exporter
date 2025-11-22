@@ -66,6 +66,21 @@ CK_TX_Downloader_JavaScript/
 !README.md  # Root README for GitHub
 # Note: Selenium-Version is completely excluded, so no need for exceptions
 
+# TxVault (Enhanced) - Ignore non-core folders
+TxVault/Documentation/
+TxVault/Screenshots/
+TxVault/Development/
+# Only track core files (matching Basic's core file list):
+# - background.js
+# - content.js
+# - icon.png
+# - manifest.json
+# - popup.html
+# - popup.js
+# - popup.css (Enhanced-specific)
+# - README.md
+# - LICENSE
+
 # Root-level extension files (use TxVault folder instead)
 background.js
 content.js
