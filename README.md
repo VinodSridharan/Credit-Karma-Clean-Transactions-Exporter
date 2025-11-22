@@ -92,6 +92,15 @@
 ## 🎨 Visual Demo
 
 ### Extension Interface
+![Extension UI](screenshots/Extension%20UI.png)
+
+### Export Notifications
+![Export Notification](screenshots/Export%20Notification.png)
+
+### Runtime Feedback
+![Runtime Notifications](screenshots/Runtime%20Notifications.png)
+
+### Extension Interface
 ![Extension UI](TxVault/Screenshots/Extension%20UI.png)
 
 ### Export Notifications
