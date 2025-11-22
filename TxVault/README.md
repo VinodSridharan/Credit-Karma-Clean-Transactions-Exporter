@@ -134,6 +134,44 @@ cd TxVault
 
 ---
 
+## ⚠️ Important Cautions & Notes
+
+### UI Appearance May Vary
+
+The user interface you encounter may differ slightly from screenshots shown in this documentation. This can occur due to:
+
+- **Extension Updates**: The extension interface undergoes regular improvements for better usability
+- **Responsive Design**: Layout adapts to your browser window size and device type
+
+**Impact**: These visual differences should not affect core functionality. The extension uses adaptive DOM selectors that work with Credit Karma's structure. If you notice functionality issues, please [report them](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/issues).
+
+### Platform Dependency & Maintenance
+
+**Important**: This extension's functionality depends entirely on Credit Karma's platform structure and backend systems. Understanding this dependency is essential:
+
+**How It Works**:
+
+- **DOM Interaction**: The extension reads transaction data by interacting with Credit Karma's HTML/DOM structure
+- **Backend Dependency**: Transaction loading, pagination, and data formatting are controlled by Credit Karma's backend systems
+- **Independent Tool**: This is a third-party solution with no official connection to Credit Karma
+
+**What This Means for You**:
+
+✅ **Active Maintenance**: We continuously monitor Credit Karma's platform and update the extension when structural changes occur  
+✅ **Adaptive Technology**: The extension uses multiple selector strategies and fallback mechanisms to handle changes gracefully  
+✅ **Community Support**: Issues are tracked and addressed through our GitHub repository  
+⚠️ **Adaptation Required**: When Credit Karma makes significant structural changes, the extension may need updates to maintain compatibility
+
+**If Something Stops Working**:
+
+1. Check our [Issues](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/issues) page to see if the problem is already reported
+2. Submit a detailed issue report describing what's not working
+3. We'll prioritize updates to restore functionality after Credit Karma's changes
+
+**Our Commitment**: We maintain this extension actively and adapt to Credit Karma's platform evolution. Your reports help us respond quickly to changes and ensure continued reliability.
+
+---
+
 ## Credits & Attribution
 
 - Built on [Credit Karma Transaction Extractor by Chirag Bangera](https://github.com/chiragbangera/credit-karma-transaction-exporter)
