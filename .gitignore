@@ -1,14 +1,21 @@
-# Keep only CK Tx Downloader folder visible on GitHub
-# Everything else is excluded
+# Keep only TxVault JavaScript Extension folder visible on GitHub
+# Selenium-Version is excluded - this repo is for JavaScript/Chrome Extension only
 
-# Allow CK Tx Downloader folder and .gitignore
-!"CK Tx Downloader/"
+# Allow TxVault (Enhanced) and TxVault-Basic (Basic/Comparison) folders, and root files
+!"TxVault/"
+!"TxVault-Basic/"
 !.gitignore
+!README.md
 
 # Exclude all root-level files and folders
 /*
-!"CK Tx Downloader"
+!"TxVault"
+!"TxVault-Basic"
 !/.gitignore
+!README.md
+
+# Exclude Selenium-Version completely (Python version - separate repo)
+Selenium-Version/
 
 # Backup/Archive Folders
 VAULT-*/
@@ -54,10 +61,12 @@ CK_TX_Downloader_JavaScript/
 
 # Development documentation files (not for GitHub)
 *.md
-!"CK Tx Downloader/README.md"
-!README.md
+!"TxVault/README.md"
+!"TxVault-Basic/README.md"
+!README.md  # Root README for GitHub
+# Note: Selenium-Version is completely excluded, so no need for exceptions
 
-# Root-level extension files (use CK Tx Downloader folder instead)
+# Root-level extension files (use TxVault folder instead)
 background.js
 content.js
 popup.js

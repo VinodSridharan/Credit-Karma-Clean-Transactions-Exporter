@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TxVault Basic - Credit Karma Exporter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            width: 300px;
+            padding: 20px;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .input-container {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .date-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #303f9f;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .footer-meta {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .dark-mode input[type="date"] {
+            background-color: #333;
+            border-color: #444;
+            color: #fff;
+        }
+
+        .dark-mode .date-label {
+            color: #ccc;
+        }
+
+        .dark-mode button {
+            background-color: #7986cb;
+        }
+
+        .dark-mode button:hover {
+            background-color: #5c6bc0;
+        }
+
+        .dark-mode .footer {
+            color: #ccc;
+        }
+
+        .dark-mode .footer-meta {
+            color: #999;
+        }
+
+        /* Theme switch styles */
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .theme-switch__label {
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #3f51b5;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .dark-mode input:checked + .slider {
+            background-color: #7986cb;
+        }
+
+        .csv-type-selection {
+            margin-bottom: 15px;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Export Transactions</h2>
+    
+    <div class="theme-switch">
+        <label class="switch">
+            <input type="checkbox" id="dark-mode-toggle">
+            <span class="slider"></span>
+        </label>
+        <span class="theme-switch__label">Dark Mode</span>
+    </div>
+
+    <div class="input-container">
+        <label class="date-label" for="start-date">Start Date</label>
+        <input type="date" id="start-date">
+    </div>
+
+    <div class="input-container">
+        <label class="date-label" for="end-date">End Date</label>
+        <input type="date" id="end-date">
+    </div>
+
+    <div class="csv-type-selection">
+        <h3>Select CSV Types to Export</h3>
+        <div class="checkbox-container">
+            <label>
+                <input type="checkbox" id="allTransactionsCheckbox" checked>
+                All Transactions
+            </label>
+            <label>
+                <input type="checkbox" id="incomeCheckbox">
+                Only Income
+            </label>
+            <label>
+                <input type="checkbox" id="expensesCheckbox">
+                Only Expenses
+            </label>
+        </div>
+    </div>
+
+    <button id="export-btn">Export</button>
+
+    <div class="footer">
+        <div class="footer-meta">
+            <p><strong>TxVault Basic v1.2.1</strong></p>
+            <p>Enhanced with late November 2024 date format fix</p>
+            <p>Original extension by Chirag Bangera</p>
+            <p>This extension is not affiliated with or endorsed by Credit Karma.</p>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
+

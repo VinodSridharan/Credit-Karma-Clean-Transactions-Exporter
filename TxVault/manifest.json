@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "TxVault Exporter",
+    "version": "3.0.4",
+    "description": "Liberate your financial data - Export Credit Karma transactions to clean CSV format",
+    "permissions": ["activeTab", "scripting", "tabs", "storage"],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icon.png",
+        "48": "icon.png",
+        "128": "icon.png"
+      }
+    },
+    "content_scripts": [
+      {
+        "matches": ["*://www.creditkarma.com/*", "*://creditkarma.com/*"],
+        "js": ["content.js"],
+        "run_at": "document_idle",
+        "all_frames": false
+      }
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    }
+}
