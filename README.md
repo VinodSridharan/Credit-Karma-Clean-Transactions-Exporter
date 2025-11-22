@@ -92,13 +92,13 @@
 ## 🎨 Visual Demo
 
 ### Extension Interface
-![Extension UI](TxVault/Screenshots/Extension%20UI.png)
+<img src="TxVault/Screenshots/Extension%20UI.png" alt="Extension UI" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ### Export Notifications
-![Export Notification](TxVault/Screenshots/Export%20Notification.png)
+<img src="TxVault/Screenshots/Export%20Notification.png" alt="Export Notification" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ### Runtime Feedback
-![Runtime Notifications](TxVault/Screenshots/Runtime%20Notifications.png)
+<img src="TxVault/Screenshots/Runtime%20Notifications.png" alt="Runtime Notifications" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ---
 
