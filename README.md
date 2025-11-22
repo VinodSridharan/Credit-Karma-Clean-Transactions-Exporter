@@ -92,13 +92,13 @@
 ## 🎨 Visual Demo
 
 ### Extension Interface
-<img src="TxVault/Screenshots/Extension%20UI.png" alt="Extension UI" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<img src="https://raw.githubusercontent.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/main/TxVault/Screenshots/Extension%20UI.png" alt="Extension UI" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ### Export Notifications
-<img src="TxVault/Screenshots/Export%20Notification.png" alt="Export Notification" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<img src="https://raw.githubusercontent.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/main/TxVault/Screenshots/Export%20Notification.png" alt="Export Notification" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ### Runtime Feedback
-<img src="TxVault/Screenshots/Runtime%20Notifications.png" alt="Runtime Notifications" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<img src="https://raw.githubusercontent.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/main/TxVault/Screenshots/Runtime%20Notifications.png" alt="Runtime Notifications" width="700" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
 ---
 
