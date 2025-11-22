@@ -68,7 +68,7 @@ CK_TX_Downloader_JavaScript/
 
 # TxVault (Enhanced) - Ignore non-core folders
 TxVault/Documentation/
-TxVault/Screenshots/
+# TxVault/Screenshots/ - NEEDED for root README images
 TxVault/Development/
 # Only track core files (matching Basic's core file list):
 # - background.js
