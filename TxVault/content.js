@@ -2,6 +2,60 @@
 // TxVault Exporter - Enhanced Content Script
 // ============================================================================
 
+// ============================================================================
+// CONFIGURATION PARAMETERS - Update values here as needed
+// ============================================================================
+
+/**
+ * USER-CONFIGURABLE PARAMETERS
+ * All adjustable parameters are centralized here for easy maintenance.
+ * Update these values in one location to adjust extraction behavior.
+ */
+
+const CONFIG = {
+    // Reference Standard: October transaction count range
+    EXPECTED_MIN: 133,        // Minimum expected transactions for Last Month
+    EXPECTED_MAX: 140,        // Maximum expected transactions for Last Month
+    
+    // Scroll Configuration - Minimum scrolls before checking stop conditions
+    MIN_SCROLLS: {
+        LAST_MONTH: 40,       // Minimum scrolls for Last Month preset (reduced from 60)
+        MEDIUM_RANGE: 30,     // Minimum scrolls for medium ranges (11-31 days)
+        LARGE_RANGE: 50,      // Minimum scrolls for large ranges (>31 days)
+        BOTTOM_CHECK: 40,     // Minimum scrolls before bottom check (Last Month)
+        UNCHANGED_CHECK: 40   // Minimum scrolls before unchanged check (Last Month)
+    },
+    
+    // Boundary Buffer Configuration - Days to scroll past boundaries
+    BUFFER_DAYS: {
+        SMALL_RANGE: 2,       // Days past end for small ranges (<=10 days)
+        MEDIUM_RANGE: 3,      // Days past end for medium ranges (11-31 days, non-Last-Month)
+        LAST_MONTH: 5,        // Days past end for Last Month preset (31 days) - INCREASED for robustness
+        LARGE_RANGE: 5,       // Days past end for large ranges (32-90 days)
+        VERY_LARGE_RANGE: 7   // Days past end for very large ranges (>90 days)
+    },
+    
+    // Before Start Buffer - Days before start date to capture
+    BEFORE_START_BUFFER: {
+        LAST_MONTH: 3,        // Days before start for Last Month preset
+        STANDARD: 2,          // Days before start for standard ranges (<=90 days)
+        LARGE: 3              // Days before start for large ranges (>90 days)
+    },
+    
+    // Coverage Requirements - Percentage of date range that must be present
+    COVERAGE_THRESHOLD: {
+        RECENT: 0.98,         // Coverage required for recent ranges (<60 days ago) - 98%
+        STANDARD: 0.95        // Coverage required for older ranges - 95%
+    },
+    
+    // Wait Times - Milliseconds between scrolls
+    SCROLL_WAIT_TIME: {
+        FAST: 1000,           // Fast wait when target range found for 3+ consecutive scrolls
+        STANDARD: 1500        // Standard wait time between scrolls
+    }
+};
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -671,7 +725,7 @@ function showPreviewTable(transactions) {
     
     const table = sortedForPreview.slice(0, 20).map(t => `
         <tr>
-            <td>${(!t.date || t.date.trim() === '') ? 'Pending' : convertDateFormat(t.date)}</td>
+            <td>${(!t.date || (typeof t.date === 'string' && t.date.trim() === '')) ? 'Pending' : convertDateFormat(t.date)}</td>
             <td>${t.description}</td>
             <td>$${t.amount.toFixed(2)}</td>
             <td>${t.category}</td>
@@ -741,45 +795,18 @@ function calculateCompleteness(transactions) {
 let stopScrolling = false;
 
 /**
- * Enhanced scroll function with smaller increments for better coverage
- * FIXED: Ensure scrolling actually happens and triggers lazy loading
+ * Simple scroll function - PRISTINE VERSION APPROACH
+ * ROLLBACK: Restore simple scroll from working version (October-133-Version)
+ * This Month, Last Month, This Year presets work with this approach
+ * Keep simple and proven - worked for 133 transactions extraction
+ * 
+ * LESSON LEARNED: Simple window.scrollTo() works better than complex event dispatching
+ * Credit Karma's lazy loading triggers naturally on window scroll
  */
 function scrollDown() {
-    try {
-        // Get current scroll position and viewport height
-        const currentPosition = window.scrollY || window.pageYOffset || 0;
-        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
-        const scrollDistance = viewportHeight * 1.5;
-        const newPosition = currentPosition + scrollDistance;
-        
-        // CRITICAL: Use scrollTo with smooth behavior to trigger lazy loading
-        // Also try multiple scroll methods to ensure it works
-        window.scrollTo({
-            top: newPosition,
-            behavior: 'auto' // Use 'auto' for faster scrolling, 'smooth' might be too slow
-        });
-        
-        // Fallback: Direct assignment if scrollTo doesn't work
-        if (window.scrollY === currentPosition) {
-            window.scrollY = newPosition;
-            window.pageYOffset = newPosition;
-            document.documentElement.scrollTop = newPosition;
-            document.body.scrollTop = newPosition;
-        }
-        
-        // Trigger a scroll event to ensure lazy loading is triggered
-        window.dispatchEvent(new Event('scroll'));
-        document.dispatchEvent(new Event('scroll'));
-        
-        return newPosition;
-    } catch (error) {
-        console.error('Error in scrollDown():', error);
-        // Fallback: Try basic scroll
-        const currentPosition = window.scrollY || 0;
-        const viewportHeight = window.innerHeight || 800;
-        window.scrollTo(0, currentPosition + viewportHeight * 1.5);
-        return currentPosition + viewportHeight * 1.5;
-    }
+    // Simple, proven scroll mechanism from pristine version
+    const currentPosition = window.scrollY;
+    window.scrollTo(0, currentPosition + window.innerHeight * 1.5);
 }
 
 /**
@@ -794,7 +821,12 @@ function scrollToTop() {
  * @param {Function} progressCallback - Optional callback for progress updates
  * @returns {Promise} Resolves when scroll to top is complete
  */
-async function scrollToTopSegmented(progressCallback = null) {
+/**
+ * LESSON LEARNED: Enhanced segmented scroll-back with extraction at each step
+ * Scrolls back to top in small increments and extracts transactions at each segment
+ * This ensures older transactions at top of list are captured during scroll-back
+ */
+async function scrollToTopSegmented(progressCallback = null, extractCallback = null) {
     const currentPosition = window.scrollY || window.pageYOffset || 0;
     const targetPosition = 0;
     
@@ -804,27 +836,26 @@ async function scrollToTopSegmented(progressCallback = null) {
         return;
     }
     
-    // Calculate scroll segments: at least 33% per scroll (maximum 3 segments)
-    const segmentPercentage = Math.max(0.33, 1 / 3); // At least 33%, or 1/3 for 3 segments
+    // LESSON LEARNED: Use smaller scroll increments (0.2x viewport height) for better lazy loading
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+    const scrollStep = viewportHeight * 0.2; // Small segments (20% of viewport)
     const totalDistance = currentPosition - targetPosition;
-    const segmentDistance = Math.ceil(totalDistance * segmentPercentage);
+    const numSegments = Math.ceil(totalDistance / scrollStep);
     
-    // Calculate number of segments needed
-    const numSegments = Math.ceil(totalDistance / segmentDistance);
-    const actualSegmentSize = Math.ceil(totalDistance / numSegments);
-    
-    console.log(`Scrolling back to top in ${numSegments} segments (${Math.round(segmentPercentage * 100)}% per segment, ${actualSegmentSize}px per segment)`);
+    console.log(`Scrolling back to top in ${numSegments} segments (${Math.round(scrollStep)}px per segment, ~20% viewport)`);
     
     let remainingDistance = currentPosition;
     let segmentNumber = 0;
     
-    while (remainingDistance > 10 && segmentNumber < 10) { // Safety limit: max 10 segments
+    while (remainingDistance > 10 && segmentNumber < 20) { // Safety limit: max 20 segments
         segmentNumber++;
-        remainingDistance = Math.max(0, remainingDistance - actualSegmentSize);
+        remainingDistance = Math.max(0, remainingDistance - scrollStep);
         const targetScrollPosition = Math.max(0, remainingDistance);
         
         // Scroll to this segment position
         window.scrollTo({ top: targetScrollPosition, behavior: 'smooth' });
+        
+        // PRISTINE VERSION: No event dispatching needed - native scroll works
         
         // Call progress callback if provided
         if (progressCallback) {
@@ -832,8 +863,18 @@ async function scrollToTopSegmented(progressCallback = null) {
             progressCallback(segmentNumber, numSegments, progressPercent);
         }
         
-        // Wait for scroll to complete (smooth scroll duration ~500ms)
-        await new Promise(resolve => setTimeout(resolve, 600));
+        // Wait for scroll to complete and DOM to update
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        // LESSON LEARNED: Extract transactions after EACH scroll segment
+        // This captures newly-loaded older transactions at top of list
+        if (extractCallback && typeof extractCallback === 'function') {
+            try {
+                extractCallback(); // Extract transactions at this position
+            } catch (e) {
+                console.warn(`Warning: Extraction callback failed at segment ${segmentNumber}:`, e);
+            }
+        }
         
         // Verify scroll happened
         const actualPosition = window.scrollY || window.pageYOffset || 0;
@@ -841,27 +882,46 @@ async function scrollToTopSegmented(progressCallback = null) {
             // Scroll didn't happen, try direct scroll
             window.scrollTo(0, targetScrollPosition);
             await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Extract again after forced scroll
+            if (extractCallback && typeof extractCallback === 'function') {
+                try {
+                    extractCallback();
+                } catch (e) {
+                    console.warn(`Warning: Extraction callback failed after forced scroll:`, e);
+                }
+            }
         }
         
         // Small pause between segments to avoid triggering logout
         await new Promise(resolve => setTimeout(resolve, randomDelay(200, 400)));
     }
     
-    // Final scroll to ensure we're at top
-    if ((window.scrollY || window.pageYOffset || 0) > 10) {
+    // Final scroll to ensure we're at true top (window.scrollY <= 0)
+    const finalCheck = window.scrollY || window.pageYOffset || 0;
+    if (finalCheck > 10) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Verify final position
+        // Verify final position - must be at true top
         const finalPosition = window.scrollY || window.pageYOffset || 0;
         if (finalPosition > 10) {
             window.scrollTo(0, 0); // Direct scroll as fallback
             await new Promise(resolve => setTimeout(resolve, 300));
         }
+        
+        // LESSON LEARNED: Final extraction at top to capture any remaining older transactions
+        if (extractCallback && typeof extractCallback === 'function') {
+            try {
+                extractCallback();
+            } catch (e) {
+                console.warn(`Warning: Final extraction callback failed:`, e);
+            }
+        }
     }
     
     if (progressCallback) progressCallback(numSegments, numSegments, 100);
-    console.log(`✓ Completed segmented scroll back to top (${segmentNumber} segments)`);
+    console.log(`✓ Completed segmented scroll back to top (${segmentNumber} segments) with extraction at each step`);
 }
 
 /**
@@ -1018,15 +1078,23 @@ function calculateScrollStrategy(startDate, endDate) {
  */
 async function captureTransactionsInDateRange(startDate, endDate, request = {}) {
     const startTime = Date.now();
+    
+    // CRITICAL: Collect system date once at start for consistency throughout extraction
+    const SYSTEM_DATE = new Date();
+    const SYSTEM_YEAR = SYSTEM_DATE.getFullYear();
+    const SYSTEM_MONTH = SYSTEM_DATE.getMonth();
+    const SYSTEM_DAY = SYSTEM_DATE.getDate();
+    
     console.log(`=== STARTING EXTRACTION ===`);
+    console.log(`System Date: ${SYSTEM_DATE.toLocaleDateString()} (collected at start for consistency)`);
     console.log(`Input date range: ${startDate} to ${endDate}`);
     
         let allTransactions = [];
         
-        // REFERENCE STANDARD: October expected 133-140 transactions
-        const EXPECTED_MIN = 133;  // Minimum expected for October
-        const EXPECTED_MAX = 140;  // Maximum expected for October
-        const TARGET_RANGE = { min: EXPECTED_MIN, max: EXPECTED_MAX };  // 133-140
+        // REFERENCE STANDARD: October expected 133-140 transactions (from CONFIG)
+        const EXPECTED_MIN = CONFIG.EXPECTED_MIN;
+        const EXPECTED_MAX = CONFIG.EXPECTED_MAX;
+        const TARGET_RANGE = { min: EXPECTED_MIN, max: EXPECTED_MAX };
         let extractionComplete = false;  // Flag when 100% achieved
         
         // Track scroll statistics for 100% recovery optimization
@@ -1173,11 +1241,18 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
         // CRITICAL: Start by scrolling to top to ensure we capture everything
         // Use segmented scroll to avoid logout triggers
         console.log('Scrolling to top to start from beginning (segmented)...');
-        await scrollToTopSegmented((segment, total, progress) => {
-            if (counterElement && document.body.contains(counterElement)) {
-                counterElement.textContent = `Starting from top: Segment ${segment}/${total} (${progress}%)...`;
+        await scrollToTopSegmented(
+            (segment, total, progress) => {
+                if (counterElement && document.body.contains(counterElement)) {
+                    counterElement.textContent = `Starting from top: Segment ${segment}/${total} (${progress}%)...`;
+                }
+            },
+            () => {
+                // LESSON LEARNED: Extract at each scroll segment to capture older transactions
+                const segmentTransactions = extractAllTransactions();
+                allTransactions = combineTransactions(allTransactions, segmentTransactions);
             }
-        });
+        );
         // IMPROVED: Longer wait to ensure page is fully loaded, especially after app refresh
         await new Promise(resolve => setTimeout(resolve, randomDelay(1500, 2000)));
         
@@ -1213,10 +1288,10 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             const progress = Math.min((scrollAttempts / MAX_SCROLL_ATTEMPTS) * 100, 95);
             progressBar.style.width = `${progress}%`;
             
-            // Extract transactions multiple times for better coverage (3-4 passes)
+            // Extract transactions multiple times for better coverage (5 passes for thorough collection)
+            // CRITICAL: More thorough extraction per scroll to collect all 133 transactions efficiently
             let newTransactions = extractAllTransactions();
             
-            // Optimized: Reduced passes and wait times for speed
             // Second pass after short wait
             await new Promise(resolve => setTimeout(resolve, randomDelay(200, 350)));
             const secondPass = extractAllTransactions();
@@ -1227,12 +1302,42 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             const thirdPass = extractAllTransactions();
             newTransactions = combineTransactions(newTransactions, thirdPass);
             
+            // Fourth pass for thorough collection (critical for 133 transactions)
+            await new Promise(resolve => setTimeout(resolve, randomDelay(200, 350)));
+            const fourthPass = extractAllTransactions();
+            newTransactions = combineTransactions(newTransactions, fourthPass);
+            
+            // Fifth pass for final verification
+            await new Promise(resolve => setTimeout(resolve, randomDelay(200, 350)));
+            const fifthPass = extractAllTransactions();
+            newTransactions = combineTransactions(newTransactions, fifthPass);
+            
             // Combine with existing
             allTransactions = combineTransactions(allTransactions, newTransactions);
             
             // Calculate in-range count using improved date comparison
+            // CRITICAL: For "Last Month" preset, count ONLY posted transactions (exclude pending)
+            // This ensures we target 133 POSTED transactions, not total transactions
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndForStatus = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
+            const isLastMonthForStatus = daysSinceEndForStatus >= 30 && daysSinceEndForStatus < 60;
+            
             const inRangeCount = allTransactions.filter(t => {
-                return isDateInRange(t.date, startDateObj, endDateObj);
+                // First check if date is in range
+                if (!isDateInRange(t.date, startDateObj, endDateObj)) {
+                    return false;
+                }
+                // CRITICAL: For "Last Month" preset, exclude pending transactions from count
+                // This ensures we target 133 POSTED transactions (as per requirement)
+                if (isLastMonthForStatus) {
+                    // For Last Month, count only posted transactions
+                    // CRITICAL FIX: Check if t.date exists before calling .trim() to prevent TypeError
+                    const isPending = !t.date || (typeof t.date === 'string' && t.date.trim() === '') || 
+                                    (t.status && t.status.toLowerCase() === 'pending');
+                    return !isPending; // Only count non-pending (posted) transactions
+                }
+                // For other presets, count all transactions in range
+                return true;
             }).length;
             
             // Calculate out-of-range count
@@ -1314,10 +1419,12 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             // OPTIMIZED: Smart stopping for recent vs old date ranges
             // For recent dates (like November), stop earlier. For old dates, scroll more.
             // CRITICAL: For "Last Month", require minimum scrolls before checking stop conditions
-            const todayMinCheck = new Date();
-            const daysSinceEndDateMin = (todayMinCheck - endDateObj) / (24 * 60 * 60 * 1000);
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndDateMin = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
             const isLastMonthMin = daysSinceEndDateMin >= 30 && daysSinceEndDateMin < 60;
-            const MIN_SCROLLS_FOR_LAST_MONTH = 60; // Require at least 60 scrolls for last month (was 30, increased due to poor extraction)
+            // OPTIMIZED: Reduced to 40 scrolls but with stricter boundary verification for early stopping
+            // Early stop allowed when boundaries verified AND 133+ transactions collected
+            const MIN_SCROLLS_FOR_LAST_MONTH = CONFIG.MIN_SCROLLS.LAST_MONTH; // From CONFIG (reduced from 60 to minimize logout risk while ensuring completeness)
             
             // ROLLBACK: Restore simple stop condition checks from working version
             // CRITICAL: For "Last Month", require minimum scrolls before checking stop conditions
@@ -1330,38 +1437,48 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                     if (oldestDate && !isNaN(oldestDate.getTime())) {
                         const oldestDateTime = new Date(oldestDate.getFullYear(), oldestDate.getMonth(), oldestDate.getDate()).getTime();
                         
-                        const today = new Date();
-                        const daysSinceEndDate = (today - endDateObj) / (24 * 60 * 60 * 1000);
+                        // Use SYSTEM_DATE for consistency (captured once at start)
+                        const daysSinceEndDate = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
                     
-                    // CRITICAL: For "Last Month" (30-60 days ago), we need to scroll MUCH more thoroughly
-                    // Data is in descending order, so last month data is further down
-                    // We must scroll past the START date, not just the END date
-                    // For "Last Month" specifically (30-60 days), require scrolling past START date by at least 3 days
-                    const isLastMonth = daysSinceEndDate >= 30 && daysSinceEndDate < 60;
+            // CRITICAL: For "Last Month" (30-60 days ago), we need to scroll MUCH more thoroughly
+            // Data is in descending order, so last month data is further down
+            // We must scroll past the START date, not just the END date
+            // For "Last Month" specifically (30-60 days), require scrolling past START date by at least 3 days
+            // UPDATED: Increased to ensure all 133 October transactions are collected
+            const isLastMonth = daysSinceEndDate >= 30 && daysSinceEndDate < 60;
                     
                     // IMPROVED: Calculate range size and adjust stop threshold
                     const rangeDays = Math.ceil((endDateTime - startDateTime) / (24 * 60 * 60 * 1000)) + 1;
                     
                     // CRITICAL: Always include buffer to ensure boundary dates are captured
+                    // LESSON LEARNED: Increased buffers to prevent missing start boundary (Oct 1)
                     // For small ranges (<= 10 days), stop 2 days past end (ensure last day captured)
-                    // For medium ranges (11-31 days - single month), stop 3 days past end
+                    // For medium ranges (11-31 days - single month), stop 5 days past end (INCREASED from 3)
                     // For large ranges (32-90 days - 1-3 months), stop 5 days past end
                     // For very large ranges (> 90 days - 3+ months), limit to avoid excessive scrolling
                     let daysPastEndToStop;
+                    // Use CONFIG values for buffer days based on range size
+                    // CRITICAL FIX: rangeDays calculation adds +1, so 31-day month = 32, not 31
+                    // Changed condition from <= 31 to <= 32 to correctly identify Last Month (31-day months)
                     if (rangeDays <= 10) {
-                        daysPastEndToStop = 2; // Small range - stop 2 days past end (ensure boundary)
-                    } else if (rangeDays <= 31) {
-                        daysPastEndToStop = 3; // Medium range (single month) - stop 3 days past end
+                        daysPastEndToStop = CONFIG.BUFFER_DAYS.SMALL_RANGE;
+                    } else if (rangeDays <= 32) {
+                        daysPastEndToStop = isLastMonth ? CONFIG.BUFFER_DAYS.LAST_MONTH : CONFIG.BUFFER_DAYS.MEDIUM_RANGE;
                     } else if (rangeDays <= 90) {
-                        daysPastEndToStop = 5; // Large range (1-3 months) - stop 5 days past end
+                        daysPastEndToStop = CONFIG.BUFFER_DAYS.LARGE_RANGE;
                     } else {
                         // Very large ranges (> 3 months) - limit scrolling to avoid issues
-                        // For year-long ranges, we'll stop 7 days past end max
-                        daysPastEndToStop = 7; // Very large range - stop 7 days past end (prevent excessive scrolling)
+                        daysPastEndToStop = CONFIG.BUFFER_DAYS.VERY_LARGE_RANGE;
                         console.warn(`⚠️ Large date range detected (${rangeDays} days). Limiting scroll to prevent issues. Consider splitting into smaller ranges.`);
                     }
-                    // Also ensure we scroll at least 2 days BEFORE start date to capture start boundary
-                    const daysBeforeStartToCapture = rangeDays <= 90 ? 2 : 3; // More buffer for large ranges
+                    // LESSON LEARNED: Increased buffer before start date to 3 days (was 2) for Last Month
+                    // This ensures Oct 1 is captured (scroll to Sep 28 or earlier)
+                    // Use CONFIG values for before-start buffer
+                    // CRITICAL FIX: rangeDays calculation (line 1481) adds +1, so 31-day month = 32, not 31
+                    // Changed condition from <= 31 to <= 32 to correctly identify Last Month (31-day months)
+                    const daysBeforeStartToCapture = (isLastMonth && rangeDays <= 32) 
+                        ? CONFIG.BEFORE_START_BUFFER.LAST_MONTH 
+                        : (rangeDays <= 90 ? CONFIG.BEFORE_START_BUFFER.STANDARD : CONFIG.BEFORE_START_BUFFER.LARGE);
                     const stopThresholdMs = daysPastEndToStop * 24 * 60 * 60 * 1000;
                     const startCaptureThresholdMs = daysBeforeStartToCapture * 24 * 60 * 60 * 1000;
                     
@@ -1379,6 +1496,16 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                             const datesFound = new Set();
                             const transactionsInRange = allTransactions.filter(t => {
                                 if (isDateInRange(t.date, startDateObj, endDateObj)) {
+                                    // CRITICAL: For "Last Month", count ONLY posted transactions
+                                    // Exclude pending transactions from count (target is 133 POSTED transactions)
+                                    if (isLastMonth) {
+                                        // CRITICAL FIX: Check if t.date exists before calling .trim() to prevent TypeError
+                                        const isPending = !t.date || (typeof t.date === 'string' && t.date.trim() === '') || 
+                                                        (t.status && t.status.toLowerCase() === 'pending');
+                                        if (isPending) {
+                                            return false; // Exclude pending transactions
+                                        }
+                                    }
                                     const txDate = parseTransactionDate(t.date);
                                     if (txDate) {
                                         const dateKey = `${txDate.getFullYear()}-${txDate.getMonth()}-${txDate.getDate()}`;
@@ -1389,21 +1516,55 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                                 return false;
                             });
                             
-                            // For "Last Month", require 98% coverage AND scrolled past BOTH boundaries
-                            const requiredCoverage = 0.98;
-                            const hasAllDates = datesFound.size >= rangeDays * requiredCoverage;
+                            // LESSON LEARNED: Enhanced boundary verification - require BOTH Oct 1 AND Oct 31 dates
+                            // Check for explicit boundary dates (start and end of month)
+                            const startDateKey = `${startDateObj.getFullYear()}-${startDateObj.getMonth()}-${startDateObj.getDate()}`;
+                            const endDateKey = `${endDateObj.getFullYear()}-${endDateObj.getMonth()}-${endDateObj.getDate()}`;
+                            const hasStartDate = datesFound.has(startDateKey); // Oct 1 must be present
+                            const hasEndDate = datesFound.has(endDateKey);   // Oct 31 must be present
                             
-                            // CRITICAL: Only stop if we've scrolled past BOTH start AND end boundaries
-                            // This ensures October 31 (end boundary) is captured
-                            if (scrolledPastStart && scrolledPastEnd && hasAllDates) {
+                            // LESSON LEARNED: Complete month check - require 31 unique dates for October
+                            const expectedUniqueDates = rangeDays; // For October: 31 days
+                            const hasCompleteMonth = datesFound.size >= expectedUniqueDates; // All 31 dates present
+                            
+                            // For "Last Month", require 98% coverage AND scrolled past BOTH boundaries
+                            // CRITICAL: Also verify we have 133+ POSTED transactions before stopping
+                            const requiredCoverage = CONFIG.COVERAGE_THRESHOLD.RECENT;
+                            const hasAllDates = datesFound.size >= rangeDays * requiredCoverage;
+                            const hasEnoughTransactions = transactionsInRange.length >= TARGET_RANGE.min; // At least 133 POSTED transactions
+                            
+                            // LESSON LEARNED: Only stop when ALL criteria met:
+                            // 1. Scrolled past BOTH boundaries (start AND end)
+                            // 2. Has BOTH boundary dates (Oct 1 AND Oct 31)
+                            // 3. Complete month coverage (31 unique dates)
+                            // 4. Enough transactions (133+ posted)
+                            // 5. Date coverage (98%+)
+                            const allCriteriaMet = scrolledPastStart && scrolledPastEnd && 
+                                                  hasStartDate && hasEndDate && 
+                                                  hasCompleteMonth && 
+                                                  hasEnoughTransactions && 
+                                                  hasAllDates;
+                            
+                            if (allCriteriaMet) {
                                 scrolledPastDateRange = true;
-                                console.log(`✓ Last Month: Scrolled past BOTH boundaries. Oldest: ${oldestDate.toLocaleDateString()}, Start: ${new Date(startDateTime).toLocaleDateString()}, End: ${new Date(endDateTime).toLocaleDateString()}, Transactions: ${transactionsInRange.length}, Dates found: ${datesFound.size}/${rangeDays} (${Math.round(datesFound.size/rangeDays*100)}%)`);
+                                console.log(`✓ Last Month: ALL CRITERIA MET! Scrolled past BOTH boundaries. Oldest: ${oldestDate.toLocaleDateString()}, Start: ${new Date(startDateTime).toLocaleDateString()}, End: ${new Date(endDateTime).toLocaleDateString()}, Transactions: ${transactionsInRange.length} (target: 133-140), Unique dates: ${datesFound.size}/${expectedUniqueDates}, Dates found: ${datesFound.size}/${rangeDays} (${Math.round(datesFound.size/rangeDays*100)}%)`);
                             } else {
-                                console.log(`Last Month: Continuing scroll. Past start: ${scrolledPastStart}, Past end: ${scrolledPastEnd}, Transactions: ${transactionsInRange.length}, Dates: ${datesFound.size}/${rangeDays} (need ${Math.round(rangeDays*requiredCoverage)}), oldest: ${oldestDate.toLocaleDateString()}`);
+                                // Diagnostic logging for incomplete criteria
+                                const missingCriteria = [];
+                                if (!scrolledPastStart) missingCriteria.push('past start boundary');
+                                if (!scrolledPastEnd) missingCriteria.push('past end boundary');
+                                if (!hasStartDate) missingCriteria.push(`start date (${startDateObj.toLocaleDateString()})`);
+                                if (!hasEndDate) missingCriteria.push(`end date (${endDateObj.toLocaleDateString()})`);
+                                if (!hasCompleteMonth) missingCriteria.push(`complete month (${datesFound.size}/${expectedUniqueDates} dates)`);
+                                if (!hasEnoughTransactions) missingCriteria.push(`enough transactions (${transactionsInRange.length}/${TARGET_RANGE.min})`);
+                                if (!hasAllDates) missingCriteria.push(`date coverage (${Math.round(datesFound.size/rangeDays*100)}% < 98%)`);
+                                
+                                console.log(`Last Month: Continuing scroll. Missing: ${missingCriteria.join(', ')}. Past start: ${scrolledPastStart}, Past end: ${scrolledPastEnd}, Transactions: ${transactionsInRange.length}/${TARGET_RANGE.min}, Unique dates: ${datesFound.size}/${expectedUniqueDates}, oldest: ${oldestDate.toLocaleDateString()}`);
                             }
                         }
                     } else {
-                        // For other date ranges, use improved logic with boundary checking
+                        // LESSON LEARNED: Enhanced boundary checks apply to ALL presets (not just Last Month)
+                        // For other date ranges, use enhanced logic with explicit boundary date checks
                         // CRITICAL: Check BOTH boundaries to ensure complete capture
                         if (scrolledPastStart || scrolledPastEnd) {
                             // Check if we have transactions for all dates in the range
@@ -1420,25 +1581,43 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                                 return false;
                             });
                             
+                            // LESSON LEARNED: Explicit boundary date checks for ALL presets
+                            const startDateKey = `${startDateObj.getFullYear()}-${startDateObj.getMonth()}-${startDateObj.getDate()}`;
+                            const endDateKey = `${endDateObj.getFullYear()}-${endDateObj.getMonth()}-${endDateObj.getDate()}`;
+                            const hasStartDateExplicit = datesFound.has(startDateKey); // Start date must be present
+                            const hasEndDateExplicit = datesFound.has(endDateKey);     // End date must be present
+                            
+                            // LESSON LEARNED: Complete range verification for ALL presets
+                            const expectedUniqueDates = rangeDays; // Full range coverage
+                            const hasCompleteRange = datesFound.size >= expectedUniqueDates * 0.95; // 95%+ coverage required
+                            
                             // For recent ranges, require higher coverage (98%) before stopping
-                            // For older ranges, 95% is acceptable
-                            const requiredCoverage = daysSinceEndDate < 60 ? 0.98 : 0.95;
+                            // For older ranges, use CONFIG coverage thresholds
+                            const requiredCoverage = daysSinceEndDate < 60 ? CONFIG.COVERAGE_THRESHOLD.RECENT : CONFIG.COVERAGE_THRESHOLD.STANDARD;
                             const hasAllDates = datesFound.size >= rangeDays * requiredCoverage;
                             const wayPast = oldestDateTime < (endDateTime - (stopThresholdMs * 2)); // 2x threshold
                             
                             // CRITICAL: For proper boundaries, require BOTH boundaries passed
-                            // This ensures October 31 (end boundary) is captured
+                            // AND explicit boundary dates present for ALL presets
                             const bothBoundariesPassed = scrolledPastStart && scrolledPastEnd;
+                            const allBoundariesVerified = bothBoundariesPassed && hasStartDateExplicit && hasEndDateExplicit;
                             
-                            if ((hasAllDates && bothBoundariesPassed) || wayPast) {
+                            // LESSON LEARNED: Enhanced stop condition for ALL presets
+                            // Require: both boundaries passed, explicit dates present, and good coverage
+                            if ((hasAllDates && allBoundariesVerified && hasCompleteRange) || wayPast) {
                                 scrolledPastDateRange = true;
-                                console.log(`✓ Scrolled past BOTH boundaries. Oldest: ${oldestDate.toLocaleDateString()}, Start: ${new Date(startDateTime).toLocaleDateString()}, End: ${new Date(endDateTime).toLocaleDateString()}, Transactions: ${transactionsInRange.length}, Dates: ${datesFound.size}/${rangeDays} (${Math.round(datesFound.size/rangeDays*100)}%)`);
+                                console.log(`✓ Scrolled past BOTH boundaries with explicit dates verified. Oldest: ${oldestDate.toLocaleDateString()}, Start: ${new Date(startDateTime).toLocaleDateString()}, End: ${new Date(endDateTime).toLocaleDateString()}, Transactions: ${transactionsInRange.length}, Unique dates: ${datesFound.size}/${expectedUniqueDates}, Boundary dates: Start (${hasStartDateExplicit ? 'YES' : 'NO'}), End (${hasEndDateExplicit ? 'YES' : 'NO'})`);
                             } else {
-                                console.log(`Continuing scroll: Past start: ${scrolledPastStart}, Past end: ${scrolledPastEnd}, Transactions: ${transactionsInRange.length}, Dates: ${datesFound.size}/${rangeDays} (need ${Math.round(rangeDays*requiredCoverage)}), oldest: ${oldestDate.toLocaleDateString()}`);
+                                const missingChecks = [];
+                                if (!bothBoundariesPassed) missingChecks.push('both boundaries passed');
+                                if (!hasStartDateExplicit) missingChecks.push('explicit start date');
+                                if (!hasEndDateExplicit) missingChecks.push('explicit end date');
+                                if (!hasCompleteRange) missingChecks.push(`complete range (${datesFound.size}/${expectedUniqueDates} dates)`);
+                                console.log(`Continuing scroll: Past start: ${scrolledPastStart}, Past end: ${scrolledPastEnd}, Transactions: ${transactionsInRange.length}, Unique dates: ${datesFound.size}/${expectedUniqueDates}, Missing: ${missingChecks.join(', ')}, oldest: ${oldestDate.toLocaleDateString()}`);
                             }
                         }
                     }
-                    } // Close if statement from line 1174
+                }
                 } catch (e) {
                     console.error(`Error comparing dates: ${oldestTransaction ? oldestTransaction.date : 'oldestTransaction is null/undefined'}`, e);
                     // Continue scrolling if there's an error - don't stop extraction
@@ -1447,15 +1626,15 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             // Enhanced stop conditions
             // IMPROVED: For small ranges, don't require minimum scrolls
-            const todayStopCheck = new Date();
-            const daysSinceEndDateStop = (todayStopCheck - endDateObj) / (24 * 60 * 60 * 1000);
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndDateStop = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
             const isLastMonthStop = daysSinceEndDateStop >= 30 && daysSinceEndDateStop < 60;
             const rangeDaysForStop = Math.ceil((endDateTime - startDateTime) / (24 * 60 * 60 * 1000)) + 1;
             
             // REFERENCE STANDARD: Check if 100% recovery achieved (133-140 for October)
             if (isLastMonthStop && inRangeCount >= TARGET_RANGE.min && inRangeCount <= TARGET_RANGE.max) {
                 if (scrollStats.scrollsAt100Percent === null) {
-                    const currentWaitTime = (foundTargetDateRange && consecutiveTargetDateMatches >= 3) ? 1000 : 1500;
+                    const currentWaitTime = (foundTargetDateRange && consecutiveTargetDateMatches >= 3) ? CONFIG.SCROLL_WAIT_TIME.FAST : CONFIG.SCROLL_WAIT_TIME.STANDARD;
                     scrollStats.scrollsAt100Percent = scrollAttempts;
                     scrollStats.parametersAt100Percent = {
                         totalScrolls: scrollAttempts,
@@ -1487,21 +1666,34 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             // For small ranges (<= 10 days), allow stopping early (no minimum scrolls)
             // For medium ranges (11-31 days), require some scrolls
             // For large ranges (> 31 days), use original logic
+            // OPTIMIZED: Reduced minimum scrolls for "Last Month" but with strict boundary verification
+            // Early stop allowed when boundaries verified AND 133+ transactions collected (see boundary check below)
+            // Use CONFIG values for minimum scrolls based on range size
+            // CRITICAL FIX: rangeDaysForStop calculation adds +1, so 31-day month = 32, not 31
+            // Changed condition from <= 31 to <= 32 to correctly identify Last Month (31-day months)
             let MIN_SCROLLS_FOR_STOP = 0;
             if (rangeDaysForStop <= 10) {
                 MIN_SCROLLS_FOR_STOP = 0; // Small range - no minimum
-            } else if (rangeDaysForStop <= 31) {
-                MIN_SCROLLS_FOR_STOP = isLastMonthStop ? 60 : 30; // Medium range - require some scrolls
+            } else if (rangeDaysForStop <= 32) {
+                MIN_SCROLLS_FOR_STOP = isLastMonthStop ? CONFIG.MIN_SCROLLS.LAST_MONTH : CONFIG.MIN_SCROLLS.MEDIUM_RANGE;
             } else {
-                MIN_SCROLLS_FOR_STOP = isLastMonthStop ? 60 : 50; // Large range - require more scrolls
+                MIN_SCROLLS_FOR_STOP = isLastMonthStop ? CONFIG.MIN_SCROLLS.LAST_MONTH : CONFIG.MIN_SCROLLS.LARGE_RANGE;
             }
             const canStopNow = !isLastMonthStop || scrollAttempts >= MIN_SCROLLS_FOR_STOP || rangeDaysForStop <= 10;
             
             // OPTIMIZATION: If 100% achieved and verified, can stop early (but verify boundaries first)
-            if (isLastMonthStop && extractionComplete && inRangeCount >= TARGET_RANGE.min && inRangeCount <= TARGET_RANGE.max) {
-                // Got 133-140, but verify we've reached boundaries (first and last days of October)
+            // LESSON LEARNED: Enhanced verification - require ALL criteria before early stop
+            // CRITICAL: Allow early stopping when we have 133+ POSTED transactions AND both boundaries verified
+            // AND both boundary dates present AND complete month coverage
+            if (isLastMonthStop && inRangeCount >= TARGET_RANGE.min) {
+                // Got 133+ POSTED transactions, verify we've reached boundaries (first and last days of October)
                 const inRangeTransactions = allTransactions.filter(t => {
-                    return isDateInRange(t.date, startDateObj, endDateObj);
+                    if (!isDateInRange(t.date, startDateObj, endDateObj)) return false;
+                    // LESSON LEARNED: Count only posted transactions for Last Month
+                    // CRITICAL FIX: Check if t.date exists before calling .trim() to prevent TypeError
+                    const isPending = !t.date || (typeof t.date === 'string' && t.date.trim() === '') || 
+                                    (t.status && t.status.toLowerCase() === 'pending');
+                    return !isPending; // Only posted transactions
                 });
                 
                 if (inRangeTransactions.length > 0) {
@@ -1514,23 +1706,94 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                         const earliestDate = new Date(Math.min(...collectedDates.map(d => d.getTime())));
                         const latestDate = new Date(Math.max(...collectedDates.map(d => d.getTime())));
                         
-                        // If we have first and last days, and count is in target range, extraction is complete
-                        if (earliestDate <= startDateObj && latestDate >= endDateObj) {
+                        // LESSON LEARNED: Get unique dates for complete month check
+                        const uniqueDates = new Set(
+                            collectedDates.map(d => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`)
+                        );
+                        const expectedUniqueDates = rangeDaysForStop; // For October: 31 days
+                        const hasCompleteMonth = uniqueDates.size >= expectedUniqueDates;
+                        
+                        // LESSON LEARNED: Explicit boundary date checks
+                        const startDateKey = `${startDateObj.getFullYear()}-${startDateObj.getMonth()}-${startDateObj.getDate()}`;
+                        const endDateKey = `${endDateObj.getFullYear()}-${endDateObj.getMonth()}-${endDateObj.getDate()}`;
+                        const hasStartDateExplicit = uniqueDates.has(startDateKey); // Oct 1 must be present
+                        const hasEndDateExplicit = uniqueDates.has(endDateKey);     // Oct 31 must be present
+                        
+                        // CRITICAL: Verify we have BOTH start date (Oct 1) AND end date (Oct 31)
+                        // Also verify we've scrolled past both boundaries AND complete month coverage
+                        const hasStartDate = earliestDate <= startDateObj;
+                        const hasEndDate = latestDate >= endDateObj;
+                        const countInRange = inRangeCount >= TARGET_RANGE.min && inRangeCount <= TARGET_RANGE.max;
+                        
+                        // LESSON LEARNED: Check if we've scrolled past boundaries with increased buffers
+                        // Require 5 days past end, 3 days before start for Last Month
+                        let hasScrolledPastBoundaries = false;
+                        let scrolledPastStartBoundary = false;
+                        let scrolledPastEndBoundary = false;
+                        if (oldestTransaction && oldestTransaction.date) {
+                            const oldestTxDate = parseTransactionDate(oldestTransaction.date);
+                            if (oldestTxDate && !isNaN(oldestTxDate.getTime())) {
+                                const oldestTxDateTime = new Date(oldestTxDate.getFullYear(), oldestTxDate.getMonth(), oldestTxDate.getDate()).getTime();
+                                
+                                // LESSON LEARNED: Increased buffer - 5 days past end, 3 days before start
+                                const daysPastEndBuffer = 5 * 24 * 60 * 60 * 1000; // 5 days
+                                const daysBeforeStartBuffer = 3 * 24 * 60 * 60 * 1000; // 3 days
+                                
+                                scrolledPastStartBoundary = oldestTxDateTime < (startDateTime - daysBeforeStartBuffer);
+                                scrolledPastEndBoundary = oldestTxDateTime < (endDateTime - daysPastEndBuffer);
+                                hasScrolledPastBoundaries = scrolledPastStartBoundary && scrolledPastEndBoundary;
+                            }
+                        }
+                        
+                        // LESSON LEARNED: Only allow early stop if ALL criteria met:
+                        // 1. Has start date (earliest <= Oct 1)
+                        // 2. Has end date (latest >= Oct 31)
+                        // 3. Has explicit boundary dates (Oct 1 AND Oct 31 present)
+                        // 4. Complete month coverage (31 unique dates)
+                        // 5. Enough transactions (133+ posted)
+                        // 6. Scrolled past both boundaries (5 days after, 3 days before)
+                        const allEarlyStopCriteria = hasStartDate && hasEndDate && 
+                                                     hasStartDateExplicit && hasEndDateExplicit &&
+                                                     hasCompleteMonth &&
+                                                     countInRange && 
+                                                     (hasScrolledPastBoundaries || scrolledPastDateRange);
+                        
+                        // If we have ALL criteria, extraction is complete!
+                        if (allEarlyStopCriteria) {
                             // We have full boundaries and target count - extraction complete!
                             const currentDOMCount = document.querySelectorAll('[data-index]').length;
                             const isStable = await waitForDOMStability(currentDOMCount, 2000);
-                            if (isStable && unchangedCount >= 5) {
+                            // CRITICAL FIX: Restore robustness check - ensure at least 5 consecutive scrolls with no new transactions
+                            // This verifies the transaction list has stabilized before stopping (prevents premature stopping)
+                            // Also verify minimum scrolls performed and DOM is stable
+                            if (isStable && scrollAttempts >= MIN_SCROLLS_FOR_STOP && unchangedCount >= 5) {
                                 console.log('');
                                 console.log('='.repeat(70));
-                                console.log('✅ EXTRACTION COMPLETE: 100% Recovery + Boundaries Verified');
+                                console.log('✅ EXTRACTION COMPLETE: 100% Recovery + ALL Boundaries Verified');
                                 console.log('='.repeat(70));
-                                console.log(`   Transactions found: ${inRangeCount} (target: 133-140)`);
-                                console.log(`   Boundaries: ${earliestDate.toLocaleDateString()} to ${latestDate.toLocaleDateString()}`);
+                                console.log(`   Transactions found: ${inRangeCount} (target: 133-140 posted transactions)`);
+                                console.log(`   Unique dates: ${uniqueDates.size}/${expectedUniqueDates} (complete month: ${hasCompleteMonth ? 'YES' : 'NO'})`);
+                                console.log(`   Boundary dates: Start (Oct 1): ${hasStartDateExplicit ? 'YES' : 'NO'}, End (Oct 31): ${hasEndDateExplicit ? 'YES' : 'NO'}`);
+                                console.log(`   Scrolled past boundaries: Start: ${scrolledPastStartBoundary ? 'YES' : 'NO'}, End: ${scrolledPastEndBoundary ? 'YES' : 'NO'}`);
+                                console.log(`   Boundaries verified: ${earliestDate.toLocaleDateString()} to ${latestDate.toLocaleDateString()}`);
                                 console.log(`   Expected range: ${startDateObj.toLocaleDateString()} to ${endDateObj.toLocaleDateString()}`);
-                                console.log(`   Stopping early to avoid unnecessary scrolls`);
+                                console.log(`   Scrolls: ${scrollAttempts} (stopping early to avoid logout)`);
                                 console.log('='.repeat(70));
                                 console.log('');
                                 break;
+                        } else {
+                            // Diagnostic logging for incomplete criteria (every 10 scrolls to avoid spam)
+                            if (scrollAttempts % 10 === 0) {
+                                const missingCriteria = [];
+                                if (!hasStartDate) missingCriteria.push('start date (earliest > Oct 1)');
+                                if (!hasEndDate) missingCriteria.push('end date (latest < Oct 31)');
+                                if (!hasStartDateExplicit) missingCriteria.push(`explicit start date (Oct 1)`);
+                                if (!hasEndDateExplicit) missingCriteria.push(`explicit end date (Oct 31)`);
+                                if (!hasCompleteMonth) missingCriteria.push(`complete month (${uniqueDates.size}/${expectedUniqueDates} dates)`);
+                                if (!countInRange) missingCriteria.push(`enough transactions (${inRangeCount}/${TARGET_RANGE.min})`);
+                                if (!hasScrolledPastBoundaries && !scrolledPastDateRange) missingCriteria.push('scrolled past boundaries');
+                                
+                                console.log(`Last Month: Continuing scroll. Missing: ${missingCriteria.join(', ')}. Transactions: ${inRangeCount}/${TARGET_RANGE.min}, Unique dates: ${uniqueDates.size}/${expectedUniqueDates}`);
                             }
                         }
                     }
@@ -1550,16 +1813,16 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                 break;
                 }
             } else if (foundTargetDateRange && scrolledPastDateRange && !canStopNow) {
-                console.log(`Last Month: Found range but only ${scrollAttempts} scrolls (need ${MIN_SCROLLS_FOR_LAST_MONTH_STOP}). Continuing...`);
+                console.log(`Last Month: Found range but only ${scrollAttempts} scrolls (need ${MIN_SCROLLS_FOR_STOP}). Continuing...`);
             }
             
             // Check if scroll position hasn't changed (reached bottom)
             // For "Last Month", be more conservative - require more unchanged scrolls
-            const todayCheck = new Date();
-            const daysSinceEndDateCheck = (todayCheck - endDateObj) / (24 * 60 * 60 * 1000);
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndDateCheck = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
             const isLastMonthCheck = daysSinceEndDateCheck >= 30 && daysSinceEndDateCheck < 60;
             const requiredUnchangedScrolls = isLastMonthCheck ? 5 : 3; // More for last month
-            const MIN_SCROLLS_FOR_LAST_MONTH_BOTTOM = 60;
+            const MIN_SCROLLS_FOR_LAST_MONTH_BOTTOM = CONFIG.MIN_SCROLLS.BOTTOM_CHECK; // From CONFIG (reduced from 60 to minimize logout risk)
             const canStopAtBottom = !isLastMonthCheck || scrollAttempts >= MIN_SCROLLS_FOR_LAST_MONTH_BOTTOM;
             
             const currentScrollPosition = window.scrollY;
@@ -1607,11 +1870,11 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             // Check if no new transactions found
             // For "Last Month", require more attempts before stopping
-            const todayUnchanged = new Date();
-            const daysSinceEndDateUnchanged = (todayUnchanged - endDateObj) / (24 * 60 * 60 * 1000);
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndDateUnchanged = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
             const isLastMonthUnchanged = daysSinceEndDateUnchanged >= 30 && daysSinceEndDateUnchanged < 60;
             const requiredUnchangedAttempts = isLastMonthUnchanged ? 15 : 8; // More for last month
-            const MIN_SCROLLS_FOR_LAST_MONTH_UNCHANGED = 60;
+            const MIN_SCROLLS_FOR_LAST_MONTH_UNCHANGED = CONFIG.MIN_SCROLLS.UNCHANGED_CHECK; // From CONFIG (reduced from 60 to minimize logout risk)
             const canStopUnchanged = !isLastMonthUnchanged || scrollAttempts >= MIN_SCROLLS_FOR_LAST_MONTH_UNCHANGED;
             
             if (allTransactions.length === lastTransactionCount) {
@@ -1658,35 +1921,13 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             lastTransactionCount = allTransactions.length;
             
-            // FIXED: Enhanced scroll with error handling and verification
-            // Scroll down first (like successful version)
-            const scrollBefore = window.scrollY || window.pageYOffset || 0;
-            try {
-                scrollDown();
-                
-                // Verify scroll actually happened (wait a bit for it to execute)
-                await new Promise(resolve => setTimeout(resolve, 100));
-                const scrollAfter = window.scrollY || window.pageYOffset || 0;
-                
-                if (Math.abs(scrollAfter - scrollBefore) < 10) {
-                    console.warn(`⚠️ Scroll may not have executed (before: ${scrollBefore}, after: ${scrollAfter}). Retrying...`);
-                    // Force scroll if it didn't happen
-                    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
-                    window.scrollTo(0, scrollBefore + viewportHeight * 1.5);
-                    window.dispatchEvent(new Event('scroll'));
-                } else {
-                    console.log(`✓ Scrolled from ${scrollBefore} to ${scrollAfter} (scroll attempt ${scrollAttempts})`);
-                }
-            } catch (scrollError) {
-                console.error('Error during scroll:', scrollError);
-                // Fallback: try basic scroll
-                const viewportHeight = window.innerHeight || 800;
-                window.scrollTo(0, scrollBefore + viewportHeight * 1.5);
-            }
+            // PRISTINE VERSION: Simple scroll - no verification, no event dispatching
+            // Simple approach worked for 133 transactions extraction
+            scrollDown();
             
             // ROLLBACK: Simple adaptive wait time (from successful October-133-Version)
-            // 1000ms if found range for 3+ scrolls, 1500ms otherwise
-            const waitTime = (foundTargetDateRange && consecutiveTargetDateMatches >= 3) ? 1000 : 1500;
+            // Use CONFIG wait times: fast if found range for 3+ scrolls, standard otherwise
+            const waitTime = (foundTargetDateRange && consecutiveTargetDateMatches >= 3) ? CONFIG.SCROLL_WAIT_TIME.FAST : CONFIG.SCROLL_WAIT_TIME.STANDARD;
             await new Promise(resolve => setTimeout(resolve, waitTime));
             
             // Add micro-pauses for human behavior (from successful version)
@@ -1707,8 +1948,8 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             // Calculate smart scroll limits based on date range
             // For recent dates (like November), only check top portion of page
-            const today = new Date();
-            const daysSinceEndDate = (today - endDateObj) / (24 * 60 * 60 * 1000);
+            // Use SYSTEM_DATE for consistency (captured once at start)
+            const daysSinceEndDate = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
             const rangeDays = (endDateObj - startDateObj) / (24 * 60 * 60 * 1000);
             
             // Determine scroll limit based on how recent the range is
@@ -1733,16 +1974,23 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                 console.log(`Small date range (${Math.round(rangeDays)} days) - checking top 70%`);
             }
             
-            // Scroll to top for final pass - use segmented scroll to avoid logout
-            console.log('Scrolling back to top for final verification pass (segmented)...');
-            await scrollToTopSegmented((segment, total, progress) => {
-                if (counterElement && document.body.contains(counterElement)) {
-                    counterElement.textContent = `Returning to top: Segment ${segment}/${total} (${progress}%)...`;
+            // LESSON LEARNED: Scroll to top with extraction at each segment
+            console.log('Scrolling back to top for final verification pass (segmented with extraction)...');
+            await scrollToTopSegmented(
+                (segment, total, progress) => {
+                    if (counterElement && document.body.contains(counterElement)) {
+                        counterElement.textContent = `Returning to top: Segment ${segment}/${total} (${progress}%)...`;
+                    }
+                },
+                () => {
+                    // LESSON LEARNED: Extract at each scroll segment to capture older transactions
+                    const segmentTransactions = extractAllTransactions();
+                    allTransactions = combineTransactions(allTransactions, segmentTransactions);
                 }
-            });
+            );
             await new Promise(resolve => setTimeout(resolve, randomDelay(800, 1200)));
             
-            // Extract at top
+            // Final extraction at top
             let finalTransactions = extractAllTransactions();
             allTransactions = combineTransactions(allTransactions, finalTransactions);
             
@@ -1881,12 +2129,19 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             // CRITICAL: Enhanced pending transaction check - check top area thoroughly
             console.log('Performing enhanced pending transaction check...');
-            console.log('Scrolling back to top for pending check (segmented)...');
-            await scrollToTopSegmented((segment, total, progress) => {
-                if (counterElement && document.body.contains(counterElement)) {
-                    counterElement.textContent = `Returning to top for pending check: Segment ${segment}/${total} (${progress}%)...`;
+            console.log('Scrolling back to top for pending check (segmented with extraction)...');
+            await scrollToTopSegmented(
+                (segment, total, progress) => {
+                    if (counterElement && document.body.contains(counterElement)) {
+                        counterElement.textContent = `Returning to top for pending check: Segment ${segment}/${total} (${progress}%)...`;
+                    }
+                },
+                () => {
+                    // LESSON LEARNED: Extract at each scroll segment
+                    const segmentTransactions = extractAllTransactions();
+                    allTransactions = combineTransactions(allTransactions, segmentTransactions);
                 }
-            });
+            );
             await new Promise(resolve => setTimeout(resolve, randomDelay(1000, 1500)));
             
             // Extract at top first
@@ -1916,7 +2171,14 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             
             // Final extraction at top to catch any remaining pending
             console.log('Final scroll to top (segmented)...');
-            await scrollToTopSegmented();
+            await scrollToTopSegmented(
+                null,
+                () => {
+                    // LESSON LEARNED: Extract at each scroll segment
+                    const segmentTransactions = extractAllTransactions();
+                    allTransactions = combineTransactions(allTransactions, segmentTransactions);
+                }
+            );
             await new Promise(resolve => setTimeout(resolve, randomDelay(800, 1200)));
             const finalPendingPass = extractAllTransactions();
             allTransactions = combineTransactions(allTransactions, finalPendingPass);
@@ -1924,20 +2186,20 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             // Log pending transaction count
             const pendingCount = allTransactions.filter(t => {
                 const isPendingStatus = t.status && t.status.toLowerCase() === 'pending';
-                const hasNoDate = !t.date || t.date.trim() === '';
+                // CRITICAL FIX: Check if t.date exists before calling .trim() to prevent TypeError
+                const hasNoDate = !t.date || (typeof t.date === 'string' && t.date.trim() === '');
                 return isPendingStatus || hasNoDate;
             }).length;
             console.log(`✓ Pending transaction check complete. Found ${pendingCount} pending transactions`);
             
             console.log(`Final extraction complete. Total unique transactions: ${allTransactions.length}`);
             console.log(`Final verification pass complete. Performed ${finalVerificationScrolls} verification scrolls.`);
-            
         } catch (finalPassError) {
             console.error('Error during final verification pass:', finalPassError);
             // Log error but continue - don't let final pass error stop the export
             console.log(`Final verification pass encountered error but continuing. Verification scrolls attempted: ${finalVerificationScrolls}`);
         }
-        
+        // Nested try-catch block is now fully closed above
     } finally {
         // Clean up UI
         if (document.body.contains(stopButton)) {
@@ -1980,7 +2242,8 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
     // Filter transactions using the export date range (trimmed if buffer detected)
     // IMPORTANT: Include pending transactions (those without dates OR with "Pending" status) if ORIGINAL end date is today or future
     // Use original endDateObj (not trimmed exportEndDate) to determine if we should include pending
-    const today = new Date();
+    // Use SYSTEM_DATE for consistency (captured once at start)
+    const today = new Date(SYSTEM_DATE);
     today.setHours(0, 0, 0, 0); // Normalize to start of day
     const originalEndDate = new Date(endDateObj);
     originalEndDate.setHours(23, 59, 59, 999); // End of day
@@ -2041,8 +2304,8 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
     console.log(`Transactions in export range: ${filteredTransactions.length}`);
     
     // REFERENCE STANDARD: Show 100% recovery parameters if achieved
-    const todaySummary = new Date();
-    const daysSinceEndDateSummary = (todaySummary - endDateObj) / (24 * 60 * 60 * 1000);
+    // Use SYSTEM_DATE for consistency (captured once at start)
+    const daysSinceEndDateSummary = (SYSTEM_DATE - endDateObj) / (24 * 60 * 60 * 1000);
     const isLastMonthSummary = daysSinceEndDateSummary >= 30 && daysSinceEndDateSummary < 60;
     
     if (isLastMonthSummary && scrollStats.scrollsAt100Percent !== null) {
@@ -2121,7 +2384,8 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
     if (filteredTransactions.length > 0) {
         const postedFiltered = filteredTransactions.filter(t => {
             const isPendingStatus = t.status && t.status.toLowerCase() === 'pending';
-            const hasNoDate = !t.date || t.date.trim() === '';
+            // CRITICAL FIX: Check if t.date exists before calling .trim() to prevent TypeError
+            const hasNoDate = !t.date || (typeof t.date === 'string' && t.date.trim() === '');
             return !isPendingStatus && !hasNoDate;
         });
         if (postedFiltered.length > 0) {
