@@ -138,6 +138,22 @@
         .dark-mode .disclaimer-notice p {
             color: #ffd54f !important;
         }
+        
+        #ck-page-notice {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #1565c0;
+        }
+        
+        .dark-mode #ck-page-notice {
+            background-color: #0d47a1;
+            border-color: #2196f3;
+            color: #64b5f6;
+        }
 
         /* Dark mode styles */
         body.dark-mode {
@@ -408,6 +424,16 @@
         <button id="export-btn" style="flex: 1; margin: 0; padding: 10px 20px;">Export</button>
     </div>
 
+    <div class="input-container" id="ck-transactions-notice" style="display: none; margin-bottom: 15px; padding: 10px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; font-size: 13px; color: #856404;">
+        <p style="margin: 0; font-weight: 600;">⚠️ Not on Transactions Page</p>
+        <p style="margin: 5px 0 0 0;">Please navigate to the Credit Karma transactions page to use the export feature.</p>
+    </div>
+    
+    <div id="ck-page-notice" style="display: none; margin-bottom: 15px; padding: 10px; background-color: #e8f5e9; border: 1px solid #4caf50; border-radius: 4px; font-size: 13px; color: #2e7d32;">
+        <p style="margin: 0; font-weight: 600;">✅ On Transactions Page</p>
+        <p style="margin: 5px 0 0 0;">You're ready to export! Select a date range below.</p>
+    </div>
+    
     <div class="input-container">
         <label class="date-label">Quick Presets</label>
         <div class="date-presets">

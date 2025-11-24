@@ -1617,7 +1617,7 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                             }
                         }
                     }
-                }
+                    }
                 } catch (e) {
                     console.error(`Error comparing dates: ${oldestTransaction ? oldestTransaction.date : 'oldestTransaction is null/undefined'}`, e);
                     // Continue scrolling if there's an error - don't stop extraction
@@ -1810,7 +1810,7 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
                     } else {
                         console.log('Found range, scrolled past, and DOM is stable. Stopping.');
                     }
-                break;
+                    break;  // CRITICAL: Fixed to 20 spaces - MUST align with lines 1808, 1810, 1812 to be inside if(isStable)
                 }
             } else if (foundTargetDateRange && scrolledPastDateRange && !canStopNow) {
                 console.log(`Last Month: Found range but only ${scrollAttempts} scrolls (need ${MIN_SCROLLS_FOR_STOP}). Continuing...`);

@@ -251,8 +251,8 @@ document.getElementById('export-btn').addEventListener('click', () => {
         
         // IMPROVED: Function to ensure content script is loaded before sending message
         const ensureContentScriptAndSend = async (retryCount = 0) => {
-            const maxRetries = 8; // Increased retries
-            const baseDelay = 800; // Longer base delay
+            const maxRetries = 2; // Quick retry - only 2 attempts max
+            const baseDelay = 300; // Quick base delay
             
             try {
                 // IMPROVED: Better injection and verification mechanism
@@ -323,10 +323,10 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     }
                 }
                 
-                // Step 3: Wait for script to fully initialize (longer wait if just injected)
+                // Step 3: Wait for script to fully initialize (quick wait)
                 const waitTime = scriptReady 
-                    ? baseDelay + (retryCount * 200)  // Shorter wait if already loaded
-                    : baseDelay + (retryCount * 400) + 1000; // Longer wait if just injected
+                    ? baseDelay + (retryCount * 100)  // Quick wait if already loaded
+                    : baseDelay + (retryCount * 200) + 500; // Quick wait if just injected
                 console.log(`Waiting ${waitTime}ms for content script to initialize (ready: ${scriptReady})...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
                 
@@ -395,22 +395,22 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     
                     // Check if it's a "receiving end doesn't exist" error (content script not loaded)
                         if (errorMsg.includes("receiving end") || errorMsg.includes("Could not establish") || errorMsg.includes("message port closed") || errorMsg.includes("Extension context invalidated")) {
-                            // Retry if we haven't exceeded max retries
+                            // Retry if we haven't exceeded max retries (quick retry)
                             if (retryCount < maxRetries) {
                                 const nextRetry = retryCount + 1;
-                                const retryWaitTime = baseDelay + (nextRetry * 400);
+                                const retryWaitTime = baseDelay + (nextRetry * 200);
                                 console.log(`Content script not ready (attempt ${nextRetry}/${maxRetries}), retrying in ${retryWaitTime}ms...`);
-                                showStatus(`Waiting for page to load... (${nextRetry}/${maxRetries})`, 'info');
+                                showStatus(`Loading... (${nextRetry}/${maxRetries})`, 'info');
                                 
-                                // Update button to show it's retrying
-                                exportBtn.textContent = `Retrying... (${nextRetry}/${maxRetries})`;
+                                // Update button to show it's retrying (simpler message)
+                                exportBtn.textContent = `Loading...`;
                                 
                                 setTimeout(() => {
                                     ensureContentScriptAndSend(nextRetry);
                                 }, retryWaitTime);
                                 return;
                             } else {
-                                showStatus('Error: Content script could not load after multiple attempts. Please refresh the page completely (Ctrl+F5) and try again.', 'error');
+                                showStatus('Error: Content script could not load. Please refresh the page (Ctrl+F5) and try again.', 'error');
                                 exportBtn.textContent = originalText;
                                 exportBtn.disabled = false;
                             }
@@ -437,33 +437,33 @@ document.getElementById('export-btn').addEventListener('click', () => {
             } catch (error) {
                 console.error('Error in ensureContentScriptAndSend:', error);
                 
-                // Retry if we haven't exceeded max retries
+                // Retry if we haven't exceeded max retries (quick retry)
                 if (retryCount < maxRetries) {
                     const nextRetry = retryCount + 1;
-                    const retryWaitTime = baseDelay + (nextRetry * 400);
+                    const retryWaitTime = baseDelay + (nextRetry * 200);
                     console.log(`Error occurred (attempt ${nextRetry}/${maxRetries}), retrying in ${retryWaitTime}ms...`);
-                    showStatus(`Retrying... (${nextRetry}/${maxRetries})`, 'info');
+                    showStatus(`Loading... (${nextRetry}/${maxRetries})`, 'info');
                     
-                    // Update button to show it's retrying
-                    exportBtn.textContent = `Retrying... (${nextRetry}/${maxRetries})`;
+                    // Update button to show it's retrying (simpler message)
+                    exportBtn.textContent = `Loading...`;
                     
                     setTimeout(() => {
                         ensureContentScriptAndSend(nextRetry);
                     }, retryWaitTime);
                 } else {
                 const errorMsg = error?.message || error?.toString() || 'Failed to start export';
-                    showStatus(`Error: ${errorMsg}. Please refresh the page completely (Ctrl+F5) and try again.`, 'error');
+                    showStatus(`Error: ${errorMsg}. Please refresh the page (Ctrl+F5) and try again.`, 'error');
                 exportBtn.textContent = originalText;
                 exportBtn.disabled = false;
             }
             }
         };
         
-        // Start the process with a longer initial delay to ensure page is ready
-        showStatus('Preparing export...', 'info');
+        // Start the process quickly
+        showStatus('Starting export...', 'info');
         setTimeout(() => {
             ensureContentScriptAndSend(0);
-        }, 500);
+        }, 200);
     });
 });
 
@@ -503,11 +503,40 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Don't mark any button as active by default - only when user clicks
     
+    // Show notice if on CK transactions page
+    function updateCKPageNotice() {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            const successNotice = document.getElementById('ck-page-notice');
+            const warningNotice = document.getElementById('ck-transactions-notice');
+            const isOnTransactionsPage = tabs[0] && tabs[0].url && 
+                (tabs[0].url.includes('creditkarma.com/networth/transactions') || 
+                 tabs[0].url.includes('/transactions'));
+            
+            if (successNotice) {
+                successNotice.style.display = isOnTransactionsPage ? 'block' : 'none';
+            }
+            if (warningNotice) {
+                warningNotice.style.display = isOnTransactionsPage ? 'none' : 'block';
+            }
+        });
+    }
+    
+    // Check on load
+    updateCKPageNotice();
+    
+    // Check when tab updates
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (changeInfo.status === 'complete' && tab.active) {
+            updateCKPageNotice();
+        }
+    });
+    
     // Auto-open transactions page if not already there (removes redundant step)
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         if (tabs[0] && tabs[0].url && tabs[0].url.includes('creditkarma.com/networth/transactions')) {
             // User is already on the page - show success message
             showStatus('✓ You are on the Credit Karma transactions page. Ready to export!', 'success');
+            updateCKPageNotice();
         } else {
             // Auto-open transactions page
             chrome.runtime.sendMessage({ action: 'openTransactionsPage' }, (response) => {

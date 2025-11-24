@@ -64,10 +64,13 @@ CK_TX_Downloader_JavaScript/
 !"TxVault/README.md"
 !"TxVault-Basic/README.md"
 !README.md  # Root README for GitHub
+!PROJECT_REVIEW.md  # Project review documentation
+!LESSONS_LEARNED.md  # Lessons learned documentation
 # Note: Selenium-Version is completely excluded, so no need for exceptions
 
 # TxVault (Enhanced) - Ignore non-core folders
 TxVault/Documentation/
+!TxVault/Documentation/PROJECT_REVIEW.md  # Allow project review documentation
 # TxVault/Screenshots/ - NEEDED for root README images
 TxVault/Development/
 # Only track core files (matching Basic's core file list):
