@@ -2200,24 +2200,9 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
             console.log(`Final verification pass encountered error but continuing. Verification scrolls attempted: ${finalVerificationScrolls}`);
         }
         // Nested try-catch block is now fully closed above
-    } finally {
-        // Clean up UI
-        if (document.body.contains(stopButton)) {
-        document.body.removeChild(stopButton);
-        }
-        if (document.body.contains(counterElement)) {
-        document.body.removeChild(counterElement);
-        }
-        if (document.body.contains(progressBar)) {
-            progressBar.style.width = '100%';
-            setTimeout(() => {
-                if (document.body.contains(progressBar)) {
-                    document.body.removeChild(progressBar);
-                }
-            }, 500);
-        }
-    }
-    
+
+        // End of final verification pass try-catch block
+
     console.log(`Total transactions found: ${allTransactions.length}`);
     
     // Use strict boundaries if requested (default: true for exact month boundaries)
@@ -2542,8 +2527,30 @@ Range: ${requestedRange} | Found: ${foundDateRange} | (Time: ${elapsedDisplay})
         : `${totalTime}s`;
     
     console.log(`Filtered transactions: ${filteredTransactions.length} (Total time: ${totalTimeDisplay})`);
-    
+
     return { allTransactions, filteredTransactions, elapsedTime: totalTimeDisplay };
+}
+
+    } catch (mainError) {
+        console.error('Error during main extraction process:', mainError);
+        throw mainError;
+    } finally {
+        // Clean up UI
+        if (document.body.contains(stopButton)) {
+            document.body.removeChild(stopButton);
+        }
+        if (document.body.contains(counterElement)) {
+            document.body.removeChild(counterElement);
+        }
+        if (document.body.contains(progressBar)) {
+            progressBar.style.width = '100%';
+            setTimeout(() => {
+                if (document.body.contains(progressBar)) {
+                    document.body.removeChild(progressBar);
+                }
+            }, 500);
+        }
+    }
 }
 
 // Message Listener
