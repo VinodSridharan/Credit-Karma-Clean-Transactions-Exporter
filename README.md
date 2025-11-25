@@ -58,7 +58,7 @@
 - 🔒 **Zero Top Scrolling** – Stays at current position, no unnecessary navigation
 - 📈 **Robust Bottom Detection** – Handles 10+ year date ranges with intelligent delays
 - ✅ **Pending Transaction Support** – Automatic detection for this-week, this-month, this-year presets
-- 📜 **Scroll & Capture Mode** – User-controlled scrolling with real-time statistics and 100% accuracy
+- 💡 **Innovative Mode (Scroll & Capture)** – User-controlled scrolling with real-time statistics and 100% accuracy
 
 ### Performance Metrics
 
@@ -358,9 +358,9 @@ This remarkable achievement demonstrates the extension's ability to handle large
 ### Speed
 
 - ⚡ **Innovative Mode**: User-controlled pace, export anytime
-- ⚡ **Monthly exports**: Under 3 minutes (auto presets)
-- ⚡ **Weekly exports**: Under 2 minutes (auto presets)
-- ⚡ **Multi-year exports**: 15-25 minutes for full year (auto presets)
+- ⚡ **Monthly exports**: Under 3 minutes (Presets Mode)
+- ⚡ **Weekly exports**: Under 2 minutes (Presets Mode)
+- ⚡ **Multi-year exports**: 15-25 minutes for full year (Presets Mode)
 
 ### Accuracy
 
@@ -387,7 +387,7 @@ The project is organized into branches based on extraction methods:
 1. **Main Branch** (`main`)
    - **Innovative Mode (Scroll & Capture)** ⭐ (Recommended)
    - **Basic Mode**
-   - **Auto Presets Mode** (Under Development)
+   - **Presets Mode (Auto-Scroll)** (Under Development)
 
 2. **Development Branch** (`dev-auto-presets`)
    - Focused on resolving auto-scroll reliability issues
