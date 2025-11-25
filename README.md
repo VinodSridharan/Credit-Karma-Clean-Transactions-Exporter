@@ -161,16 +161,19 @@ TxVault offers three extraction methods, organized by priority and innovation:
 - **Accuracy**: 100% verified
 - **User Experience**: Manual scrolling with real-time statistics
 - **Reliability**: Highest - manual control ensures all content loads
+- **Access**: Click the **"Scroll & Capture"** preset button in the extension popup
 - **Innovation**: User-controlled extraction with automatic capture and cleanup
 
 **👉 This is our top recommendation for all users.**
 
 **Key Features:**
-- Real-time statistics and monthly breakdowns
-- Automatic duplicate removal
-- "Pending" date filtering
-- Export anytime functionality
-- Auto-export on logout protection
+- **Preset-Based Access**: Available as a preset button in the extension popup
+- **Real-Time Statistics**: Live transaction counts, date ranges, and monthly breakdowns
+- **Persistent Status Box**: Central panel stays visible with live updates
+- **Automatic Capture**: Captures transactions as you scroll (manual scroll detection + periodic capture)
+- **Automatic Cleanup**: Removes duplicates and filters "Pending" dates before export
+- **Export Anytime**: Export CSV whenever you're ready
+- **Auto-Export on Logout**: Automatically saves your data if Credit Karma logs you out
 
 ### 2. ⚙️ Presets Mode (Auto-Scroll)
 
@@ -192,9 +195,14 @@ TxVault offers three extraction methods, organized by priority and innovation:
 - **Accuracy**: Variable depending on use case
 - **User Experience**: Basic extraction functionality
 - **Reliability**: Good for straightforward scenarios
+- **Access**: Manual date entry in the extension popup
 - **Features**: Manual date entry only, no presets
 
 **Note**: This is a reference implementation. For best results, use Innovative Mode (Scroll & Capture).
+
+---
+
+**Important**: All three methods are available in the same **TxVault** extension. Simply click different preset buttons or use manual date entry in the extension popup to access each method.
 
 ---
 
