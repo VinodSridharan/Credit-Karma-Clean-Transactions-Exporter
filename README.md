@@ -17,11 +17,11 @@
 
 ---
 
-## 🌟 Top Recommendation: Scroll & Capture Mode ⭐
+## 🌟 Top Recommendation: Innovative Mode (Scroll & Capture) ⭐
 
-### **Why Scroll & Capture is Our #1 Choice**
+### **Why Innovative Mode is Our #1 Choice**
 
-**Scroll & Capture** is the **most reliable and user-friendly** method for extracting transactions. It gives you **complete control** while ensuring **100% accuracy** through verified testing.
+**Innovative Mode (Scroll & Capture)** is the **most reliable and user-friendly** method for extracting transactions. It gives you **complete control** while ensuring **100% accuracy** through verified testing. This innovative approach combines user-controlled scrolling with automatic capture and cleanup.
 
 #### ✅ **Proven Performance**
 - **100% Accuracy** for Last Year (2024): Perfect match - 738 transactions
@@ -477,7 +477,7 @@ Free to use, modify, and distribute. Perfect for personal projects, startups, an
 
 | Date | Update Type | Description | Source |
 |------|-------------|-------------|--------|
-| 2025-11-25 | Documentation | Reorganized documentation to highlight Scroll & Capture as top recommendation, updated statistics with verified results, restructured extraction methods by priority | Project Management |
+| 2025-11-25 | Documentation | Renamed extraction methods: Enhanced → Presets Mode, Basic → Innovative Mode (Scroll & Capture). Reorganized README with logical flow: Innovative Mode (recommended), Presets Mode, Basic Mode | Project Management |
 | 2025-11-25 10:50:08 | Documentation | Created comprehensive v4.0 documentation suite including project plan, success stories, code implementation, function reference, metrics, and documentation index | Project Plan & Review Resource, Metrics Resource, Code Resource, Update Tracking Resource |
 
 **Note:** This document is automatically updated by Metadata Resource when changes occur per [WORKFLOW_POLICY.md](WORKFLOW_POLICY.md).
