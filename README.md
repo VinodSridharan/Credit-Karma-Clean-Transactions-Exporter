@@ -92,9 +92,11 @@
    - Log into Credit Karma
    - Navigate to Transactions
    - Click the TxVault icon in your toolbar
-   - **Recommended**: Click **"Scroll & Capture"** (Innovative Mode)
-   - Scroll through your transactions
-   - Click **"Export CSV"** when ready
+   - **Recommended**: Click **"Scroll & Capture"** preset button (Innovative Mode)
+   - A status box appears showing real-time statistics
+   - Scroll through your transactions at your own pace
+   - Watch the transaction count and monthly breakdowns update in real-time
+   - Click **"Export CSV"** when ready (or when you've scrolled to your desired date range)
 
 **That's it!** Your CSV file downloads automatically. 🎉
 
@@ -108,11 +110,14 @@ Innovative Mode (Scroll & Capture) is a **user-controlled extraction method** th
 
 ### How It Works
 
-1. **Start Capture**: Click "Scroll & Capture" preset in the extension popup
-2. **Scroll Naturally**: Scroll through your transactions at your own pace
-3. **Watch Statistics**: See live transaction counts and monthly breakdowns in the central status box
-4. **Export Anytime**: Click "Export CSV" when you've scrolled to your desired date range
-5. **Auto-Protection**: If Credit Karma logs you out, your captured data is automatically exported
+1. **Start Capture**: Click the **"Scroll & Capture"** preset button in the extension popup
+2. **Status Box Appears**: A central status box appears showing real-time statistics
+3. **Scroll Naturally**: Scroll through your transactions at your own pace
+4. **Watch Statistics**: See live transaction counts, date ranges, and monthly breakdowns update automatically
+5. **Export Anytime**: Click **"Export CSV"** button in the status box when ready
+6. **Auto-Protection**: If Credit Karma logs you out, your captured data is automatically exported
+
+**Note**: Scroll & Capture is accessed via a preset button in the extension popup, just like other date range presets. The difference is that it captures transactions as you scroll, rather than auto-scrolling for you.
 
 ### Features
 

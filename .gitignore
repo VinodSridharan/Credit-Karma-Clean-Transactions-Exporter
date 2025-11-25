@@ -1,7 +1,7 @@
 # Keep only TxVault JavaScript Extension folder visible on GitHub
 # Selenium-Version is excluded - this repo is for JavaScript/Chrome Extension only
 
-# Allow TxVault (Enhanced) and TxVault-Basic (Basic/Comparison) folders, and root files
+# Allow TxVault (main extension with all modes) and TxVault-Basic (reference/comparison) folders, and root files
 !"TxVault/"
 !"TxVault-Basic/"
 !.gitignore
