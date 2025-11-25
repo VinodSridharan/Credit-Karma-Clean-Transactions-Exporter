@@ -42,7 +42,7 @@
 - **Perfect monthly matches** for October 2025 (133/133) and full year 2024 (738/738)
 - **Comprehensive coverage** exceeding reference presets in most comparisons
 
-**👉 [Learn More About Scroll & Capture](#scroll--capture-mode)**
+**👉 [Learn More About Innovative Mode](#innovative-mode-scroll--capture)**
 
 ---
 
@@ -64,11 +64,11 @@
 
 | Method | Transactions | Accuracy | Status | Best For |
 |--------|-------------|----------|--------|----------|
-| **📜 Scroll & Capture** | 2,440+ | **100%** | ✅ **RECOMMENDED** | **All use cases** |
-| **Basic Mode** | Variable | Variable | ✅ Available | Simple extractions |
-| **Auto Presets** | 133-2,865 | 100% | ⚠️ Under Development | Specific date ranges |
+| **💡 Innovative (Scroll & Capture)** | 2,440+ | **100%** | ✅ **RECOMMENDED** | **All use cases** |
+| **⚙️ Presets (Auto-Scroll)** | 133-2,865 | 100% | ⚠️ Under Development | Specific date ranges |
+| **🔧 Basic** | Variable | Variable | ✅ Available | Simple extractions |
 
-**Scroll & Capture = 100% accuracy, user control, verified reliability**
+**Innovative Mode (Scroll & Capture) = 100% accuracy, user control, verified reliability**
 
 ---
 
@@ -92,7 +92,7 @@
    - Log into Credit Karma
    - Navigate to Transactions
    - Click the TxVault icon in your toolbar
-   - **Recommended**: Click **"Scroll & Capture"** preset
+   - **Recommended**: Click **"Scroll & Capture"** (Innovative Mode)
    - Scroll through your transactions
    - Click **"Export CSV"** when ready
 
@@ -100,11 +100,11 @@
 
 ---
 
-## 📜 Scroll & Capture Mode {#scroll--capture-mode}
+## 💡 Innovative Mode (Scroll & Capture) {#innovative-mode-scroll--capture}
 
-### What is Scroll & Capture?
+### What is Innovative Mode?
 
-Scroll & Capture is a **user-controlled extraction mode** that captures transactions as you manually scroll through Credit Karma's transaction page. It provides **real-time statistics** and **guaranteed accuracy** through manual control.
+Innovative Mode (Scroll & Capture) is a **user-controlled extraction method** that captures transactions as you manually scroll through Credit Karma's transaction page. It provides **real-time statistics** and **guaranteed accuracy** through manual control. This innovative approach ensures 100% reliability by combining user control with automatic capture and cleanup.
 
 ### How It Works
 
@@ -127,7 +127,7 @@ Scroll & Capture is a **user-controlled extraction mode** that captures transact
 
 ### Verified Performance
 
-| Test Case | Scroll & Capture | Reference | Accuracy | Status |
+| Test Case | Innovative Mode | Reference | Accuracy | Status |
 |-----------|------------------|-----------|----------|--------|
 | **Last Month (Oct 2025)** | 133 | 133 | **100.0%** | ✅ Perfect Match |
 | **Last Year (2024)** | 738 | 738 | **100.0%** | ✅ Perfect Match |
@@ -137,18 +137,18 @@ Scroll & Capture is a **user-controlled extraction mode** that captures transact
 ### Success Story: Perfect Accuracy Achievement
 
 **The Challenge**: Extract transactions with 100% accuracy across multiple date ranges  
-**The Achievement**: Scroll & Capture achieved **perfect matches** for both Last Month (133/133) and Last Year (738/738)  
+**The Achievement**: Innovative Mode (Scroll & Capture) achieved **perfect matches** for both Last Month (133/133) and Last Year (738/738)  
 **The Result**: ✅ **100% ACCURACY** - Verified through comprehensive comparison with reference presets
 
-Scroll & Capture mode has proven to be the most reliable method, consistently achieving 100% accuracy where reference data is available, and exceeding expectations in broader comparisons.
+Innovative Mode has proven to be the most reliable method, consistently achieving 100% accuracy where reference data is available, and exceeding expectations in broader comparisons.
 
 ---
 
 ## 🛠️ Extraction Methods
 
-TxVault offers three extraction methods, organized by priority:
+TxVault offers three extraction methods, organized by priority and innovation:
 
-### 1. 📜 Scroll & Capture Mode (Recommended) ⭐
+### 1. 💡 Innovative Mode (Scroll & Capture) ⭐ **RECOMMENDED**
 
 **Status**: ✅ **Production Ready & Recommended**
 
@@ -156,19 +156,18 @@ TxVault offers three extraction methods, organized by priority:
 - **Accuracy**: 100% verified
 - **User Experience**: Manual scrolling with real-time statistics
 - **Reliability**: Highest - manual control ensures all content loads
+- **Innovation**: User-controlled extraction with automatic capture and cleanup
 
 **👉 This is our top recommendation for all users.**
 
-### 2. 🔧 Basic Mode
+**Key Features:**
+- Real-time statistics and monthly breakdowns
+- Automatic duplicate removal
+- "Pending" date filtering
+- Export anytime functionality
+- Auto-export on logout protection
 
-**Status**: ✅ Available
-
-- **Best For**: Simple, quick extractions
-- **Accuracy**: Variable depending on use case
-- **User Experience**: Basic extraction functionality
-- **Reliability**: Good for straightforward scenarios
-
-### 3. ⚙️ Auto Presets Mode
+### 2. ⚙️ Presets Mode (Auto-Scroll)
 
 **Status**: ⚠️ Under Active Development
 
@@ -176,14 +175,27 @@ TxVault offers three extraction methods, organized by priority:
 - **Accuracy**: 100% when working correctly
 - **User Experience**: Fully automated scrolling and extraction
 - **Reliability**: Currently being optimized for consistent auto-scroll behavior
+- **Presets Available**: This Week, This Month, Last Month, Last Year, Last 2 Years, Last 3 Years, Custom Range
 
-**Note**: Auto-scroll functionality is being refined in a separate development branch. Scroll & Capture mode is recommended until auto-scroll issues are fully resolved.
+**Note**: Auto-scroll functionality is being refined in a separate development branch. Innovative Mode (Scroll & Capture) is recommended until auto-scroll issues are fully resolved.
+
+### 3. 🔧 Basic Mode
+
+**Status**: ✅ Available
+
+- **Best For**: Simple, quick extractions without advanced features
+- **Accuracy**: Variable depending on use case
+- **User Experience**: Basic extraction functionality
+- **Reliability**: Good for straightforward scenarios
+- **Features**: Manual date entry only, no presets
+
+**Note**: This is a reference implementation. For best results, use Innovative Mode (Scroll & Capture).
 
 ---
 
 ## 📊 Statistics & Performance
 
-### Scroll & Capture Performance
+### Innovative Mode Performance
 
 **Overall Statistics:**
 - **Total Transactions Captured**: 2,440+
@@ -209,14 +221,14 @@ TxVault offers three extraction methods, organized by priority:
 
 ### Comparison with Reference Presets
 
-| Preset | Scroll & Capture | Reference | Accuracy | Status |
+| Preset | Innovative Mode | Reference | Accuracy | Status |
 |--------|------------------|-----------|----------|--------|
 | **Last Month** | 133 | 133 | **100.0%** | ✅ Perfect Match |
 | **Last Year** | 738 | 738 | **100.0%** | ✅ Perfect Match |
 | **Last 2 Years** | 2,440 | 2,268 | **107.6%** | ✅ Exceeds |
 | **Last 3 Years** | 2,440 | 2,406 | **101.4%** | ✅ Exceeds |
 
-### Auto Presets Performance (Historical)
+### Presets Mode Performance (Historical)
 
 | Preset | Transactions | Time | Status | Recovery |
 |--------|-------------|------|--------|----------|
@@ -230,19 +242,19 @@ TxVault offers three extraction methods, organized by priority:
 
 **PRISTINE = 100% accuracy, zero data loss, verified complete extraction**
 
-**Note**: Auto presets are currently under active development to resolve auto-scroll reliability issues. Scroll & Capture is recommended for guaranteed accuracy.
+**Note**: Presets Mode is currently under active development to resolve auto-scroll reliability issues. Innovative Mode (Scroll & Capture) is recommended for guaranteed accuracy.
 
 ---
 
 ## 🎉 Success Stories
 
-### Success Story #1: Scroll & Capture Perfect Accuracy ⭐
+### Success Story #1: Innovative Mode Perfect Accuracy ⭐
 
 **The Challenge**: Extract transactions with guaranteed 100% accuracy  
-**The Achievement**: Scroll & Capture achieved **perfect matches** for Last Month (133/133) and Last Year (738/738)  
+**The Achievement**: Innovative Mode (Scroll & Capture) achieved **perfect matches** for Last Month (133/133) and Last Year (738/738)  
 **The Result**: ✅ **100% ACCURACY** - Verified through comprehensive comparison with 56 reference CSV files
 
-This achievement demonstrates that user-controlled scrolling provides the most reliable extraction method, consistently achieving perfect accuracy where reference data is available.
+This achievement demonstrates that Innovative Mode's user-controlled scrolling provides the most reliable extraction method, consistently achieving perfect accuracy where reference data is available.
 
 ### Success Story #2: Perfect Month Extraction
 
@@ -266,13 +278,13 @@ This remarkable achievement demonstrates the extension's ability to handle large
 🚀 **Time Saved**: Automated what used to take hours into minutes  
 💼 **Professional Grade**: Enterprise-quality data extraction accessible to everyone  
 🎯 **Proven Reliability**: Multiple successful extractions validate the extension's robustness  
-📜 **Scroll & Capture**: New standard for reliability and user control
+💡 **Innovative Mode**: New standard for reliability and user control
 
 ---
 
 ## 💡 Key Features
 
-### Scroll & Capture Features
+### Innovative Mode (Scroll & Capture) Features
 
 - **Real-Time Statistics** – Central status box with live transaction counts and monthly breakdowns
 - **Persistent UI** – Status box remains visible during page interaction
@@ -280,8 +292,9 @@ This remarkable achievement demonstrates the extension's ability to handle large
 - **Periodic Capture** – Captures lazy-loaded content every 2 seconds
 - **Auto-Export on Logout** – Automatically saves data if Credit Karma logs you out
 - **Export Anytime** – Export CSV whenever you're ready
+- **Automatic Cleanup** – Removes duplicates and filters "Pending" dates before export
 
-### Intelligent Scrolling Strategy (Auto Presets)
+### Intelligent Scrolling Strategy (Presets Mode)
 
 1. **Boundary Discovery Phase**
    - Finds RIGHT boundary (first transaction after end date)
@@ -344,7 +357,7 @@ This remarkable achievement demonstrates the extension's ability to handle large
 
 ### Speed
 
-- ⚡ **Scroll & Capture**: User-controlled pace, export anytime
+- ⚡ **Innovative Mode**: User-controlled pace, export anytime
 - ⚡ **Monthly exports**: Under 3 minutes (auto presets)
 - ⚡ **Weekly exports**: Under 2 minutes (auto presets)
 - ⚡ **Multi-year exports**: 15-25 minutes for full year (auto presets)
@@ -352,13 +365,13 @@ This remarkable achievement demonstrates the extension's ability to handle large
 ### Accuracy
 
 - ✅ **100% Recovery** – Complete transaction extraction with zero data loss
-- ✅ **Scroll & Capture**: 100% accuracy verified for Last Month and Last Year
+- ✅ **Innovative Mode**: 100% accuracy verified for Last Month and Last Year
 - ✅ **PRISTINE Status** – Verified across all date ranges
 - ✅ **Boundary Verification** – Ensures complete date range coverage
 
 ### Scalability
 
-- 🏆 **Tested with 2,440+ transactions** – Scroll & Capture mode
+- 🏆 **Tested with 2,440+ transactions** – Innovative Mode (Scroll & Capture)
 - 🏆 **Tested with 2,865+ transactions** – Last 3 Years preset
 - 🏆 **Handles 10+ year ranges** – Robust bottom detection
 - 🏆 **Memory efficient** – Optimized for large datasets
@@ -372,7 +385,7 @@ This remarkable achievement demonstrates the extension's ability to handle large
 The project is organized into branches based on extraction methods:
 
 1. **Main Branch** (`main`)
-   - **Scroll & Capture Mode** ⭐ (Recommended)
+   - **Innovative Mode (Scroll & Capture)** ⭐ (Recommended)
    - **Basic Mode**
    - **Auto Presets Mode** (Under Development)
 
@@ -383,9 +396,9 @@ The project is organized into branches based on extraction methods:
 
 ### Recommended Workflow
 
-- **For Production Use**: Use **Scroll & Capture Mode** from main branch
-- **For Development**: Contribute to auto-presets branch to improve scrolling reliability
-- **For Simple Use Cases**: Use Basic Mode from main branch
+- **For Production Use**: Use **Innovative Mode (Scroll & Capture)** from main branch
+- **For Development**: Contribute to auto-presets branch to improve Presets Mode scrolling reliability
+- **For Simple Use Cases**: Use Basic Mode from main branch (reference implementation)
 
 ---
 
