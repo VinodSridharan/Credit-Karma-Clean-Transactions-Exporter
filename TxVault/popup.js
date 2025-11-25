@@ -126,6 +126,13 @@ function setDatePreset(preset) {
             endDate.setHours(23, 59, 59, 999); // End of today
             break;
             
+        case 'this-year':
+            // This year: January 1st of current year to today (exact boundaries)
+            startDate = new Date(today.getFullYear(), 0, 1); // January 1st
+            endDate = new Date(today);
+            endDate.setHours(23, 59, 59, 999); // End of today
+            break;
+            
         case 'last-month':
             // Last month: First day to last day (exact month boundaries)
             const lastMonth = today.getMonth() - 1;
@@ -161,12 +168,23 @@ function setDatePreset(preset) {
             endDate.setHours(23, 59, 59, 999); // End of today
             break;
             
+        case 'scroll-capture':
+            // Scroll & Capture mode: Captures everything visible as you scroll
+            // Dates don't matter - no filtering, but set to current month for display
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month
+            endDate = new Date(today);
+            endDate.setHours(23, 59, 59, 999); // End of today
+            break;
+            
         default:
             return;
     }
     
     startDateInput.value = formatDateForInput(startDate);
     endDateInput.value = formatDateForInput(endDate);
+    
+    // Store selected preset
+    window.selectedPreset = preset;
     
     showStatus(`Date range set to ${preset.replace(/-/g, ' ')} (exact month boundaries).`, 'success');
 }
@@ -356,11 +374,15 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     }
                 }
                 
+                // Get selected preset
+                const selectedPreset = window.selectedPreset || null;
+                
                 // Now try to send the message
                 chrome.tabs.sendMessage(tabs[0].id, {
                     action: 'captureTransactions', 
                     startDate, 
                     endDate,
+                    preset: selectedPreset, // Pass preset to content script
                     trimToExactMonth: trimToExactMonth,
                     csvTypes: {
                         allTransactions: allTransactionsChecked,
@@ -491,8 +513,7 @@ darkModeToggle.addEventListener('change', () => {
 document.addEventListener('DOMContentLoaded', () => {
     // Set default to "This Month" (first day of month to today + 2 days for pending)
     const today = new Date();
-    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    startDate.setDate(startDate.getDate() - 2); // Subtract 2 days for edge dates
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month (no subtraction)
     const endDate = new Date(today);
     endDate.setDate(endDate.getDate() + 2); // Add 2 days for pending transactions
     
@@ -506,11 +527,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show notice if on CK transactions page
     function updateCKPageNotice() {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            if (!tabs || !tabs[0]) {
+                console.log('TxVault: No active tab found');
+                return;
+            }
+            
             const successNotice = document.getElementById('ck-page-notice');
             const warningNotice = document.getElementById('ck-transactions-notice');
-            const isOnTransactionsPage = tabs[0] && tabs[0].url && 
-                (tabs[0].url.includes('creditkarma.com/networth/transactions') || 
-                 tabs[0].url.includes('/transactions'));
+            const currentUrl = tabs[0].url || '';
+            
+            // More flexible URL matching - check for transactions page
+            const isOnTransactionsPage = currentUrl && 
+                (currentUrl.includes('creditkarma.com/networth/transactions') || 
+                 currentUrl.includes('creditkarma.com/transactions') ||
+                 currentUrl.includes('/transactions'));
+            
+            console.log(`TxVault: Checking page notice. URL: ${currentUrl}, Is on transactions: ${isOnTransactionsPage}`);
             
             if (successNotice) {
                 successNotice.style.display = isOnTransactionsPage ? 'block' : 'none';
@@ -520,6 +552,92 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Update scrolling status in popup notice
+    function updateScrollingStatus(scrollProgress) {
+        const successNotice = document.getElementById('ck-page-notice');
+        const noticeTitle = document.getElementById('ck-page-notice-title');
+        const noticeText = document.getElementById('ck-page-notice-text');
+        
+        if (successNotice && noticeTitle && noticeText) {
+            if (scrollProgress && scrollProgress.isScrolling) {
+                // Show scrolling status
+                successNotice.style.backgroundColor = '#e3f2fd';
+                successNotice.style.borderColor = '#2196f3';
+                successNotice.style.color = '#1565c0';
+                noticeTitle.textContent = '🔄 Now Scrolling';
+                
+                // OPTIMIZED DISPLAY: Show meaningful status without scroll counts
+                let statusText = '';
+                
+                // Show status based on phase
+                if (scrollProgress.searchingForBoundary && scrollProgress.searchProgress) {
+                    // Fetching boundaries phase
+                    statusText = `🔍 Fetching boundaries...`;
+                    if (scrollProgress.expectedRange) {
+                        statusText += `\nDate range expected: ${scrollProgress.expectedRange}`;
+                    }
+                    if (scrollProgress.detectedRange && scrollProgress.detectedRange !== 'N/A') {
+                        statusText += `\nFound: ${scrollProgress.detectedRange}`;
+                    }
+                } else if (scrollProgress.foundRightBoundary && !scrollProgress.foundLeftBoundary) {
+                    // Found right boundary, searching for left
+                    if (scrollProgress.boundaryReached) {
+                        statusText = `✅ ${scrollProgress.boundaryReached}`;
+                    } else {
+                        statusText = `✅ Found right of range`;
+                    }
+                    if (scrollProgress.expectedRange) {
+                        statusText += `\n🔍 Finding left of range... Date range expected: ${scrollProgress.expectedRange}`;
+                    }
+                    if (scrollProgress.detectedRange && scrollProgress.detectedRange !== 'N/A') {
+                        statusText += `\nFound: ${scrollProgress.detectedRange}`;
+                    }
+                } else if (scrollProgress.foundRightBoundary && scrollProgress.foundLeftBoundary) {
+                    // Both boundaries found, harvesting
+                    if (scrollProgress.boundaryReached) {
+                        statusText = `✅ ${scrollProgress.boundaryReached}`;
+                    } else {
+                        statusText = `✅ Found left of range | ✅ Found right of range`;
+                    }
+                    if (scrollProgress.expectedRange) {
+                        statusText += `\n🌾 Harvesting between range: ${scrollProgress.expectedRange}`;
+                    }
+                } else {
+                    // Fallback
+                    if (scrollProgress.expectedRange) {
+                        statusText = `Date range expected: ${scrollProgress.expectedRange}`;
+                    }
+                }
+                
+                // Add records and time information
+                if (scrollProgress.inRangeCount !== undefined) {
+                    statusText += `\nRecords harvested: ${scrollProgress.inRangeCount}`;
+                }
+                if (scrollProgress.timeElapsed) {
+                    statusText += ` | Time: ${scrollProgress.timeElapsed}`;
+                }
+                
+                noticeText.textContent = statusText;
+                successNotice.style.display = 'block';
+            } else {
+                // Reset to ready state
+                successNotice.style.backgroundColor = '#e8f5e9';
+                successNotice.style.borderColor = '#4caf50';
+                successNotice.style.color = '#2e7d32';
+                noticeTitle.textContent = '✅ On Transactions Page';
+                noticeText.textContent = "You're ready to export! Select a date range below.";
+            }
+        }
+    }
+    
+    // Listen for scroll progress messages from content script
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.action === 'scrollProgress') {
+            updateScrollingStatus(message.data);
+        }
+        return true;
+    });
     
     // Check on load
     updateCKPageNotice();

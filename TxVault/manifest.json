@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "TxVault Exporter",
-    "version": "3.0.4",
+    "version": "4.2.1",
     "description": "Liberate your financial data - Export Credit Karma transactions to clean CSV format",
     "permissions": ["activeTab", "scripting", "tabs", "storage"],
     "action": {

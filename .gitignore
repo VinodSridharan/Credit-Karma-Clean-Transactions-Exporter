@@ -64,8 +64,70 @@ CK_TX_Downloader_JavaScript/
 !"TxVault/README.md"
 !"TxVault-Basic/README.md"
 !README.md  # Root README for GitHub
-!PROJECT_REVIEW.md  # Project review documentation
-!LESSONS_LEARNED.md  # Lessons learned documentation
+!BRANCH_STRUCTURE.md  # Branch organization guide
+!SUCCESS_STORIES.md  # Success stories
+!GITHUB_PUBLICATION_GUIDE.md  # Publication guide
+!CHANGELOG_EXPORT_FILTERING.md  # Export filtering changelog
+!PUBLICATION_READY.md  # Publication readiness checklist
+
+# Analysis and comparison reports (generated files)
+SCROLL_CAPTURE_*.md
+*_ANALYSIS.md
+*_COMPARISON*.md
+*_REPORT.md
+*_STATUS.md
+*_GUIDE.md
+*_INSTRUCTIONS.md
+*_WORKFLOW.md
+*_SUMMARY.md
+*_CHECKLIST.md
+*_STEPS.md
+*_VALIDATION*.md
+*_FIXES*.md
+*_ENHANCEMENTS*.md
+*_LESSONS*.md
+*_METRICS.md
+*_HIGHLIGHTS.md
+*_PLAN.md
+*_INDEX.md
+*_REFERENCE*.md
+*_VERIFICATION*.md
+*_ORGANIZATION*.md
+*_APPROVAL*.md
+*_INFO.md
+*_UPDATE*.md
+*_REVIEW*.md
+*_POLICY.md
+*_ALIGNMENT.md
+*_CAPACITY*.md
+*_BOUNDARY*.md
+*_IMPLEMENTATION*.md
+*_CODE*.md
+*_ANALYSIS*.md
+*_SYNTAX*.md
+*_INDENTATION*.md
+*_SUCCESS*.md
+*_STORY*.md
+*_DISCLAIMER.md
+*_SETUP*.md
+*_START*.md
+*_NAVIGATE*.md
+*_GO_TO*.md
+*_LOCATION*.md
+*_STATUS*.txt
+*_FILES*.txt
+*_ORGANIZATION*.txt
+WHERE_IS_*.md
+MVP_*.md
+MANUAL_*.md
+LOGOUT_*.md
+PENDING_*.md
+QUICK_*.md
+TESTING_*.md
+VALIDATION_*.md
+IMPROVEMENTS_*.md
+FIXES_*.md
+ENHANCEMENTS_*.md
 # Note: Selenium-Version is completely excluded, so no need for exceptions
 
 # TxVault (Enhanced) - Ignore non-core folders
@@ -97,3 +159,10 @@ MANUAL_RECOVERY_SCRIPT.js
 
 # Development/Testing folders
 # screenshots/ - ALLOWED for root README images
+
+# LinkedIn Manager - Private activity logs (never sync to git)
+LinkedIn-Manager/.activities/
+LinkedIn-Manager/**/.activities/
+LinkedIn-Manager/**/*.json
+LinkedIn-Manager/__pycache__/
+LinkedIn-Manager/**/__pycache__/
