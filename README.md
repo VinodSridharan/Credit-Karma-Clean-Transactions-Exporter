@@ -202,6 +202,100 @@ TxVault offers three extraction methods, organized by priority and innovation:
 
 ---
 
+## 📊 Comparison: Basic Mode vs Presets Mode
+
+### Quick Comparison Table
+
+| Feature | Basic Mode | Presets Mode (Auto-Scroll) |
+|---------|-----------|---------------------------|
+| **Access Method** | Manual date entry in popup | Preset buttons (This Week, This Month, Last Month, Last Year, Last 2 Years, Last 3 Years, Custom Range) |
+| **Scrolling** | Manual (user scrolls) | Automatic (extension scrolls) |
+| **Date Selection** | Manual date picker only | Quick preset buttons + manual date picker |
+| **Automation Level** | Low - user controls everything | High - fully automated |
+| **Time Required** | Variable (depends on user) | 2-25 minutes (automated) |
+| **Accuracy** | Variable | 100% when working correctly |
+| **Best For** | Simple, quick extractions | Automated extraction of specific date ranges |
+| **Status** | ✅ Available | ⚠️ Under Active Development |
+| **Reliability** | Good for straightforward scenarios | Currently being optimized |
+| **Features** | Basic extraction only | Advanced features (boundary detection, oscillation, progress tracking) |
+
+### Detailed Feature Comparison
+
+#### **Basic Mode**
+
+**Strengths:**
+- ✅ Simple and straightforward
+- ✅ No learning curve
+- ✅ Works immediately
+- ✅ Good for quick, one-time extractions
+- ✅ User has full control
+
+**Limitations:**
+- ❌ No preset buttons - must enter dates manually
+- ❌ No automated scrolling
+- ❌ No advanced features (boundary detection, progress tracking)
+- ❌ User must manually scroll through all transactions
+- ❌ Time-consuming for large date ranges
+- ❌ Variable accuracy depending on user's scrolling
+
+**Use Case Example:**
+- "I need transactions from March 15 to March 20"
+- User enters dates manually
+- User scrolls through transactions
+- User clicks Export
+
+#### **Presets Mode (Auto-Scroll)**
+
+**Strengths:**
+- ✅ Quick preset buttons for common ranges
+- ✅ Fully automated scrolling
+- ✅ Advanced features (boundary detection, intelligent oscillation)
+- ✅ Progress tracking and real-time updates
+- ✅ Optimized for large date ranges
+- ✅ 100% accuracy when working correctly
+- ✅ Time-efficient (2-25 minutes depending on range)
+
+**Limitations:**
+- ⚠️ Currently under active development
+- ⚠️ Auto-scroll reliability being optimized
+- ⚠️ May require troubleshooting if auto-scroll fails
+- ⚠️ Less user control during extraction
+
+**Use Case Example:**
+- "I need all transactions from Last Year"
+- User clicks "Last Year" preset button
+- Extension automatically scrolls and extracts
+- Extension shows progress in real-time
+- CSV file downloads automatically when complete
+
+### When to Use Each Mode
+
+**Use Basic Mode when:**
+- You need a simple, one-time extraction
+- You want full manual control
+- You're extracting a small date range
+- You prefer simplicity over automation
+- You don't mind manually scrolling
+
+**Use Presets Mode when:**
+- You need automated extraction
+- You want to extract large date ranges (months/years)
+- You want preset buttons for quick access
+- You want progress tracking and real-time updates
+- You want advanced features (boundary detection, etc.)
+- **Note**: Currently recommended to use Innovative Mode (Scroll & Capture) instead until auto-scroll issues are resolved
+
+### Recommendation
+
+**For Production Use**: Use **Innovative Mode (Scroll & Capture)** - combines the best of both:
+- ✅ Preset-based access (like Presets Mode)
+- ✅ Real-time statistics and progress tracking
+- ✅ User control (like Basic Mode)
+- ✅ 100% verified accuracy
+- ✅ Production ready
+
+---
+
 **Important**: All three methods are available in the same **TxVault** extension. Simply click different preset buttons or use manual date entry in the extension popup to access each method.
 
 ---
