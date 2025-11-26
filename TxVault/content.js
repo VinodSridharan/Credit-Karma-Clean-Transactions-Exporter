@@ -2397,14 +2397,25 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                     console.log(`   • Scroll position: ${Math.round(targetRangeStartBoundary)}px`);
                     console.log(`   • Scroll attempt: ${scrollAttempts}`);
                     console.log(`   • Transactions found so far: ${allTransactions.length} total, ${transactionsInRangeCount} in range`);
-                    console.log(`✅ [BOUNDARY DETECTION COMPLETE] BOTH BOUNDARIES FOUND`);
-                    console.log(`   • RIGHT boundary: ${Math.round(targetRangeEndBoundary)}px (${rightBoundaryDate.toLocaleDateString()})`);
-                    console.log(`   • LEFT boundary: ${Math.round(targetRangeStartBoundary)}px (${leftBoundaryDate.toLocaleDateString()})`);
-                    console.log(`   • Boundary distance: ${Math.round(boundaryDistance)}px`);
-                    console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
-                    console.log(`   • Status: Found "${targetPeriodName}" - Both boundaries reached!`);
-                    console.log(`   • Next phase: Starting oscillations between boundaries (dynamic limits, exit when no progress)`);
-                    scrollingDirection = 'oscillating'; // Switch to oscillation mode
+                    // CRITICAL: Check if found range is NEWER than target BEFORE entering oscillation phase
+                    // If found range is newer, we haven't reached the target yet - continue scrolling DOWN
+                    if (foundRangeIsNewerThanTarget) {
+                        console.log(`⚠️ CRITICAL: Boundaries detected but found range is NEWER than target. Blocking oscillation phase. Must continue scrolling DOWN to find older transactions.`);
+                        console.log(`   • Found range: ${foundDateRange}`);
+                        console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
+                        console.log(`   • Continuing Phase 1/2 scrolling DOWN instead of oscillating...`);
+                        // Don't enter oscillation phase - continue scrolling DOWN
+                        scrollingDirection = 'down';
+                    } else {
+                        console.log(`✅ [BOUNDARY DETECTION COMPLETE] BOTH BOUNDARIES FOUND`);
+                        console.log(`   • RIGHT boundary: ${Math.round(targetRangeEndBoundary)}px (${rightBoundaryDate.toLocaleDateString()})`);
+                        console.log(`   • LEFT boundary: ${Math.round(targetRangeStartBoundary)}px (${leftBoundaryDate.toLocaleDateString()})`);
+                        console.log(`   • Boundary distance: ${Math.round(boundaryDistance)}px`);
+                        console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
+                        console.log(`   • Status: Found "${targetPeriodName}" - Both boundaries reached!`);
+                        console.log(`   • Next phase: Starting oscillations between boundaries (dynamic limits, exit when no progress)`);
+                        scrollingDirection = 'oscillating'; // Switch to oscillation mode
+                    }
                     // Send notification to popup
                     sendScrollProgress({
                         isScrolling: true,
@@ -2421,7 +2432,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 
                 // OPTIMIZED: Track progress during oscillations (after both boundaries found)
                 // Exit early if no progress for 2 consecutive oscillations
-                if (harvestingStarted && startBoundaryFound && endBoundaryFound) {
+                // CRITICAL: NEVER enter oscillation phase if found range is NEWER than target - must continue scrolling DOWN
+                if (harvestingStarted && startBoundaryFound && endBoundaryFound && !foundRangeIsNewerThanTarget) {
                     // Check if we're at a boundary (start or end) - this marks one oscillation
                     const currentPosition = window.scrollY;
                     const distanceToStart = Math.abs(currentPosition - targetRangeStartBoundary);
