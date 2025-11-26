@@ -18,8 +18,9 @@ const CONFIG = {
     EXPECTED_MAX: 140,        // Maximum expected transactions for Last Month
     
     // Scroll Configuration - Minimum scrolls before checking stop conditions
+    // PRISTINE VERSION VALUES: Proven to work for 133 transactions extraction
     MIN_SCROLLS: {
-        LAST_MONTH: 40,       // Minimum scrolls for Last Month preset (reduced from 60)
+        LAST_MONTH: 40,       // Minimum scrolls for Last Month preset (Pristine: worked perfectly)
         MEDIUM_RANGE: 30,     // Minimum scrolls for medium ranges (11-31 days)
         LARGE_RANGE: 50,      // Minimum scrolls for large ranges (>31 days)
         BOTTOM_CHECK: 40,     // Minimum scrolls before bottom check (Last Month)
