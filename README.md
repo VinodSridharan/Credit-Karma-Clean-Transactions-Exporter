@@ -185,7 +185,19 @@ TxVault offers three extraction methods, organized by priority and innovation:
 - **Reliability**: Currently being optimized for consistent auto-scroll behavior
 - **Presets Available**: This Week, This Month, Last Month, Last Year, Last 2 Years, Last 3 Years, Custom Range
 
-**Note**: Auto-scroll functionality is being refined in a separate development branch. Innovative Mode (Scroll & Capture) is recommended until auto-scroll issues are fully resolved.
+**⚠️ Known Issues:**
+- **Scrolling Reliability**: Auto-scroll may not trigger Credit Karma's lazy loading consistently
+- **Premature Exit**: May stop scrolling before reaching target date range if found range is newer than target
+- **Stagnation Detection**: May exit too early if no new transactions detected for 3 scrolls (even if more scrolling needed)
+- **Credit Karma Lazy Loading**: Credit Karma's lazy loading mechanism may not respond to programmatic scrolling
+
+**Testing Recommendation:**
+- **Best Preset to Test**: **"Last Month"** - Most optimized in code with specific logic for 31-day months
+- **Why Last Month**: Has dedicated optimization, boundary detection, and early-stop logic
+- **Expected Behavior**: Should scroll automatically and extract transactions
+- **If It Doesn't Scroll**: Check browser console (F12) for scroll attempt logs - may show why scrolling isn't working
+
+**Note**: Auto-scroll functionality is being refined in a separate development branch. **Innovative Mode (Scroll & Capture) is strongly recommended** until auto-scroll issues are fully resolved. Manual scrolling reliably triggers Credit Karma's lazy loading, while programmatic scrolling may not.
 
 ### 3. 🔧 Basic Mode
 
