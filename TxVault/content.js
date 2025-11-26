@@ -1853,6 +1853,11 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             
             scrollAttempts++;
             
+            // CRITICAL: Log loop condition check for debugging premature exits
+            if (scrollAttempts <= 15) {
+                console.log(`🔍 [LOOP CHECK] Scroll ${scrollAttempts}: stopScrolling=${stopScrolling}, scrollAttempts=${scrollAttempts}, dynamicMaxScrollAttempts=${dynamicMaxScrollAttempts}, condition=${scrollAttempts < dynamicMaxScrollAttempts}`);
+            }
+            
             // ============================================================================
             // MANUAL SCROLL EXTRACTION: If user manually scrolled, extract immediately
             // ============================================================================
