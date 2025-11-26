@@ -3185,29 +3185,17 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 // PHASE 1: Haven't found END boundary yet - scroll DOWN only to find it
                 const reachedRange = foundDateRange !== 'N/A' ? foundDateRange : 'None yet';
                 console.log(`🔍 Phase 1: Searching for END boundary (${endDateObj.toLocaleDateString()})... Expected: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()} | Reached: ${reachedRange} | Scroll: ${scrollAttempts}`);
-                // Use element-based scrolling to trigger lazy loading
-                const txElements = document.querySelectorAll('[data-index]');
-                if (txElements.length > 0) {
-                    const lastElement = txElements[txElements.length - 1];
-                    lastElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                } else {
-                    window.scrollTo({ top: nextPosition, behavior: 'smooth' });
-                }
-                currentScrollPosition = nextPosition;
+                // PRISTINE VERSION: Simple scroll
+                scrollDown();
+                currentScrollPosition = window.scrollY;
                 lastKnownScrollY = window.scrollY; // Update to prevent detecting our own scroll as manual
             } else if (!startBoundaryFound) {
                 // PHASE 2: Found END boundary, but not START boundary yet - continue scrolling DOWN only
                 const reachedRange = foundDateRange !== 'N/A' ? foundDateRange : 'None yet';
                 console.log(`🔍 Phase 2: END boundary found! Searching for START boundary (${startDateObj.toLocaleDateString()})... Expected: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()} | Reached: ${reachedRange} | Scroll: ${scrollAttempts}`);
-                // Use element-based scrolling to trigger lazy loading
-                const txElements = document.querySelectorAll('[data-index]');
-                if (txElements.length > 0) {
-                    const lastElement = txElements[txElements.length - 1];
-                    lastElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                } else {
-                    window.scrollTo({ top: nextPosition, behavior: 'smooth' });
-                }
-                currentScrollPosition = nextPosition;
+                // PRISTINE VERSION: Simple scroll
+                scrollDown();
+                currentScrollPosition = window.scrollY;
                 lastKnownScrollY = window.scrollY; // Update to prevent detecting our own scroll as manual
             } else {
                 // PHASE 3: BOTH boundaries found! Now oscillate BETWEEN boundaries (MAX 3 oscillations)
