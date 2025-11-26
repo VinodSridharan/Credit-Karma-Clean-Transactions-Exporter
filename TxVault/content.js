@@ -2312,6 +2312,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 // OPTIMIZED BOUNDARY DETECTION: Find last transaction BEFORE start date and first transaction AFTER end date
                 // For October: Left boundary = Last transaction of Sept 30, Right boundary = First transaction of Nov 1
                 // This ensures 100% recovery of all transactions in the range
+                // CRITICAL: Only detect boundaries if found range is NOT newer than target
+                // If found range is newer, we haven't reached the target yet - don't detect boundaries
                 
                 // Calculate boundary dates (day before start, day after end)
                 const leftBoundaryDate = new Date(startDateObj);
@@ -2381,7 +2383,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 }
                 
                 // Phase 2: Check if LEFT boundary (last transaction BEFORE start date) found SECOND (descending order)
-                if (endBoundaryFound && !startBoundaryFound && leftBoundaryTx) {
+                // CRITICAL: Only detect boundaries if found range is NOT newer than target
+                if (endBoundaryFound && !startBoundaryFound && leftBoundaryTx && !foundRangeIsNewerThanTarget) {
                     startBoundaryFound = true;
                     targetRangeStartBoundary = window.scrollY; // LEFT boundary is lower on page (found second)
                     harvestingStarted = true; // Start harvesting immediately
