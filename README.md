@@ -199,6 +199,15 @@ TxVault offers three extraction methods, organized by priority and innovation:
 
 **Note**: Auto-scroll functionality is being refined in a separate development branch. **Innovative Mode (Scroll & Capture) is strongly recommended** until auto-scroll issues are fully resolved. Manual scrolling reliably triggers Credit Karma's lazy loading, while programmatic scrolling may not.
 
+**🔍 Why Pristine Version Worked (Historical Reference):**
+A previous "Pristine" version successfully extracted Last Month (133 transactions in 2m 35s) using:
+- ✅ **Simple `window.scrollTo()`** - Native browser scroll (no complex event dispatching)
+- ✅ **Fixed wait times** - 1.5 seconds standard, 1 second fast
+- ✅ **Fixed minimum scrolls** - 40 scrolls for Last Month preset
+- ✅ **Direct approach** - No `scrollIntoView()`, no element-based scrolling, no WheelEvent dispatching
+
+**Key Lesson:** Simple `window.scrollTo()` reliably triggers Credit Karma's lazy loading. The current version's complex scrolling methods (scrollIntoView, element-based, event dispatching) may be over-engineered and may not trigger lazy loading consistently.
+
 ### 3. 🔧 Basic Mode
 
 **Status**: ✅ Available
