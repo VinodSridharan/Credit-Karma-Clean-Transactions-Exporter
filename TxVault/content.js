@@ -2071,8 +2071,18 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                         }
                     } else {
                         // Haven't found target range yet, continue scrolling to find it
-                        console.log(`⚠️ No new transactions for ${STAGNATION_THRESHOLD} scrolls, but target range not found yet. Continuing to search for target dates...`);
-                        stagnationScrolls = 0; // Reset counter, keep searching
+                        // CRITICAL: Also check if we have transactions but they're newer than target
+                        // This handles the case where we found November but haven't found October yet
+                        if (allTransactions.length > 0 && !foundTargetDateRange) {
+                            // We have transactions but haven't found target range - likely still searching
+                            console.log(`⚠️ No new transactions for ${STAGNATION_THRESHOLD} scrolls, but target range not found yet. Continuing to search for target dates...`);
+                            console.log(`   🔍 Debug: allTransactions.length=${allTransactions.length}, foundDateRange=${foundDateRange}, foundTargetDateRange=${foundTargetDateRange}`);
+                            stagnationScrolls = 0; // Reset counter, keep searching
+                        } else {
+                            // No transactions at all - page might not be loaded, continue scrolling
+                            console.log(`⚠️ No transactions found yet (${allTransactions.length} total). Page may still be loading. Continuing to scroll...`);
+                            stagnationScrolls = 0; // Reset counter, keep searching
+                        }
                     }
                 }
             } else {
