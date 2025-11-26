@@ -175,30 +175,30 @@ TxVault offers three extraction methods, organized by priority and innovation:
 - **Export Anytime**: Export CSV whenever you're ready
 - **Auto-Export on Logout**: Automatically saves your data if Credit Karma logs you out
 
-### 2. ⚙️ Presets Mode (Auto-Scroll)
+### 2. ⚙️ Presets Mode (Auto-Scroll) - Last Month Only
 
-**Status**: ⚠️ Under Active Development
+**Status**: ✅ Simplified - Using Pristine Version Approach
 
-- **Best For**: Automated extraction of specific date ranges
-- **Accuracy**: 100% when working correctly
+- **Best For**: Automated extraction of Last Month transactions
+- **Accuracy**: 100% when working correctly (proven with Pristine version - 133 transactions)
 - **User Experience**: Fully automated scrolling and extraction
-- **Reliability**: Currently being optimized for consistent auto-scroll behavior
-- **Presets Available**: This Week, This Month, Last Month, Last Year, Last 2 Years, Last 3 Years, Custom Range
-
-**⚠️ Status: Simplified to Pristine Version Approach**
+- **Reliability**: Simplified to proven Pristine version scrolling method
+- **Access**: Click **"Last Month"** preset button in the extension popup
+- **Presets Available**: Last Month only (simplified to focus on working solution)
 
 **Recent Changes:**
 - ✅ **Simplified Scrolling**: Replaced complex scrolling methods with simple `window.scrollTo()` (Pristine version approach)
 - ✅ **Removed Complexity**: Removed `scrollIntoView()`, element-based scrolling, and event dispatching
 - ✅ **Proven Method**: Using the same simple scrolling that successfully extracted 133 transactions (Last Month)
+- ✅ **Removed Other Presets**: Focused on Last Month only - removed This Week, This Month, This Year, Last Year, Last 2 Years, Last 3 Years
 
 **Testing Recommendation:**
-- **Best Preset to Test**: **"Last Month"** - Now uses simplified Pristine version scrolling
-- **Why Last Month**: Has dedicated optimization, boundary detection, and now uses proven simple scrolling
+- **Only Preset Available**: **"Last Month"** - Uses simplified Pristine version scrolling
+- **Why Last Month**: Has dedicated optimization, boundary detection, and proven simple scrolling
 - **Expected Behavior**: Should scroll automatically using simple `window.scrollTo()` method
 - **If It Doesn't Scroll**: Check browser console (F12) for scroll attempt logs
 
-**Note**: The scrolling has been simplified to match the Pristine version that successfully extracted Last Month. **Innovative Mode (Scroll & Capture) is still recommended** for guaranteed reliability, but Presets Mode should now work better with the simplified approach.
+**Note**: Only Last Month preset is available. The scrolling has been simplified to match the Pristine version that successfully extracted 133 transactions. **Innovative Mode (Scroll & Capture) is recommended** for all other date ranges and guaranteed reliability.
 
 **🔍 Why Pristine Version Worked (Historical Reference):**
 A previous "Pristine" version successfully extracted Last Month (133 transactions in 2m 35s) using:
