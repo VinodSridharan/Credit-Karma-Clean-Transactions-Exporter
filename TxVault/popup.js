@@ -108,27 +108,10 @@ function setDatePreset(preset) {
     let startDate, endDate;
     
     switch(preset) {
-        case 'this-week':
-            // This week: Start of current week (Sunday) to today (exact boundaries)
-            const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-            const daysFromSunday = dayOfWeek; // Days since Sunday
-            startDate = new Date(today);
-            startDate.setDate(today.getDate() - daysFromSunday); // Go back to Sunday
-            startDate.setHours(0, 0, 0, 0); // Start of Sunday
-            endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
-            break;
-            
-        case 'this-month':
-            // This month: First day of current month to today (exact boundaries)
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
-            break;
-            
-        case 'this-year':
-            // This year: January 1st of current year to today (exact boundaries)
-            startDate = new Date(today.getFullYear(), 0, 1); // January 1st
+        case 'scroll-capture':
+            // Scroll & Capture mode: Captures everything visible as you scroll
+            // Dates don't matter - no filtering, but set to current month for display
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month
             endDate = new Date(today);
             endDate.setHours(23, 59, 59, 999); // End of today
             break;
@@ -142,38 +125,6 @@ function setDatePreset(preset) {
             startDate = new Date(lastMonthYear, lastMonth, 1);
             endDate = new Date(lastDayOfLastMonth);
             endDate.setHours(23, 59, 59, 999); // End of last day
-            break;
-            
-        case 'last-year':
-            // January 1st of last year MINUS 2 days to December 31st of last year PLUS 2 days
-            startDate = new Date(today.getFullYear() - 1, 0, 1);
-            startDate.setDate(startDate.getDate() - 2); // Subtract 2 days
-            endDate = new Date(today.getFullYear() - 1, 11, 31);
-            endDate.setDate(endDate.getDate() + 2); // Add 2 days
-            break;
-            
-        case 'last-2-years':
-            // November 19th of 2 years ago to November 18th of current year (exact manual test settings)
-            // Manual test: 11/19/2023 to 11/18/2025 = 2,286 transactions, 100% complete, 18m 3s
-            startDate = new Date(today.getFullYear() - 2, 10, 19); // November = month 10, day 19
-            endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
-            break;
-            
-        case 'last-3-years':
-            // November 1st of 3 years ago to November 18th of current year (exact manual test settings)
-            // Manual test: 11/01/2022 to 11/18/2025 = 2,865 transactions, 100% complete, 22m 51s
-            startDate = new Date(today.getFullYear() - 3, 10, 1); // November = month 10, day 1
-            endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
-            break;
-            
-        case 'scroll-capture':
-            // Scroll & Capture mode: Captures everything visible as you scroll
-            // Dates don't matter - no filtering, but set to current month for display
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month
-            endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
             break;
             
         default:

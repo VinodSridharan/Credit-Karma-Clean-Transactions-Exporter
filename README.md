@@ -65,7 +65,7 @@
 | Method | Transactions | Accuracy | Status | Best For |
 |--------|-------------|----------|--------|----------|
 | **💡 Innovative (Scroll & Capture)** | 2,440+ | **100%** | ✅ **RECOMMENDED** | **All use cases** |
-| **⚙️ Presets (Auto-Scroll)** | 133-2,865 | 100% | ⚠️ Under Development | Specific date ranges |
+| **⚙️ Presets (Last Month)** | 133 | 100% | ✅ Simplified | Last Month only |
 | **🔧 Basic** | Variable | Variable | ✅ Available | Simple extractions |
 
 **Innovative Mode (Scroll & Capture) = 100% accuracy, user control, verified reliability**
@@ -357,21 +357,15 @@ A previous "Pristine" version successfully extracted Last Month (133 transaction
 | **Last 2 Years** | 2,440 | 2,268 | **107.6%** | ✅ Exceeds |
 | **Last 3 Years** | 2,440 | 2,406 | **101.4%** | ✅ Exceeds |
 
-### Presets Mode Performance (Historical)
+### Presets Mode Performance
 
 | Preset | Transactions | Time | Status | Recovery |
 |--------|-------------|------|--------|----------|
-| **This Week** | *Variable* | <2m | ✅ PRISTINE | 100% |
-| **This Month** | 52 | 2m 58s | ✅ PRISTINE | 100% |
 | **Last Month** | 133 | 2m 35s | ✅ PRISTINE | 100% |
-| **This Year** | *Variable* | *Variable* | ✅ PRISTINE | 100% |
-| **Last Year** | 738 | ~15-25m | ✅ Verified | 100% |
-| **Last 2 Years** | 2,286 | 18m 3s | ✅ PRISTINE | 100% |
-| **Last 3 Years** | 2,865 | 22m 51s | ✅ PRISTINE | 100% |
 
 **PRISTINE = 100% accuracy, zero data loss, verified complete extraction**
 
-**Note**: Presets Mode is currently under active development to resolve auto-scroll reliability issues. Innovative Mode (Scroll & Capture) is recommended for guaranteed accuracy.
+**Note**: Only "Last Month" preset is available. Simplified to use proven Pristine version scrolling approach. Innovative Mode (Scroll & Capture) is recommended for all other date ranges.
 
 ---
 
