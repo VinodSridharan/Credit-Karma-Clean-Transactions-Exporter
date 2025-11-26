@@ -2074,8 +2074,36 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                                 console.log(`⚠️ STAGNATION DETECTED but only pending transactions found. Continuing to scroll DOWN to find posted transactions...`);
                                 stagnationScrolls = 0; // Reset and continue
                             } else {
-                                console.log(`⚠️ STAGNATION DETECTED: No new transactions for ${STAGNATION_THRESHOLD} consecutive scrolls. Target range found. Exiting scroll loop.`);
-                                break;
+                                // CRITICAL: Before breaking, verify foundRangeIsNewerThanTarget one more time
+                                // Recalculate to ensure we have the latest state
+                                let recalculatedFoundRangeIsNewerThanTarget = false;
+                                if (allTransactions.length > 0) {
+                                    const transactionsWithDates = allTransactions
+                                        .map(t => {
+                                            const txDate = parseTransactionDate(t.date);
+                                            return { transaction: t, date: txDate };
+                                        })
+                                        .filter(item => item.date !== null && item.date !== undefined)
+                                        .sort((a, b) => a.date.getTime() - b.date.getTime());
+                                    
+                                    if (transactionsWithDates.length > 0) {
+                                        const oldestFoundDate = transactionsWithDates[0].date;
+                                        if (oldestFoundDate && oldestFoundDate > startDateObj) {
+                                            recalculatedFoundRangeIsNewerThanTarget = true;
+                                        }
+                                    }
+                                }
+                                
+                                if (recalculatedFoundRangeIsNewerThanTarget) {
+                                    // Recalculated check shows range is still newer - don't exit!
+                                    console.log(`⚠️ CRITICAL: Recalculated check shows found range is STILL newer than target. Blocking exit. Must continue scrolling DOWN.`);
+                                    console.log(`   🔍 Debug: recalculatedFoundRangeIsNewerThanTarget=${recalculatedFoundRangeIsNewerThanTarget}, foundDateRange=${foundDateRange}`);
+                                    stagnationScrolls = 0; // Reset counter, keep searching DOWN
+                                } else {
+                                    console.log(`⚠️ STAGNATION DETECTED: No new transactions for ${STAGNATION_THRESHOLD} consecutive scrolls. Target range found. Exiting scroll loop.`);
+                                    console.log(`   🔍 Final check: foundRangeIsNewerThanTarget=${foundRangeIsNewerThanTarget}, recalculatedFoundRangeIsNewerThanTarget=${recalculatedFoundRangeIsNewerThanTarget}, foundTargetDateRange=${foundTargetDateRange}`);
+                                    break;
+                                }
                             }
                         }
                     } else {
