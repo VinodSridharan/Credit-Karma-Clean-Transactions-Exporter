@@ -2000,36 +2000,25 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                     harvestingStarted = false;
                     scrollingDirection = 'down'; // Force DOWN scrolling, not oscillation
                 }
-                // CRITICAL FIX: Increase limit IMMEDIATELY when found range is newer - don't wait for conditions
-                // This prevents premature exit at low scroll counts (e.g., 10 scrolls)
+                // CRITICAL FIX: ALWAYS increase limit when found range is newer - don't wait for conditions
+                // This prevents premature exit at ANY scroll count (e.g., 10 scrolls)
+                // If found range is newer, we MUST continue scrolling DOWN until we find older transactions
                 const scrollsRemaining = dynamicMaxScrollAttempts - scrollAttempts;
-                if (scrollAttempts <= 20 || scrollsRemaining <= 30) {
-                    // Early scrolls OR close to limit - increase significantly
-                    const additionalScrolls = Math.max(200, Math.ceil(MAX_SCROLL_ATTEMPTS * 1.5)); // Add 150% more scrolls, minimum 200
-                    const newMaxScrolls = dynamicMaxScrollAttempts + additionalScrolls;
-                    const increasePercent = Math.round((additionalScrolls / dynamicMaxScrollAttempts) * 100);
-                    console.log(`📊 [SCROLL CAP INCREASE] IMMEDIATE - Found range newer than target detected`);
-                    console.log(`   • Previous limit: ${dynamicMaxScrollAttempts} scrolls`);
-                    console.log(`   • New limit: ${newMaxScrolls} scrolls (+${additionalScrolls}, +${increasePercent}%)`);
-                    console.log(`   • Current scroll: ${scrollAttempts} | Remaining: ${scrollsRemaining}`);
-                    console.log(`   • Reason: Found range is NEWER than target - must continue scrolling DOWN`);
-                    console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
-                    console.log(`   • Found range: ${foundDateRange || 'N/A'}`);
-                    dynamicMaxScrollAttempts = newMaxScrolls; // Update dynamic limit
-                } else if (scrollAttempts % 5 === 0) {
-                    // Every 5 scrolls (more frequent), increase limit proactively if still newer
-                    const additionalScrolls = Math.max(100, Math.ceil(MAX_SCROLL_ATTEMPTS * 0.5)); // Add 50% more scrolls, minimum 100
-                    const newMaxScrolls = dynamicMaxScrollAttempts + additionalScrolls;
-                    const increasePercent = Math.round((additionalScrolls / dynamicMaxScrollAttempts) * 100);
-                    console.log(`📊 [SCROLL CAP INCREASE] PROACTIVE (every 5 scrolls) - Found range still newer than target`);
-                    console.log(`   • Previous limit: ${dynamicMaxScrollAttempts} scrolls`);
-                    console.log(`   • New limit: ${newMaxScrolls} scrolls (+${additionalScrolls}, +${increasePercent}%)`);
-                    console.log(`   • Current scroll: ${scrollAttempts} | Remaining: ${dynamicMaxScrollAttempts - scrollAttempts}`);
-                    console.log(`   • Reason: Found range is still NEWER than target after ${scrollAttempts} scrolls`);
-                    console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
-                    console.log(`   • Found range: ${foundDateRange || 'N/A'}`);
-                    dynamicMaxScrollAttempts = newMaxScrolls;
-                }
+                
+                // ALWAYS increase limit when found range is newer - no conditions
+                // Increase aggressively to ensure we have enough scrolls to reach older transactions
+                const additionalScrolls = Math.max(300, Math.ceil(MAX_SCROLL_ATTEMPTS * 2)); // Add 200% more scrolls, minimum 300
+                const newMaxScrolls = dynamicMaxScrollAttempts + additionalScrolls;
+                const increasePercent = Math.round((additionalScrolls / dynamicMaxScrollAttempts) * 100);
+                console.log(`📊 [SCROLL CAP INCREASE] ALWAYS - Found range newer than target detected`);
+                console.log(`   • Previous limit: ${dynamicMaxScrollAttempts} scrolls`);
+                console.log(`   • New limit: ${newMaxScrolls} scrolls (+${additionalScrolls}, +${increasePercent}%)`);
+                console.log(`   • Current scroll: ${scrollAttempts} | Remaining: ${scrollsRemaining}`);
+                console.log(`   • Reason: Found range is NEWER than target - MUST continue scrolling DOWN`);
+                console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
+                console.log(`   • Found range: ${foundDateRange || 'N/A'}`);
+                console.log(`   • CRITICAL: Will continue scrolling DOWN until October transactions are found`);
+                dynamicMaxScrollAttempts = newMaxScrolls; // Update dynamic limit
             }
             
             // SMART STAGNATION DETECTION: Only stop if we've found the target range
