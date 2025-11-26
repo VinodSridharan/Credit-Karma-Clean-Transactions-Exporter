@@ -2032,6 +2032,12 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             // CRITICAL: NEVER stop if found range is NEWER than target - must continue scrolling DOWN
             if (newTransactionsThisScroll === 0) {
                 stagnationScrolls++;
+                
+                // CRITICAL: Log stagnation for debugging
+                if (scrollAttempts <= 15) {
+                    console.log(`🔍 [STAGNATION] Scroll ${scrollAttempts}: stagnationScrolls=${stagnationScrolls}/${STAGNATION_THRESHOLD}, foundRangeIsNewerThanTarget=${foundRangeIsNewerThanTarget}, foundTargetDateRange=${foundTargetDateRange}`);
+                }
+                
                 // CRITICAL: Don't stop on stagnation until we've found the target date range
                 // If we haven't found October yet, keep scrolling down
                 // ALSO: If found range is NEWER than target, continue scrolling DOWN (NEVER stop)
@@ -2041,6 +2047,7 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                         // Found range is NEWER than target - MUST continue scrolling DOWN to find older transactions
                         // NEVER exit in this case - reset stagnation and continue
                         console.log(`⚠️ CRITICAL: Found range is NEWER than target. No new transactions for ${STAGNATION_THRESHOLD} scrolls, but MUST continue scrolling DOWN to find older transactions (target: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}). Resetting stagnation counter.`);
+                        console.log(`   🔍 Debug: foundRangeIsNewerThanTarget=${foundRangeIsNewerThanTarget}, foundDateRange=${foundDateRange}, allTransactions.length=${allTransactions.length}`);
                         stagnationScrolls = 0; // Reset counter, keep searching DOWN
                         // CRITICAL: Don't allow loop to exit due to MAX_SCROLL_ATTEMPTS when found range is newer
                         // Reset scrollAttempts check by continuing (we'll check MAX_SCROLL_ATTEMPTS in loop condition)
