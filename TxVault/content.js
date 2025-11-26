@@ -2543,9 +2543,16 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                             }
                             
                             // Exit early if consecutive no-progress oscillations reached (dynamic limit)
+                            // CRITICAL: NEVER exit if found range is NEWER than target - must continue scrolling DOWN
                             if (consecutiveNoProgressOscillations >= maxNoProgressOscillations) {
-                                console.log(`✅ EARLY EXIT: No progress for ${consecutiveNoProgressOscillations} consecutive oscillations. Stopping and outputting results.`);
-                                break; // Exit scroll loop immediately
+                                if (foundRangeIsNewerThanTarget) {
+                                    // Found range is NEWER than target - MUST continue scrolling DOWN
+                                    console.log(`⚠️ CRITICAL: Oscillation exit blocked - found range is NEWER than target. Must continue scrolling DOWN.`);
+                                    consecutiveNoProgressOscillations = 0; // Reset counter, keep searching DOWN
+                                } else {
+                                    console.log(`✅ EARLY EXIT: No progress for ${consecutiveNoProgressOscillations} consecutive oscillations. Stopping and outputting results.`);
+                                    break; // Exit scroll loop immediately
+                                }
                             }
                         } else {
                             // Found new data - reset counters
@@ -2559,9 +2566,16 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                         oscillationCount++;
                         
                         // Exit if max oscillations reached (dynamic limit)
+                        // CRITICAL: NEVER exit if found range is NEWER than target - must continue scrolling DOWN
                         if (oscillationCount >= maxOscillations) {
-                            console.log(`✅ MAX OSCILLATIONS REACHED (${maxOscillations}). Stopping and outputting results.`);
-                            break; // Exit scroll loop
+                            if (foundRangeIsNewerThanTarget) {
+                                // Found range is NEWER than target - MUST continue scrolling DOWN
+                                console.log(`⚠️ CRITICAL: Max oscillations exit blocked - found range is NEWER than target. Must continue scrolling DOWN.`);
+                                oscillationCount = 0; // Reset counter, keep searching DOWN
+                            } else {
+                                console.log(`✅ MAX OSCILLATIONS REACHED (${maxOscillations}). Stopping and outputting results.`);
+                                break; // Exit scroll loop
+                            }
                         }
                     }
                 }
