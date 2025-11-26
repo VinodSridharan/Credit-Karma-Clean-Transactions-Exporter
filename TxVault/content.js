@@ -3070,117 +3070,13 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 console.log(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
                 console.log(`   • Found range: ${reachedRange}`);
                 console.log(`   • Must scroll DOWN to reach older transactions (target start: ${startDateObj.toLocaleDateString()})`);
-                console.log(`   • Scroll attempt: ${scrollAttempts} | Position: ${Math.round(currentPosition)} → ${Math.round(nextPosition)}`);
-                // Always scroll DOWN - never up, never oscillate
-                // CRITICAL: Use multiple scroll methods to ensure Credit Karma's lazy loading triggers
-                const scrollStartY = window.scrollY;
-                const maxScroll = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) - window.innerHeight;
-                const targetScroll = Math.min(nextPosition, maxScroll);
-                
-                console.log(`   📊 Scroll Debug: Start=${Math.round(scrollStartY)}, Target=${Math.round(targetScroll)}, Max=${Math.round(maxScroll)}, ScrollHeight=${document.documentElement.scrollHeight}`);
-                
-                // CRITICAL: Credit Karma requires ACTUAL visual scrolling to trigger lazy loading
-                // Use element-based scrolling (scrollIntoView) which actually moves the page
-                
-                // Find the last transaction element on the page (oldest transaction)
-                const allTxElements = document.querySelectorAll('[data-index]');
-                let lastTxElement = null;
-                if (allTxElements.length > 0) {
-                    // Get the last element (should be oldest transaction)
-                    lastTxElement = allTxElements[allTxElements.length - 1];
-                }
-                
-                // CRITICAL: Use scrollIntoView on actual elements - this triggers lazy loading
-                if (lastTxElement) {
-                    console.log(`   🎯 Scrolling last transaction element into view to trigger lazy loading...`);
-                    // Scroll the last transaction into view - this should trigger loading more
-                    lastTxElement.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'end',
-                        inline: 'nearest'
-                    });
-                    
-                    // Also try scrolling a few elements before the last one
-                    if (allTxElements.length > 5) {
-                        const elementBeforeLast = allTxElements[allTxElements.length - 5];
-                        setTimeout(() => {
-                            elementBeforeLast.scrollIntoView({ 
-                                behavior: 'smooth', 
-                                block: 'center',
-                                inline: 'nearest'
-                            });
-                        }, 500);
-                    }
-                } else {
-                    // No elements found - use incremental scroll to bottom
-                    console.log(`   ⚠️ No transaction elements found - using incremental scroll to bottom...`);
-                    const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-                    const currentScroll = window.scrollY;
-                    const scrollStep = window.innerHeight * 0.8; // Scroll 80% of viewport at a time
-                    const targetScroll = Math.min(currentScroll + scrollStep, scrollHeight);
-                    
-                    // Use smooth scroll which actually moves the page
-                    window.scrollTo({ 
-                        top: targetScroll, 
-                        behavior: 'smooth' 
-                    });
-                }
-                
-                // Also try scrolling window directly as backup
-                window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                document.documentElement.scrollTop = targetScroll;
-                
-                // Find and scroll main container if it exists
-                const mainContainer = document.querySelector('main') || document.querySelector('[role="main"]');
-                if (mainContainer && mainContainer.scrollHeight > mainContainer.clientHeight) {
-                    const containerMax = mainContainer.scrollHeight - mainContainer.clientHeight;
-                    mainContainer.scrollTop = Math.min(targetScroll, containerMax);
-                    console.log(`   📍 Scrolling main container to: ${Math.round(Math.min(targetScroll, containerMax))}px`);
-                }
-                
-                // CRITICAL: Verify scroll happened and check if new content loaded
-                setTimeout(() => {
-                    const actualScrollY = window.scrollY;
-                    const initialTxCount = allTxElements.length;
-                    const newTxElements = document.querySelectorAll('[data-index]');
-                    const newTxCount = newTxElements.length;
-                    
-                    console.log(`   📍 Scroll verification:`);
-                    console.log(`      • Window scrollY: ${Math.round(actualScrollY)}px (was: ${Math.round(scrollStartY)}px)`);
-                    console.log(`      • Transaction elements: ${newTxCount} (was: ${initialTxCount})`);
-                    
-                    // Check if new transactions loaded
-                    if (newTxCount > initialTxCount) {
-                        console.log(`   ✅ SUCCESS: New transactions loaded! Count increased from ${initialTxCount} to ${newTxCount} (+${newTxCount - initialTxCount})`);
-                    } else {
-                        console.log(`   ⚠️ No new transactions loaded yet. May need more scrolling or wait time.`);
-                    }
-                    
-                    // If scroll position didn't change, try more aggressive methods
-                    if (Math.abs(actualScrollY - scrollStartY) < 10) {
-                        console.log(`   ⚠️ Scroll position didn't change - trying incremental scroll...`);
-                        // Try scrolling in smaller increments using requestAnimationFrame
-                        let currentPos = scrollStartY;
-                        const targetPos = Math.min(scrollStartY + scrollIncrement, document.documentElement.scrollHeight - window.innerHeight);
-                        const steps = 10;
-                        const stepSize = (targetPos - currentPos) / steps;
-                        
-                        for (let i = 0; i < steps; i++) {
-                            setTimeout(() => {
-                                currentPos += stepSize;
-                                window.scrollTo({ top: currentPos, behavior: 'auto' });
-                                // Also scroll last element if available
-                                if (lastTxElement && i === steps - 1) {
-                                    lastTxElement.scrollIntoView({ behavior: 'auto', block: 'end' });
-                                }
-                            }, i * 50);
-                        }
-                    }
-                }, 500);
-                
-                currentScrollPosition = targetScroll;
+                console.log(`   • Scroll attempt: ${scrollAttempts} | Position: ${Math.round(currentPosition)}`);
+                // PRISTINE VERSION: Simple scroll - no verification, no event dispatching
+                // Simple approach worked for 133 transactions extraction
+                scrollDown();
+                currentScrollPosition = window.scrollY;
                 lastKnownScrollY = window.scrollY; // Update to prevent detecting our own scroll as manual
-                console.log(`   ✅ SCROLL EXECUTED: Position ${Math.round(scrollStartY)} → ${Math.round(targetScroll)} (increment: ${Math.round(scrollIncrement)})`);
+                console.log(`   ✅ SCROLL EXECUTED: Simple scroll down (Pristine approach)`);
             } else if (!endBoundaryFound) {
                 // PHASE 1: Haven't found END boundary yet - scroll DOWN only to find it
                 const reachedRange = foundDateRange !== 'N/A' ? foundDateRange : 'None yet';
