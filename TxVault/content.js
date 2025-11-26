@@ -2053,21 +2053,30 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                         // Reset scrollAttempts check by continuing (we'll check MAX_SCROLL_ATTEMPTS in loop condition)
                     } else if (foundTargetDateRange && !foundRangeIsNewerThanTarget) {
                         // We've found the target range and it's not newer than target, stagnation is valid
-                        // BUT: Check if we only have pending transactions - if so, continue scrolling to find posted
-                        const hasPostedInRange = allTransactions.some(t => {
-                            if (!isDateInRange(t.date, startDateObj, endDateObj)) return false;
-                            const isPendingStatus = t.status && t.status.toLowerCase() === 'pending';
-                            const hasNoDate = !t.date || (typeof t.date === 'string' && t.date.trim() === '');
-                            return !isPendingStatus && !hasNoDate;
-                        });
-                        
-                        if (!hasPostedInRange && isCurrentPeriodPreset) {
-                            // Only pending transactions found - continue scrolling to find posted
-                            console.log(`⚠️ STAGNATION DETECTED but only pending transactions found. Continuing to scroll DOWN to find posted transactions...`);
-                            stagnationScrolls = 0; // Reset and continue
+                        // CRITICAL: Double-check foundRangeIsNewerThanTarget - if it's actually true, don't exit
+                        // This prevents race conditions where foundRangeIsNewerThanTarget wasn't calculated correctly
+                        if (foundRangeIsNewerThanTarget) {
+                            // Defensive check: foundRangeIsNewerThanTarget is actually true, don't exit
+                            console.log(`⚠️ CRITICAL: Stagnation detected but foundRangeIsNewerThanTarget is TRUE. Blocking exit. Must continue scrolling DOWN.`);
+                            console.log(`   🔍 Debug: foundTargetDateRange=${foundTargetDateRange}, foundRangeIsNewerThanTarget=${foundRangeIsNewerThanTarget}, foundDateRange=${foundDateRange}`);
+                            stagnationScrolls = 0; // Reset counter, keep searching DOWN
                         } else {
-                            console.log(`⚠️ STAGNATION DETECTED: No new transactions for ${STAGNATION_THRESHOLD} consecutive scrolls. Target range found. Exiting scroll loop.`);
-                            break;
+                            // BUT: Check if we only have pending transactions - if so, continue scrolling to find posted
+                            const hasPostedInRange = allTransactions.some(t => {
+                                if (!isDateInRange(t.date, startDateObj, endDateObj)) return false;
+                                const isPendingStatus = t.status && t.status.toLowerCase() === 'pending';
+                                const hasNoDate = !t.date || (typeof t.date === 'string' && t.date.trim() === '');
+                                return !isPendingStatus && !hasNoDate;
+                            });
+                            
+                            if (!hasPostedInRange && isCurrentPeriodPreset) {
+                                // Only pending transactions found - continue scrolling to find posted
+                                console.log(`⚠️ STAGNATION DETECTED but only pending transactions found. Continuing to scroll DOWN to find posted transactions...`);
+                                stagnationScrolls = 0; // Reset and continue
+                            } else {
+                                console.log(`⚠️ STAGNATION DETECTED: No new transactions for ${STAGNATION_THRESHOLD} consecutive scrolls. Target range found. Exiting scroll loop.`);
+                                break;
+                            }
                         }
                     } else {
                         // Haven't found target range yet, continue scrolling to find it
