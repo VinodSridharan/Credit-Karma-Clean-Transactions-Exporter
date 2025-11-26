@@ -1989,7 +1989,17 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             // CRITICAL: If found range is NEWER than target, increase dynamicMaxScrollAttempts IMMEDIATELY
             // This ensures we have enough scrolls to reach older transactions
             // Increase aggressively and frequently to prevent premature exit
+            // ALSO: Reset boundaries if found range is newer - boundaries shouldn't be set until we reach target
             if (foundRangeIsNewerThanTarget) {
+                // CRITICAL: Reset boundaries if found range is newer than target
+                // We haven't reached the target yet, so boundaries shouldn't be detected
+                if (endBoundaryFound || startBoundaryFound) {
+                    console.log(`⚠️ CRITICAL: Found range is NEWER than target. Resetting boundaries (endBoundaryFound: ${endBoundaryFound}, startBoundaryFound: ${startBoundaryFound}). Must continue scrolling DOWN.`);
+                    endBoundaryFound = false;
+                    startBoundaryFound = false;
+                    harvestingStarted = false;
+                    scrollingDirection = 'down'; // Force DOWN scrolling, not oscillation
+                }
                 // CRITICAL FIX: Increase limit IMMEDIATELY when found range is newer - don't wait for conditions
                 // This prevents premature exit at low scroll counts (e.g., 10 scrolls)
                 const scrollsRemaining = dynamicMaxScrollAttempts - scrollAttempts;
