@@ -2354,7 +2354,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                 
                 // Phase 1: Check if RIGHT boundary (first transaction AFTER end date) found FIRST (descending order)
                 // Right boundary appears first because data is descending (newest first)
-                if (!endBoundaryFound && rightBoundaryTx) {
+                // CRITICAL: Only detect boundaries if found range is NOT newer than target
+                if (!endBoundaryFound && rightBoundaryTx && !foundRangeIsNewerThanTarget) {
                     endBoundaryFound = true;
                     targetRangeEndBoundary = window.scrollY; // RIGHT boundary is higher on page (found first)
                     const boundaryTxDate = parseTransactionDate(rightBoundaryTx.date);
