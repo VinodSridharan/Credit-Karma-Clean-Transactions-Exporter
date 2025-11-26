@@ -3054,12 +3054,18 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                     }
                 } else {
                     // Boundaries found - can stop if DOM is stable
+                    // CRITICAL: NEVER stop if found range is NEWER than target - must continue scrolling DOWN
                     if (scrollPositionUnchangedCount >= 3) {
                         const currentDOMCount = document.querySelectorAll('[data-index]').length;
                         const isStable = await waitForDOMStability(currentDOMCount, 2000);
-                        if (isStable) {
+                        if (isStable && !foundRangeIsNewerThanTarget) {
+                            // CRITICAL: Only stop if found range is NOT newer than target
                             console.log('✅ Reached bottom, boundaries found, DOM stable. Stopping.');
                             break;
+                        } else if (foundRangeIsNewerThanTarget) {
+                            // Found range is NEWER than target - MUST continue scrolling DOWN
+                            console.log(`⚠️ CRITICAL: Reached bottom but found range is NEWER than target. Blocking exit. Must continue scrolling DOWN to find older transactions.`);
+                            scrollPositionUnchangedCount = 0; // Reset counter, keep searching DOWN
                         } else {
                             scrollPositionUnchangedCount = 0; // Reset if DOM still loading
                         }
