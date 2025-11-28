@@ -15,6 +15,10 @@
 
 ![Extension Icon](TxVault/icon.png)
 
+![Extension UI](screenshots/Extension%20UI.png)
+
+*Extension popup showing Quick Presets: Scroll & Capture, Last Month, This Month, This Year, and Last Year*
+
 ---
 
 ## 🌟 Top Recommendation: Innovative Mode (Scroll & Capture) ⭐
@@ -57,18 +61,44 @@
 - ⏱️ **Time-Critical Design** – Exits immediately when no progress detected
 - 🔒 **Zero Top Scrolling** – Stays at current position, no unnecessary navigation
 - 📈 **Robust Bottom Detection** – Handles 10+ year date ranges with intelligent delays
-- ✅ **Pending Transaction Support** – Automatic detection for this-week, this-month, this-year presets
+- ✅ **Pending Transaction Support** – Automatic detection for this-month and this-year presets
 - 💡 **Innovative Mode (Scroll & Capture)** – User-controlled scrolling with real-time statistics and 100% accuracy
 
-### Performance Metrics
+## ⚠️ Known Limitations
 
-| Method | Transactions | Accuracy | Status | Best For |
-|--------|-------------|----------|--------|----------|
-| **💡 Innovative (Scroll & Capture)** | 2,440+ | **100%** | ✅ **RECOMMENDED** | **All use cases** |
-| **⚙️ Presets (Last Month)** | 133 | 100% | ✅ Simplified | Last Month only |
-| **🔧 Basic** | Variable | Variable | ✅ Available | Simple extractions |
+### Session Timeouts for Large Presets
 
-**Innovative Mode (Scroll & Capture) = 100% accuracy, user control, verified reliability**
+**Last Year** and other historical presets may encounter Credit Karma session timeouts (HTTP 401 errors) during long extraction runs (typically **15–25 minutes**).
+
+**If this happens:**
+
+- The extension will automatically export whatever partial data has been collected so far.
+- The export summary will clearly show **“⚠️ Session timeout – may be incomplete”**.
+- **What to do**: Refresh the Credit Karma page and re-run the preset.
+- Data from multiple partial runs can be **merged in post‑processing** (for example with Python / Pandas).
+
+**Best Practices:**
+
+- Run the **Last Year** preset when you have a stable internet connection and 20–25 minutes available.
+- Avoid running other **Credit Karma** tabs at the same time.
+- If you see HTTP **401** errors in the console or in the export summary, wait **1–2 minutes** before retrying.
+
+## 📅 Date Range Presets
+
+| Preset | Range | Typical Records | Typical Time | Status |
+|--------|-------|----------------|--------------|--------|
+| **Scroll & Capture** | Any (user-chosen) | 2,440 (24 months) | User-controlled | **Pristine** |
+| **Last Month** | Previous month | 133 (Oct 2025) | 2m 35s | **Pristine** |
+| **This Month** | Current month (1st–today) | Variable | ~7 min, ~160 scrolls | **Verified** |
+| **This Year** | Jan 1–today | Variable | ~15 min, ~260 scrolls | **Verified** |
+| **Last Year** | Previous full year | 738 (2024) | 15–25 min, ~260 scrolls | **Verified*** |
+
+**Status Definitions:**
+- **Pristine**: 100% accuracy verified, no known bugs
+- **Verified**: Tested and working with documented behavior
+- **Verified***: Tested and working; may encounter session timeouts on long runs (see Known Limitations)
+
+**Note**: The **Last Year** preset may encounter Credit Karma session timeouts (HTTP 401 errors) during runs longer than 15 minutes. The extension will automatically export partial data if this occurs. See [Known Limitations](#-known-limitations) for details.
 
 ---
 
@@ -175,39 +205,24 @@ TxVault offers three extraction methods, organized by priority and innovation:
 - **Export Anytime**: Export CSV whenever you're ready
 - **Auto-Export on Logout**: Automatically saves your data if Credit Karma logs you out
 
-### 2. ⚙️ Presets Mode (Auto-Scroll) - Last Month Only
+### 2. ⚙️ Presets Mode (Auto-Scroll)
 
-**Status**: ✅ Simplified - Using Pristine Version Approach
+**Status**: ✅ Available
 
-- **Best For**: Automated extraction of Last Month transactions
-- **Accuracy**: 100% when working correctly (proven with Pristine version - 133 transactions)
+- **Best For**: Automated extraction of specific date ranges
+- **Accuracy**: 100% when working correctly (verified for Last Month - 133 transactions)
 - **User Experience**: Fully automated scrolling and extraction
-- **Reliability**: Simplified to proven Pristine version scrolling method
-- **Access**: Click **"Last Month"** preset button in the extension popup
-- **Presets Available**: Last Month only (simplified to focus on working solution)
+- **Reliability**: Optimized for each preset with boundary detection and intelligent scrolling
+- **Access**: Click preset buttons in the extension popup (Last Month, This Month, This Year, Last Year)
+- **Presets Available**: Last Month, This Month, This Year, Last Year
 
-**Recent Changes:**
-- ✅ **Simplified Scrolling**: Replaced complex scrolling methods with simple `window.scrollTo()` (Pristine version approach)
-- ✅ **Removed Complexity**: Removed `scrollIntoView()`, element-based scrolling, and event dispatching
-- ✅ **Proven Method**: Using the same simple scrolling that successfully extracted 133 transactions (Last Month)
-- ✅ **Removed Other Presets**: Focused on Last Month only - removed This Week, This Month, This Year, Last Year, Last 2 Years, Last 3 Years
+**Available Presets:**
+- **Last Month**: Previous calendar month (verified: 133 transactions in 2m 35s)
+- **This Month**: Current month from 1st through today (includes pending transactions)
+- **This Year**: January 1st through today (includes pending transactions)
+- **Last Year**: Previous full calendar year (verified: 738 transactions for 2024)
 
-**Testing Recommendation:**
-- **Only Preset Available**: **"Last Month"** - Uses simplified Pristine version scrolling
-- **Why Last Month**: Has dedicated optimization, boundary detection, and proven simple scrolling
-- **Expected Behavior**: Should scroll automatically using simple `window.scrollTo()` method
-- **If It Doesn't Scroll**: Check browser console (F12) for scroll attempt logs
-
-**Note**: Only Last Month preset is available. The scrolling has been simplified to match the Pristine version that successfully extracted 133 transactions. **Innovative Mode (Scroll & Capture) is recommended** for all other date ranges and guaranteed reliability.
-
-**🔍 Why Pristine Version Worked (Historical Reference):**
-A previous "Pristine" version successfully extracted Last Month (133 transactions in 2m 35s) using:
-- ✅ **Simple `window.scrollTo()`** - Native browser scroll (no complex event dispatching)
-- ✅ **Fixed wait times** - 1.5 seconds standard, 1 second fast
-- ✅ **Fixed minimum scrolls** - 40 scrolls for Last Month preset
-- ✅ **Direct approach** - No `scrollIntoView()`, no element-based scrolling, no WheelEvent dispatching
-
-**Key Lesson:** Simple `window.scrollTo()` reliably triggers Credit Karma's lazy loading. The current version's complex scrolling methods (scrollIntoView, element-based, event dispatching) may be over-engineered and may not trigger lazy loading consistently.
+**Note**: **Innovative Mode (Scroll & Capture) is recommended** for guaranteed reliability and user control. Presets Mode provides automated extraction for users who prefer hands-off operation.
 
 ### 3. 🔧 Basic Mode
 
@@ -230,7 +245,7 @@ A previous "Pristine" version successfully extracted Last Month (133 transaction
 
 | Feature | Basic Mode | Presets Mode (Auto-Scroll) |
 |---------|-----------|---------------------------|
-| **Access Method** | Manual date entry in popup | Preset buttons (This Week, This Month, Last Month, Last Year, Last 2 Years, Last 3 Years, Custom Range) |
+| **Access Method** | Manual date entry in popup | Preset buttons (Scroll & Capture, Last Month, This Month, This Year, Last Year) |
 | **Scrolling** | Manual (user scrolls) | Automatic (extension scrolls) |
 | **Date Selection** | Manual date picker only | Quick preset buttons + manual date picker |
 | **Automation Level** | Low - user controls everything | High - fully automated |
@@ -362,10 +377,11 @@ A previous "Pristine" version successfully extracted Last Month (133 transaction
 | Preset | Transactions | Time | Status | Recovery |
 |--------|-------------|------|--------|----------|
 | **Last Month** | 133 | 2m 35s | ✅ PRISTINE | 100% |
+| **Last Year** | 738 | 15-25 min | ✅ Verified | 100%* |
 
 **PRISTINE = 100% accuracy, zero data loss, verified complete extraction**
 
-**Note**: Only "Last Month" preset is available. Simplified to use proven Pristine version scrolling approach. Innovative Mode (Scroll & Capture) is recommended for all other date ranges.
+**Note**: *Last Year preset may encounter session timeouts on long runs. Extension auto-exports partial data if this occurs. See Known Limitations for details.
 
 ---
 
