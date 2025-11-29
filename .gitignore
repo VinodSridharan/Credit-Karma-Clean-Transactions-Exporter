@@ -13,6 +13,8 @@
 !"TxVault-Basic"
 !"TxVault/Screenshots/"
 !"TxVault/Screenshots/*"
+!"screenshots/"
+!"screenshots/*"
 !/.gitignore
 !README.md
 !docs/

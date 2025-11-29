@@ -295,6 +295,12 @@ For recruiters and hiring managers who want to review the private repository:
 
 **That's it!** Your CSV file downloads automatically. 🎉
 
+The notification below shows the export completion banner with status and next steps:
+
+![Export Notification](screenshots/Export%20Notification.png)
+
+*Export notification displaying successful CSV download with transaction summary and completion status*
+
 The completion display below shows the export summary with transaction counts and status:
 
 ![Export Completion](TxVault/Screenshots/CompletionDisplay.png)
