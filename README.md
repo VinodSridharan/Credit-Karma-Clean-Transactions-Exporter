@@ -8,8 +8,6 @@
 
 > **Transform your financial data into actionable insights. Export Credit Karma transactions to clean, analysis-ready CSV files with one click. Built with pure JavaScript, zero dependencies, and production-proven reliability.**
 
-![Extension Icon](TxVault/icon.png)
-
 ---
 
 ## 🚀 About TxVault Exporter
@@ -265,6 +263,13 @@ For recruiters and hiring managers who want to review the private repository:
 
 **Public Repository**: For documentation and overview, see the [public repository](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter).
 
+### Supporting Documentation
+
+For detailed project outcomes and validation:
+
+- **Success stories and outcomes** → [docs/SUCCESS_STORIES.md](docs/SUCCESS_STORIES.md)
+- **Validation and QC details** → [docs/VALIDATION_REPORT.md](docs/VALIDATION_REPORT.md)
+
 ---
 
 ## 🚀 Quick Start
@@ -294,12 +299,6 @@ For recruiters and hiring managers who want to review the private repository:
    - Click **"Export CSV"** when ready (or when you've scrolled to your desired date range)
 
 **That's it!** Your CSV file downloads automatically. 🎉
-
-The notification below shows the export completion banner with status and next steps:
-
-![Export Notification](screenshots/Export%20Notification.png)
-
-*Export notification displaying successful CSV download with transaction summary and completion status*
 
 The completion display below shows the export summary with transaction counts and status:
 
@@ -641,6 +640,19 @@ The project is organized into branches based on extraction methods:
 - Original inspiration: [Credit Karma Transaction Extractor by Chirag Bangera](https://github.com/chiragbangera/credit-karma-transaction-exporter)
 - Major enhancements, redesign, and compliance by [Vinod Sridharan](https://www.linkedin.com/in/vinod-s-6a565b1b8/)
 - Powered by Chrome Extensions API and the open-source community
+
+---
+
+## 🔧 For Maintainers
+
+Internal documentation for project maintenance and development:
+
+- **Branch Structure** → [docs/BRANCH_STRUCTURE.md](docs/BRANCH_STRUCTURE.md)
+- **Changelog** → [docs/CHANGELOG_EXPORT_FILTERING.md](docs/CHANGELOG_EXPORT_FILTERING.md)
+- **Publication Guide** → [docs/GITHUB_PUBLICATION_GUIDE.md](docs/GITHUB_PUBLICATION_GUIDE.md)
+- **Publication Readiness** → [docs/PUBLICATION_READY.md](docs/PUBLICATION_READY.md)
+- **Workflow Activation** → [docs/WORKFLOW_ACTIVATION.md](docs/WORKFLOW_ACTIVATION.md)
+- **Workflow Policy** → [docs/WORKFLOW_POLICY.md](docs/WORKFLOW_POLICY.md)
 
 ---
 
