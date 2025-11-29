@@ -647,12 +647,12 @@ The project is organized into branches based on extraction methods:
 
 Internal documentation for project maintenance and development:
 
-- **Branch Structure** → [docs/BRANCH_STRUCTURE.md](docs/BRANCH_STRUCTURE.md)
-- **Changelog** → [docs/CHANGELOG_EXPORT_FILTERING.md](docs/CHANGELOG_EXPORT_FILTERING.md)
-- **Publication Guide** → [docs/GITHUB_PUBLICATION_GUIDE.md](docs/GITHUB_PUBLICATION_GUIDE.md)
-- **Publication Readiness** → [docs/PUBLICATION_READY.md](docs/PUBLICATION_READY.md)
-- **Workflow Activation** → [docs/WORKFLOW_ACTIVATION.md](docs/WORKFLOW_ACTIVATION.md)
-- **Workflow Policy** → [docs/WORKFLOW_POLICY.md](docs/WORKFLOW_POLICY.md)
+- **Branch Structure** → [docs/internal/BRANCH_STRUCTURE.md](docs/internal/BRANCH_STRUCTURE.md)
+- **Changelog** → [docs/internal/CHANGELOG_EXPORT_FILTERING.md](docs/internal/CHANGELOG_EXPORT_FILTERING.md)
+- **Publication Guide** → [docs/internal/GITHUB_PUBLICATION_GUIDE.md](docs/internal/GITHUB_PUBLICATION_GUIDE.md)
+- **Publication Readiness** → [docs/internal/PUBLICATION_READY.md](docs/internal/PUBLICATION_READY.md)
+- **Workflow Activation** → [docs/internal/WORKFLOW_ACTIVATION.md](docs/internal/WORKFLOW_ACTIVATION.md)
+- **Workflow Policy** → [docs/internal/WORKFLOW_POLICY.md](docs/internal/WORKFLOW_POLICY.md)
 
 ---
 

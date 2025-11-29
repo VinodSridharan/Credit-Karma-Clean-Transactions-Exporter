@@ -307,3 +307,54 @@ All exit points have been validated and confirmed to check `foundRangeIsNewerTha
 **Validation Date**: 2025-11-24  
 **Status**: ✅ **APPROVED FOR PRODUCTION**
 
+---
+
+## Validation Run – 2025-11-29
+
+**Date**: 2025-11-29  
+**Commit**: `6a13acef9dd4c36dc4e20d0cfdb78d18b546d2e2`  
+**Extensions**: `TxVault/` (main) and `TxVault-Basic/` (basic variant)
+
+### Scope of This Validation
+
+- ✅ **Manifest Validation (Static)**  
+  - Confirmed both `TxVault/manifest.json` and `TxVault-Basic/manifest.json` are Manifest V3 compliant.
+  - Verified required keys: `manifest_version`, `name`, `version`, `description`, `permissions`, `action`, `content_scripts`, `background`, and `content_security_policy`.
+  - CSP for extension pages is restricted to `script-src 'self'; object-src 'self'`, compatible with Chrome MV3.
+
+- ✅ **Project Structure Check**  
+  - Confirmed both extensions are pure JavaScript Chrome extensions (no `package.json` or build tooling required).
+  - Verified core files are present for each variant: `manifest.json`, `background.js`, `content.js`, `popup.html`, `icon.png`.
+
+- ✅ **Documentation & Policy Alignment**  
+  - Root now exposes `LICENSE` and `PRIVACY.md` for end users.
+  - `README.md` legal sections link to root `LICENSE` and `PRIVACY.md`.
+  - Documentation structure follows QC policy: only `SUCCESS_STORIES.md` and `VALIDATION_REPORT.md` visible at top-level `docs/`, with maintainer docs in `docs/internal/`.
+
+### Functional Validation (Manual – To Be Run by Maintainer)
+
+Due to environment limitations, full browser-based functional validation **cannot be executed automatically** here. The following scenarios are recommended for manual validation in a clean Chrome profile:
+
+1. **TxVault (Main Extension)**
+   - Load unpacked extension from `TxVault/`.
+   - Navigate to the Credit Karma transactions page.
+   - Open the popup and verify the UI matches the README screenshots (Quick Presets + Scroll & Capture).
+   - Run a Scroll & Capture session for:
+     - Last Month (e.g., October 2025)
+     - Last Year (e.g., 2024)
+   - Confirm CSV exports have expected columns and row counts (e.g., **133** and **738** as documented).
+
+2. **TxVault-Basic (Basic Variant)**
+   - Load unpacked extension from `TxVault-Basic/`.
+   - Verify the basic UI loads and a sample export completes successfully.
+
+3. **Error / Console Checks**
+   - Open DevTools for the extension popup and content script.
+   - Confirm no uncaught errors or CSP violations occur during normal use.
+
+### Known Issues & Limitations (Unchanged)
+
+- Long-running presets (e.g., **Last Year**) may still be subject to **Credit Karma session timeouts (HTTP 401)**.  
+  - When this occurs, the extension exports partial data rather than failing silently.
+- Overall behavior and performance metrics remain as documented in `README.md`; no new regressions were identified during this static validation pass.
+
