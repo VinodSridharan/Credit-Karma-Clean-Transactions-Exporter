@@ -1,6 +1,6 @@
 # 📋 Workflow Policy: Parallel Processing & Resource Management
 
-**Last Updated:** 2025-11-22 21:45:00  
+**Last Updated:** 2025-11-26 10:00:00  
 **Document Owner:** Project Management  
 **Status:** ✅ Active Policy - Parallel Processing Implementation  
 **Version:** 2.1
@@ -73,6 +73,9 @@ This policy ensures efficient parallel execution while maintaining document inte
 
 | Date | Update Type | Description | Source |
 |------|-------------|-------------|--------|
+| 2025-11-26 10:00:00 | Risk Tracking | Created RISK_REGISTER.md at root and added it to QC and Project Plan & Review tracking as the central risk register for TxVault; risks must be logged here and cross-referenced with RCA, Lessons Learned, and Metrics | QC Resource |
+| 2025-11-26 09:43:56 | Metrics Integration | Added Scroll & Capture baseline survey tracking (scroll_capture_2025-11-26.csv and SCROLL_CAPTURE_ANALYSIS.md) to metrics and workflow policy; this run is now the reference survey for long-range scroll strategies | Metrics Resource |
+| 2025-11-25 10:50:08 | Documentation | Created comprehensive PROJECT_HIGHLIGHTS.md with layman's terms explanation, success stories, technical power, features, validation, security, metrics, git integration, and useful links - Added to workflow policy tracking | Project Plan & Review Resource |
 | 2025-11-22 21:45:00 | Code Implementation | Fixed finally syntax error in content.js, updated popup with transaction page notices, updated .gitignore for PROJECT_REVIEW.md and LESSONS_LEARNED.md - Issue #16 resolved, Lesson #9 added | Code Resource |
 | 2025-11-22 11:15:27 | Policy Enhancement | Added Lessons Learned Check & Update to Coordinator Resource - implements lessons learned check and update when relevant during lean management activities | Direct call |
 | 2025-11-22 11:03:50 | Policy Enhancement | Added Issue Resolution Protocol to Code Resource - mandatory consultation of workflow policies, lessons learned, code implementation log, and root cause analysis for non-straightforward issues | Direct call |
@@ -237,6 +240,7 @@ When Code Resource encounters an update issue that is not straightforward, or en
 - `STEP_1.1_CODE_IMPLEMENTATION_LOG.md` - Exhaustive code change log
 - `ROOT_CAUSE_ANALYSIS.md` - Technical issues and solutions
 - `SUCCESS_STORIES.md` - Project achievements and milestones
+- `PROJECT_HIGHLIGHTS.md` - Comprehensive project highlights, success stories, and metrics (layman's terms)
 
 ---
 
@@ -276,6 +280,7 @@ When Code Resource encounters an update issue that is not straightforward, or en
 - `PROJECT_PLAN.md` - Current project plan, status, version, timeline
 - `PROJECT_REVIEW.md` - Recent updates, version, last updated, achievements
 - `LESSONS_LEARNED.md` - Separate document maintained in sync with all relevant review inputs and metadata inputs
+- `PROJECT_HIGHLIGHTS.md` - Comprehensive project highlights, success stories, metrics, and layman's terms explanation (maintained by Project Plan & Review Resource)
 - `ROOT_CAUSE_DOCUMENTS/` - Root cause analysis documents synchronized with Metrics Resource Root Cause Analysis, integrated with review inputs and metadata inputs
 
 **Integration with Metadata Resource**:
@@ -552,6 +557,7 @@ When Code Resource encounters an update issue that is not straightforward, or en
 - `PLANNED_VS_ACTUAL.md` - Planned vs actual comparison reports
 - `REFERENCE_STANDARDS_REPOSITORY.md` - Reference and standards repository
 - `QC_TRACKING_LOG.md` - File/input/output accuracy tracking log
+- `RISK_REGISTER.md` - Centralized risk register tracking technical & operational risks
 
 **Quality Checks**:
 - Code quality and compliance with standards
@@ -1046,10 +1052,94 @@ Payload: {
 
 ---
 
-**Document Version:** 2.1  
-**Last Updated:** 2025-11-22 21:45:00  
+## 🤝 Contributor & Workspace Expectations (Human Contributors)
+
+While this policy is written in terms of AI “resources”, human contributors are welcome and strongly encouraged. To keep the workspace safe, professional, and maintainable, please follow these expectations.
+
+### 1. Data-Handling & Security
+
+- **No real financial data in the repo**
+  - Never commit **real transaction data**, bank statements, or live CSV exports from Credit Karma or any other financial institution.
+  - Never commit files that contain **personally identifiable information (PII)** such as names, addresses, account numbers, emails, or phone numbers.
+- **Use synthetic or anonymized examples**
+  - For screenshots, logs, tests, and documentation, use **synthetic or anonymized** data that cannot be traced back to a real person or account.
+  - If you need to demonstrate a bug, redact or replace any sensitive fields before attaching assets.
+- **Sanitize logs before sharing**
+  - Before attaching console logs, stack traces, or CSV snippets to issues/PRs, scan them for sensitive details and **redact** or remove anything that looks like real financial data or PII.
+
+These rules apply to **all files**: source code, markdown docs, screenshots, CSVs, and any other assets.
+
+### 2. Branching & Pull Request Basics
+
+- **Work on branches, not directly on `main`**
+  - Use descriptive branch names such as `feature/last-month-oscillation-tuning` or `bugfix/logout-export`.
+  - Keep unrelated changes in separate branches to make review easier.
+- **Open PRs against the main branch**
+  - When your changes are ready, open a Pull Request targeting the primary branch (usually `main`).
+  - Keep PRs **small and reviewable** whenever possible; large, mixed-change PRs are harder to validate.
+- **Reference design documents**
+  - For details on branch naming and structure, see `BRANCH_STRUCTURE.md` (if present in this workspace).
+- **PR descriptions**
+  - Briefly describe **what changed** and **why**.
+  - Reference related issues or discussion threads (e.g., “Fixes #12”) so reviewers can trace context.
+
+### 3. Security Reporting
+
+- If you believe you’ve found a **security-sensitive issue** (e.g., a way the extension might leak data or bypass a user’s expectations):
+  - **Do not** post full exploit details or sensitive data in a public issue.
+  - Use a **private channel** instead, such as:
+    - GitHub *Security Advisories* (if enabled for the repository), or
+    - A private contact method listed in the repository (e.g., email in `README.md` or a future `SECURITY.md`).
+  - Provide enough information to reproduce the issue **without** including real account data or credentials.
+
+This keeps users safer while still allowing maintainers to investigate and fix the problem.
+
+### 4. Support Model & Behavior
+
+- **Volunteer maintainers, no SLA**
+  - TxVault is maintained by volunteers. There are **no guaranteed response times** for issues, PRs, or questions.
+  - Lack of an immediate reply does not mean your contribution is unwelcome; it may simply reflect limited maintainer bandwidth.
+- **Professional, respectful communication**
+  - Use clear, concise, and respectful language in issues and PRs.
+  - Focus feedback on the **code, behavior, or documentation**, not the person.
+  - Assume good intent from other contributors and maintainers.
+
+By contributing, you agree to follow these expectations in addition to the automated workflow described earlier in this policy.
+
+---
+
+**Document Version:** 2.2  
+**Last Updated:** 2025-11-25 10:50:08  
 **Next Review:** When workflow changes or new resources added  
 **⚠️ IMPORTANT:** Always update "Last Updated" field with current system time when making changes
 
 **Status:** ✅ Active Policy - Follow this workflow for all parallel processing activities
+
+---
+
+## 📋 Recent Updates (2025-11-25 10:50:08)
+
+### Documentation Addition
+
+**PROJECT_HIGHLIGHTS.md Created:**
+- ✅ Comprehensive project highlights document
+- ✅ Layman's terms explanation of project value
+- ✅ Success stories and real-world results
+- ✅ Technical power and architecture highlights
+- ✅ Feature overview
+- ✅ Validation process explanation
+- ✅ Security and privacy details
+- ✅ Performance metrics in logical flow
+- ✅ Git integration information
+- ✅ Useful links and resources
+- ✅ Added to workflow policy tracking (Project Plan & Review Resource)
+- ✅ Cross-referenced in documentation index
+- ✅ Linked in README.md
+
+**Workflow Policy Integration:**
+- ✅ Added to Metrics Resource document management
+- ✅ Added to Project Plan & Review Resource document management
+- ✅ Added to documentation index
+- ✅ Added to README.md documentation section
+- ✅ Update history entry added
 
