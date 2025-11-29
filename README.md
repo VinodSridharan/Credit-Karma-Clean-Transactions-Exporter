@@ -43,7 +43,9 @@ TxVault Exporter solves this problem with a production-ready Chrome extension th
 - 💪 **Zero dependencies** – Pure vanilla JavaScript, ultra-reliable
 - ✅ **Production-ready** – Tested with thousands of real transactions
 
-![Extension UI](screenshots/Extension%20UI.png)
+The extension UI below shows the date-range preset selector in action:
+
+![Extension UI](TxVault/Screenshots/EntensionUI.png)
 
 *Extension popup showing Quick Presets: Scroll & Capture, Last Month, This Month, This Year, and Last Year*
 
@@ -293,9 +295,11 @@ For recruiters and hiring managers who want to review the private repository:
 
 **That's it!** Your CSV file downloads automatically. 🎉
 
-![Export Notification](screenshots/Export%20Notification.png)
+The completion display below shows the export summary with transaction counts and status:
 
-*Export notification showing successful CSV download*
+![Export Completion](TxVault/Screenshots/CompletionDisplay.png)
+
+*Export completion notification showing successful CSV download with transaction summary*
 
 ---
 
@@ -326,10 +330,6 @@ For recruiters and hiring managers who want to review the private repository:
 - ✅ **Export Anytime**: Export CSV whenever you're ready, no need to wait
 - ✅ **Automatic Cleanup**: Removes duplicates and filters out "Pending" dates before export
 - ✅ **Clean CSV Output**: Only valid, unique transactions with real dates are exported
-
-![Runtime Notifications](screenshots/Runtime%20Notifications.png)
-
-*Real-time status updates during transaction extraction*
 
 ### Verified Performance
 
