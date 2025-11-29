@@ -5,7 +5,7 @@
 !"TxVault/"
 !"TxVault-Basic/"
 !.gitignore
-!README.md
+!README.md`n!LICENSE`n!PRIVACY.md
 
 # Exclude all root-level files and folders
 /*
@@ -16,7 +16,7 @@
 !"screenshots/"
 !"screenshots/*"
 !/.gitignore
-!README.md
+!README.md`n!LICENSE`n!PRIVACY.md
 !docs/
 !docs/*
 
@@ -83,7 +83,7 @@ CK_TX_Downloader_JavaScript/
 *.md
 !"TxVault/README.md"
 !"TxVault-Basic/README.md"
-!README.md  # Root README for GitHub
+!README.md`n!LICENSE`n!PRIVACY.md  # Root README for GitHub
 !BRANCH_STRUCTURE.md  # Branch organization guide
 !SUCCESS_STORIES.md  # Success stories
 !GITHUB_PUBLICATION_GUIDE.md  # Publication guide

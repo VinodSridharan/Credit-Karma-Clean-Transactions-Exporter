@@ -628,8 +628,8 @@ The project is organized into branches based on extraction methods:
 
 - No affiliation, endorsement, or partnership with Credit Karma, Intuit, or any third-party provider
 - All processing happens locally in your browser – your data never leaves your computer
-- Use responsibly and at your own risk
-- See [LICENSE](TxVault/LICENSE) for full terms
+- Use responsibly and at your own risk. See [PRIVACY.md](PRIVACY.md) for full privacy and data-use details.
+- See [LICENSE](LICENSE) for full terms
 
 ---
 
@@ -658,7 +658,7 @@ Internal documentation for project maintenance and development:
 
 ## 📄 License
 
-**MIT License** – See [LICENSE](TxVault/LICENSE) file for details.
+**MIT License** – See [LICENSE](LICENSE) file for details.
 
 Free to use, modify, and distribute. Perfect for personal projects, startups, and enterprise use.
 
