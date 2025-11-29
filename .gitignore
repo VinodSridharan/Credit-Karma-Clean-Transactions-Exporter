@@ -11,13 +11,12 @@
 /*
 !"TxVault"
 !"TxVault-Basic"
+!"TxVault/Screenshots/"
+!"TxVault/Screenshots/*"
 !/.gitignore
 !README.md
-!BRANCH_STRUCTURE.md
-!SUCCESS_STORIES.md
-!GITHUB_PUBLICATION_GUIDE.md
-!CHANGELOG_EXPORT_FILTERING.md
-!PUBLICATION_READY.md
+!docs/
+!docs/*
 
 # Exclude Selenium-Version completely (Python version - separate repo)
 Selenium-Version/
