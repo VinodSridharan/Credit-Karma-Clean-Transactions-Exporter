@@ -24,6 +24,8 @@ Selenium-Version/
 
 # Backup/Archive Folders
 VAULT-*/
+vault/
+*.vault/
 
 # Python Cache
 __pycache__/
@@ -34,30 +36,42 @@ __pycache__/
 
 # Python Scripts (test/analysis tools)
 *.py
+# Allow specific Python files if needed (add exceptions above this line)
 
 # PowerShell Scripts (utility scripts)
 *.ps1
+# Allow specific PowerShell files if needed (add exceptions above this line)
 
 # OS Files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# IDE
+# IDE / Editor configs
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
+.settings/
+.project
+.classpath
+*.code-workspace
+.claude/
 
 # Logs
 *.log
+*.log.*
+logs/
+*.logs
 
-# Downloads (CSV files)
+# Downloads / data outputs (CSV, Excel, stats)
 *.csv
-
-# Excel Files
 *.xlsx
 *.xls
+*.stats.json
+# Allow specific tracked CSV files if needed (add exceptions above this line)
+# !screenshots/Extension UI.png  # Already tracked, keep it
 
 # Development/Staging folders (not for GitHub)
 Staging/
@@ -74,6 +88,7 @@ CK_TX_Downloader_JavaScript/
 !GITHUB_PUBLICATION_GUIDE.md  # Publication guide
 !CHANGELOG_EXPORT_FILTERING.md  # Export filtering changelog
 !PUBLICATION_READY.md  # Publication readiness checklist
+RISK_REGISTER.md
 
 # Analysis and comparison reports (generated files)
 SCROLL_CAPTURE_*.md
@@ -122,6 +137,8 @@ SCROLL_CAPTURE_*.md
 *_STATUS*.txt
 *_FILES*.txt
 *_ORGANIZATION*.txt
+*_APPROVAL*.txt
+*_SUMMARY*.txt
 WHERE_IS_*.md
 MVP_*.md
 MANUAL_*.md
@@ -171,3 +188,40 @@ LinkedIn-Manager/**/.activities/
 LinkedIn-Manager/**/*.json
 LinkedIn-Manager/__pycache__/
 LinkedIn-Manager/**/__pycache__/
+
+# Build artifacts and temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache
+.cache/
+tmp/
+temp/
+build/
+dist/
+*.min.js
+*.min.css
+*.map
+
+# Environment and config files (may contain secrets)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+config.local.json
+secrets.json
+
+# Machine-specific files
+*.user
+*.suo
+*.userosscache
+.DS_Store?
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.AppleDouble
+.LSOverride
