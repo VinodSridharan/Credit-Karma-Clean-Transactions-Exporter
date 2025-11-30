@@ -379,6 +379,15 @@ function runStatsToMarkdown(runStats) {
         lines.push('- None');
     }
     lines.push('');
+    
+    // Add missing dates information if available
+    if (runStats.validation && runStats.validation.missingDates && runStats.validation.missingDates.length > 0) {
+        lines.push('## Missing Dates');
+        lines.push(`- Missing dates count: ${runStats.validation.missingDatesCount || runStats.validation.missingDates.length}`);
+        lines.push(`- Missing dates: ${runStats.validation.missingDates.join(', ')}`);
+        lines.push('');
+    }
+    
     return lines.join('\n');
 }
 
@@ -6213,23 +6222,64 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
             }
             const missingDates = expectedDates.filter(date => !dateDistribution[date] || dateDistribution[date] === 0);
             if (missingDates.length > 0) {
-                console.warn(`⚠️ Missing dates in export: ${missingDates.join(', ')}`);
-                // Log specific missing dates with their day of week for debugging
-                missingDates.forEach(dateStr => {
-                    const missingDate = new Date(dateStr);
-                    console.warn(`  - Missing: ${dateStr} (${missingDate.toLocaleDateString('en-US', { weekday: 'long' })})`);
+                // Convert missing dates to YYYY-MM-DD format for runStats
+                const missingDatesISO = missingDates.map(dateStr => {
+                    const date = new Date(dateStr);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
                 });
                 
-                // Special check for start date
-                const startDateStr = exportStartDate.toLocaleDateString();
-                if (missingDates.includes(startDateStr)) {
-                    console.error(`❌ CRITICAL: Start date ${startDateStr} is missing from export!`);
+                // Store missing dates in runStats for developers
+                if (typeof runStats !== 'undefined' && runStats) {
+                    if (!runStats.validation) {
+                        runStats.validation = {};
+                    }
+                    runStats.validation.missingDates = missingDatesISO; // Full list of YYYY-MM-DD strings
+                    runStats.validation.missingDatesCount = missingDates.length; // Number of days
+                    
+                    // Add alert for missing dates
+                    if (!Array.isArray(runStats.alerts)) {
+                        runStats.alerts = [];
+                    }
+                    if (!runStats.alerts.includes('MISSING_DATES_DETECTED')) {
+                        runStats.alerts.push('MISSING_DATES_DETECTED');
+                    }
+                    
+                    // Update export status if not already set to a more severe status
+                    if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                        // If many days are missing (>10% of range), mark as incomplete
+                        const daysInRange = Math.ceil((exportEndDate - exportStartDate) / (24 * 60 * 60 * 1000)) + 1;
+                        const missingPercentage = (missingDates.length / daysInRange) * 100;
+                        if (missingPercentage > 10) {
+                            runStats.validation.exportStatus = 'COMPLETE_WITH_WARNINGS';
+                        } else {
+                            runStats.validation.exportStatus = 'COMPLETE_WITH_WARNINGS';
+                        }
+                    }
                 }
                 
-                // Special check for end date
+                // Single aggregated user-facing warning (not per-date spam)
+                logUserWarning(`Export complete with warnings: ${missingDates.length} calendar day(s) in the selected range have no transactions. See validation details if this is unexpected.`);
+                
+                // Per-date logs are dev-only (gated by dev debug flag)
+                logDevDebug(`Missing dates in export: ${missingDates.join(', ')}`);
+                missingDates.forEach(dateStr => {
+                    const missingDate = new Date(dateStr);
+                    logDevDebug(`  - Missing: ${dateStr} (${missingDate.toLocaleDateString('en-US', { weekday: 'long' })})`);
+                });
+                
+                // Special check for start date (critical - keep as user error)
+                const startDateStr = exportStartDate.toLocaleDateString();
+                if (missingDates.includes(startDateStr)) {
+                    logUserError(`CRITICAL: Start date ${startDateStr} is missing from export!`);
+                }
+                
+                // Special check for end date (critical - keep as user error)
                 const endDateStr = exportEndDate.toLocaleDateString();
                 if (missingDates.includes(endDateStr)) {
-                    console.error(`❌ CRITICAL: End date ${endDateStr} is missing from export!`);
+                    logUserError(`CRITICAL: End date ${endDateStr} is missing from export!`);
                 }
             } else {
                 console.log(`✓ All dates in range have transactions`);
