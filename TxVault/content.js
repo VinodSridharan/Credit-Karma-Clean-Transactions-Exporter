@@ -7720,16 +7720,19 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                                         runStats.alerts.push('NEWER_RANGE_ONLY_2025');
                                     }
                                     
-                                    const warningMsg = `Export incomplete: Could not reach target range (2024). Only found transactions from 2025 (${transactionsIn2025.length} rows). The extension scrolled ${scrollAttempts} times but could not reach older transactions. Please try Scroll & Capture mode or check if 2024 data is available on Credit Karma.`;
+                                    // Get scrollAttempts from runStats if available
+                                    const actualScrollAttempts = (typeof runStats !== 'undefined' && runStats && runStats.scrollAttempts) ? runStats.scrollAttempts : 'unknown';
+                                    
+                                    const warningMsg = `Export incomplete: Could not reach target range (2024). Only found transactions from 2025 (${transactionsIn2025.length} rows). The extension scrolled ${actualScrollAttempts} times but could not reach older transactions. Please try Scroll & Capture mode or check if 2024 data is available on Credit Karma.`;
                                     logUserWarning(warningMsg, {
                                         targetYear: 2024,
                                         foundYear: 2025,
                                         foundCount: transactionsIn2025.length,
-                                        scrollAttempts: scrollAttempts
+                                        scrollAttempts: actualScrollAttempts
                                     });
                                     
                                     runStats.notes = runStats.notes || [];
-                                    runStats.notes.push(`Could not reach 2024: Only found ${transactionsIn2025.length} transactions from 2025 after ${scrollAttempts} scrolls`);
+                                    runStats.notes.push(`Could not reach 2024: Only found ${transactionsIn2025.length} transactions from 2025 after ${actualScrollAttempts} scrolls`);
                                 }
                             }
                         }
