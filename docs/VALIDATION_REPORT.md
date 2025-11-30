@@ -706,3 +706,41 @@ Due to environment limitations, full browser-based functional validation **canno
   - When this occurs, the extension exports partial data rather than failing silently.
 - Overall behavior and performance metrics remain as documented in `README.md`; no new regressions were identified during this static validation pass.
 
+---
+
+## Validation Run – Last Year (2024) – PRISTINE Confirmation
+
+**Date**: 2025-11-29  
+**Commit**: `a1bcb9e` (includes scroll/validation/logging fixes: `225d121`, `cef4c5f`, `7b59349`, `1def03e`)  
+**Preset**: Last Year (2024)  
+**Status**: ✅ **PRISTINE**
+
+### Run Details
+
+- **Date Range**: 2024-01-01 to 2024-12-31
+- **Transactions Exported**: 738 (from 1210 total transactions seen during extraction)
+- **Runtime**: ~11 minutes
+- **Export Status**: **PRISTINE**
+
+### Validation Results
+
+All current validation checks passed successfully:
+
+- ✅ **Boundaries**: Both start (2024-01-01) and end (2024-12-31) boundaries detected and present in export
+- ✅ **Pending Consistency**: No pending transactions in historical data (as expected)
+- ✅ **Missing Dates**: All dates in range have transactions (no missing days detected)
+- ✅ **Reference Comparison**: Perfect match against authoritative reference data (738 transactions)
+- ✅ **Newest Boundary**: All newest visible transactions captured
+- ✅ **Row Count**: Exact match with expected count (738)
+
+### Technical Notes
+
+- This run was performed after implementing the scroll logic fixes to prevent premature exit when found range is newer than target
+- The extension successfully scrolled through the entire 2024 date range without early exit
+- All validation infrastructure (reference comparison, boundary checks, missing dates detection) functioned correctly
+- Export completed with PRISTINE status, confirming 100% accuracy
+
+### Conclusion
+
+The Last Year preset (2024) is confirmed **PRISTINE** with the current TxVault build. The 738 transaction count matches the authoritative reference standard, and all validation checks passed successfully.
+

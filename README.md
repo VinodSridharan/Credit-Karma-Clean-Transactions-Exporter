@@ -59,7 +59,7 @@ The extension UI below shows the date-range preset selector in action:
 | **Last Month** | Previous month | 133 (Oct 2025) | 2m 35s | **Pristine** |
 | **This Month** | Current month (1st–today) | Variable | ~7 min, ~160 scrolls | **Verified** |
 | **This Year** | Jan 1–today | Variable | ~15 min, ~260 scrolls | **Verified** |
-| **Last Year** | Previous full year | 738 (2024) | 15–25 min, ~260 scrolls | **Verified*** |
+| **Last Year** | Previous full year | 738 (2024) | ~11 min | **Pristine** |
 
 **Status Definitions:**
 - **Pristine**: 100% accuracy verified, no known bugs
