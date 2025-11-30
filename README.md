@@ -14,7 +14,7 @@
 
 **TxVault Exporter** is a powerful Chrome extension designed for users, analysts, and developers who demand precise, privacy-first extraction of financial transaction data. Whether you're tracking expenses, analyzing spending patterns, or building financial applications, TxVault transforms hours of manual work into seconds of automated extraction.
 
-**Version:** 4.2.1 | **Status:** ✅ Production Ready | **Last Updated:** 2025-11-25
+**Version:** 4.2.1 | **Status:** ✅ Production Ready | **Last Updated:** 2025-11-30 01:44:38 UTC
 
 ---
 
