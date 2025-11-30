@@ -77,6 +77,56 @@ const CONFIG = {
 };
 
 // ============================================================================
+// Logging Helpers - Centralized logging levels for dev vs user-facing messages
+// ============================================================================
+
+/**
+ * Development debug logging - only visible when DEV_DEBUG flag is enabled
+ * Use for per-transaction decisions, detailed include/exclude logic, etc.
+ * These logs do NOT appear in Chrome Extensions error pane for normal users.
+ */
+function logDevDebug(...args) {
+    // Enable dev debug logging by setting window.__txVaultDevDebug = true in console
+    if (typeof window !== 'undefined' && window.__txVaultDevDebug === true) {
+        console.debug('[TxVault Dev]', ...args);
+    }
+}
+
+/**
+ * User-facing warning logging - appears in popup/notifications and runStats
+ * Use for high-level warnings that affect data quality (boundary failures, pending mismatch, etc.)
+ */
+function logUserWarning(message, details = null) {
+    console.warn('⚠️ [TxVault]', message);
+    if (details) {
+        console.warn('   Details:', details);
+    }
+    
+    // Add to runStats validation warnings if available
+    if (typeof window !== 'undefined' && window.__txVaultCurrentRunStats) {
+        const runStats = window.__txVaultCurrentRunStats;
+        if (!runStats.validation) {
+            runStats.validation = {};
+        }
+        if (!runStats.validation.userWarnings) {
+            runStats.validation.userWarnings = [];
+        }
+        runStats.validation.userWarnings.push(message);
+    }
+}
+
+/**
+ * User-facing error logging - for actual errors that require re-running or support
+ * Use for DOM selector failures, session timeouts, critical extraction errors
+ */
+function logUserError(message, error = null) {
+    console.error('🚨 [TxVault Error]', message);
+    if (error) {
+        console.error('   Error details:', error);
+    }
+}
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -2321,7 +2371,7 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             const removedCount = beforeCount - filteredForExport.length;
             
             if (filteredForExport.length === 0) {
-                console.warn(`⚠️ No valid transactions after filtering. Original: ${beforeCount}`);
+                logUserError(`No valid transactions after filtering. Original: ${beforeCount}`);
                 alert(`⚠️ Credit Karma logged out during extraction.\n\nNo valid transactions to export after filtering.\n\nTotal captured: ${capturedTransactions.length}\nIn range: ${beforeCount}\nRemoved: ${removedCount} (Pending dates or duplicates)\n\nCheck console (F12) for details.`);
                 return;
             }
@@ -2989,15 +3039,15 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
             // Show requested range, not found range
             const requestedRange = `${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`;
             
-            // DEBUG: Log date matching issues for October (Last Month)
+            // DEBUG: Log date matching issues for October (Last Month) - dev debug only
             if (isLastMonthForStatus && allTransactions.length > 0 && transactionsInRangeCount === 0) {
-                console.warn('⚠️ DATE MATCHING ISSUE: Found transactions but 0 in range');
-                console.warn(`   Expected range: ${requestedRange}`);
-                console.warn(`   Found range: ${foundDateRange}`);
-                console.warn(`   Sample dates found: ${sampleDates.join(', ')}`);
+                logDevDebug('DATE MATCHING ISSUE: Found transactions but 0 in range');
+                logDevDebug(`   Expected range: ${requestedRange}`);
+                logDevDebug(`   Found range: ${foundDateRange}`);
+                logDevDebug(`   Sample dates found: ${sampleDates.join(', ')}`);
                 // Log first 10 transaction dates for debugging
                 const sampleTxs = allTransactions.slice(0, 10);
-                console.warn('   Sample transaction dates:', sampleTxs.map(t => ({
+                logDevDebug('   Sample transaction dates:', sampleTxs.map(t => ({
                     raw: t.date,
                     parsed: parseTransactionDate(t.date)?.toLocaleDateString() || 'FAILED'
                 })));
@@ -5757,11 +5807,11 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
         
         // CRITICAL: Verify boundaries before export
         if (!startBoundaryFound || !endBoundaryFound) {
-            console.warn(`⚠️ EXPORT WARNING: Exporting without both boundaries found:`);
-            console.warn(`   • Start boundary found: ${startBoundaryFound}`);
-            console.warn(`   • End boundary found: ${endBoundaryFound}`);
-            console.warn(`   • This may indicate incomplete data extraction. Proceeding with export, but results may be incomplete.`);
-            console.warn(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
+            logUserWarning(`Export may be incomplete: date boundaries not fully detected. Results may be incomplete.`);
+            logDevDebug(`   Exporting without both boundaries found:`);
+            logDevDebug(`   • Start boundary found: ${startBoundaryFound}`);
+            logDevDebug(`   • End boundary found: ${endBoundaryFound}`);
+            logDevDebug(`   • Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
         } else {
             console.log(`✅ Boundary verification passed: Both boundaries found before export`);
             console.log(`   • Start boundary: ${startBoundaryFound} (last transaction before ${startDateObj.toLocaleDateString()})`);
@@ -5782,7 +5832,7 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
                     // posted" as pending, but still respect the requested export date range
                     // when a date exists. This prevents previous-period rows from leaking.
                     if (!txDate) {
-                        console.log(`Including pending transaction (no date, before first posted): ${transaction.description}, amount: ${transaction.amount}, date: "N/A"`);
+                        logDevDebug(`Including pending transaction (no date, before first posted): ${transaction.description}, amount: ${transaction.amount}, date: "N/A"`);
                         return true;
                     }
                     
@@ -5790,7 +5840,7 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
                     const isWithinRange = txDate.getTime() >= exportStartDate.getTime() && txDate.getTime() <= exportEndDate.getTime();
                     
                     if (isBeforeFirstPosted && isWithinRange) {
-                        console.log(`Including pending transaction (before first posted, in range): ${transaction.description}, amount: ${transaction.amount}, date: "${transaction.date || 'N/A'}"`);
+                        logDevDebug(`Including pending transaction (before first posted, in range): ${transaction.description}, amount: ${transaction.amount}, date: "${transaction.date || 'N/A'}"`);
                         return true;
                     }
                 }
@@ -5815,13 +5865,13 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
                         if (txDate &&
                             (txDate.getTime() < exportStartDate.getTime() ||
                              txDate.getTime() > exportEndDate.getTime())) {
-                            console.log(`Excluding out-of-range pending transaction for current-period preset: ${transaction.description}, date: "${transaction.date || 'N/A'}"`);
+                            logDevDebug(`Excluding out-of-range pending transaction for current-period preset: ${transaction.description}, date: "${transaction.date || 'N/A'}"`);
                             return false;
                         }
                         
-                        console.log(`Including pending transaction: ${transaction.description}, amount: ${transaction.amount}, status: ${transaction.status || 'Pending (no date)'}, date: "${transaction.date || 'N/A'}"`);
+                        logDevDebug(`Including pending transaction: ${transaction.description}, amount: ${transaction.amount}, status: ${transaction.status || 'Pending (no date)'}, date: "${transaction.date || 'N/A'}"`);
                     } else {
-                        console.log(`Excluding pending transaction (end date in past): ${transaction.description}`);
+                        logDevDebug(`Excluding pending transaction (end date in past): ${transaction.description}`);
                     }
                     return shouldIncludePending;
                 }
@@ -5829,15 +5879,15 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
                 const txDate = parseTransactionDate(transaction.date);
                 const inRange = isDateInRange(transaction.date, exportStartDate, exportEndDate);
                 
-                // Enhanced debugging: Log first 10 excluded transactions to help diagnose issues
+                // Enhanced debugging: Log first 10 excluded transactions to help diagnose issues (dev-only)
                 if (!inRange && txDate) {
-                    // Log first few excluded transactions for debugging
+                    // Log first few excluded transactions for debugging (dev debug only)
                     if (typeof window.__excludedTxCount === 'undefined') {
                         window.__excludedTxCount = 0;
                     }
                     if (window.__excludedTxCount < 10) {
                         window.__excludedTxCount++;
-                        console.warn(`⚠️ Excluding transaction #${window.__excludedTxCount}:`, {
+                        logDevDebug(`Excluding transaction #${window.__excludedTxCount}:`, {
                             rawDate: transaction.date,
                             parsedDate: txDate.toLocaleDateString(),
                             parsedISO: txDate.toISOString(),
@@ -5889,43 +5939,44 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
         console.log(`Total transactions found (all dates): ${allTransactions.length}`);
         console.log(`Transactions in export range: ${filteredTransactions.length}`);
         
-        // Export validation logging
-        console.log(`=== EXPORT VALIDATION ===`);
-        console.log(`📊 Posted transactions exported: ${exportedPostedTransactions.length} (out of ${filteredTransactions.length} total)`);
+        // Export validation logging (dev debug only - detailed diagnostics)
+        logDevDebug(`=== EXPORT VALIDATION ===`);
+        logDevDebug(`📊 Posted transactions exported: ${exportedPostedTransactions.length} (out of ${filteredTransactions.length} total)`);
         if (exportedStart && exportedEnd) {
-            console.log(`📅 Date range exported: ${exportedStart.toLocaleDateString()} - ${exportedEnd.toLocaleDateString()}`);
-            console.log(`📅 Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
+            logDevDebug(`📅 Date range exported: ${exportedStart.toLocaleDateString()} - ${exportedEnd.toLocaleDateString()}`);
+            logDevDebug(`📅 Target range: ${startDateObj.toLocaleDateString()} - ${endDateObj.toLocaleDateString()}`);
             
-            // Validate date range coverage
+            // Validate date range coverage - user-facing warning if missing transactions
             if (exportedStart > startDateObj) {
-                console.warn(`⚠️ EXPORT WARNING: Exported start date (${exportedStart.toLocaleDateString()}) is AFTER target start date (${startDateObj.toLocaleDateString()})`);
-                console.warn(`   • Missing transactions before ${exportedStart.toLocaleDateString()}`);
+                logUserWarning(`Export may be incomplete: missing transactions before ${exportedStart.toLocaleDateString()}`);
+                logDevDebug(`   Exported start date (${exportedStart.toLocaleDateString()}) is AFTER target start date (${startDateObj.toLocaleDateString()})`);
             }
             if (exportedEnd < endDateObj) {
-                console.warn(`⚠️ EXPORT WARNING: Exported end date (${exportedEnd.toLocaleDateString()}) is BEFORE target end date (${endDateObj.toLocaleDateString()})`);
-                console.warn(`   • Missing transactions after ${exportedEnd.toLocaleDateString()}`);
+                logUserWarning(`Export may be incomplete: missing transactions after ${exportedEnd.toLocaleDateString()}`);
+                logDevDebug(`   Exported end date (${exportedEnd.toLocaleDateString()}) is BEFORE target end date (${endDateObj.toLocaleDateString()})`);
             }
             if (exportedStart <= startDateObj && exportedEnd >= endDateObj) {
-                console.log(`✅ Date range validation passed: Exported range fully covers target range`);
+                logDevDebug(`✅ Date range validation passed: Exported range fully covers target range`);
             }
         } else {
-            console.warn(`⚠️ EXPORT WARNING: No valid dates found in exported transactions`);
+            logUserWarning(`Export warning: No valid dates found in exported transactions`);
         }
         
-        // Validate boundary status
+        // Validate boundary status - user-facing warning if boundaries not found
         if (!startBoundaryFound || !endBoundaryFound) {
-            console.warn(`⚠️ EXPORT WARNING: Exporting without both boundaries found (Start: ${startBoundaryFound}, End: ${endBoundaryFound})`);
+            logUserWarning(`Export may be incomplete: date boundaries not fully detected (Start: ${startBoundaryFound ? 'found' : 'missing'}, End: ${endBoundaryFound ? 'found' : 'missing'})`);
+            logDevDebug(`   Exporting without both boundaries found (Start: ${startBoundaryFound}, End: ${endBoundaryFound})`);
         } else {
-            console.log(`✅ Boundary validation passed: Both boundaries found before export`);
+            logDevDebug(`✅ Boundary validation passed: Both boundaries found before export`);
         }
         
         // Validate posted transactions for month/custom presets
         const isMonthOrCustomPreset = !isThisWeekPreset && !isThisMonthPreset && !isThisYearPreset;
         if (isMonthOrCustomPreset && exportedPostedTransactions.length === 0 && filteredTransactions.length > 0) {
-            console.warn(`⚠️ EXPORT WARNING: Month/Custom preset but only pending transactions exported (${filteredTransactions.length} pending, 0 posted)`);
-            console.warn(`   • For month/custom presets, posted transactions are required`);
+            logUserWarning(`Export warning: Only pending transactions exported (${filteredTransactions.length} pending, 0 posted). For month/custom presets, posted transactions are required.`);
+            logDevDebug(`   Month/Custom preset but only pending transactions exported`);
         } else if (isMonthOrCustomPreset && exportedPostedTransactions.length > 0) {
-            console.log(`✅ Posted transaction validation passed: ${exportedPostedTransactions.length} posted transactions found for month/custom preset`);
+            logDevDebug(`✅ Posted transaction validation passed: ${exportedPostedTransactions.length} posted transactions found for month/custom preset`);
         }
         
         // REFERENCE STANDARD: Show 100% recovery parameters if achieved
@@ -6123,14 +6174,14 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
         }).length;
         console.log(`Total pending transactions found (all dates): ${allPendingCount}`);
         if (allPendingCount > 0 && pendingCount.count === 0) {
-            console.warn(`⚠️ Found ${allPendingCount} pending transactions but none were included in export!`);
-            console.warn(`   Original end date: ${endDateObj.toLocaleDateString()}, Should include pending: ${shouldIncludePending}`);
+            logUserWarning(`Found ${allPendingCount} pending transactions but none were included in export. Check date range and pending inclusion settings.`);
+            logDevDebug(`   Original end date: ${endDateObj.toLocaleDateString()}, Should include pending: ${shouldIncludePending}`);
             // Log sample pending transactions for debugging
             const samplePending = allTransactions.filter(t => {
                 const isPendingStatus = t.status && t.status.toLowerCase() === 'pending';
                 return isPendingStatus;
             }).slice(0, 5);
-            console.warn(`   Sample pending transactions:`, samplePending.map(t => ({
+            logDevDebug(`   Sample pending transactions:`, samplePending.map(t => ({
                 description: t.description,
                 date: t.date,
                 status: t.status,
@@ -6410,7 +6461,7 @@ function startScrollCaptureMode(csvTypes) {
         
         if (preparedTransactions.length === 0) {
             showNotification('⚠️ No valid transactions to export.\n\nAll transactions have "Pending" dates or are duplicates.', 'error');
-            console.warn(`⚠️ Scroll & Capture: No valid transactions after filtering. Original count: ${beforeCount}`);
+            logUserError(`Scroll & Capture: No valid transactions after filtering. Original count: ${beforeCount}`);
             return;
         }
         
@@ -7158,12 +7209,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                                 runStats.validation.exportStatus = 'INCOMPLETE_NEWEST_BOUNDARY';
                                 runStats.alerts = runStats.alerts || [];
                                 runStats.alerts.push('NEWEST_BOUNDARY_MISSING');
-                                const warningMsg = `⚠️ Export finished but the newest visible transactions (e.g., ${newestDateStr}) are not present in the CSV. Consider re-running with a smaller range or reloading the page.`;
-                                console.warn(warningMsg);
+                                const warningMsg = `Export complete with warnings: some newest transactions may be missing. See details in the log or rerun with a smaller date range.`;
+                                logUserWarning(warningMsg, { newestDate: newestDateStr });
                                 runStats.notes = runStats.notes || [];
-                                runStats.notes.push(warningMsg);
+                                runStats.notes.push(`Newest visible date ${newestDateStr} not found in CSV`);
+                                logDevDebug(`Newest boundary validation FAILED: Newest visible date ${newestDateStr} not found in captured transactions`);
                             } else {
-                                console.log(`✅ Newest boundary validation PASSED: Found transaction with date ${newestDateStr}`);
+                                logDevDebug(`✅ Newest boundary validation PASSED: Found transaction with date ${newestDateStr}`);
                             }
                         }
 
@@ -7181,19 +7233,23 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                                 }
                                 runStats.alerts = runStats.alerts || [];
                                 runStats.alerts.push('PENDING_COUNT_MISMATCH');
-                                const warningMsg = `⚠️ Pending transaction count in CSV (${runStats.counts.pendingCountCaptured}) does not match the UI (${runStats.counts.pendingCountVisible}). Review pending rows manually for this preset.`;
-                                console.warn(warningMsg);
+                                const warningMsg = `Export complete with warnings: pending vs posted counts don't match what's on screen. Please double-check pending rows.`;
+                                logUserWarning(warningMsg, { 
+                                    captured: runStats.counts.pendingCountCaptured, 
+                                    visible: runStats.counts.pendingCountVisible 
+                                });
                                 runStats.notes = runStats.notes || [];
-                                runStats.notes.push(warningMsg);
+                                runStats.notes.push(`Pending count mismatch: CSV=${runStats.counts.pendingCountCaptured}, UI=${runStats.counts.pendingCountVisible}`);
+                                logDevDebug(`Pending consistency check WARN: Captured=${runStats.counts.pendingCountCaptured}, Visible=${runStats.counts.pendingCountVisible}`);
                             } else {
                                 runStats.validation.pendingConsistencyCheck = 'PASS';
-                                console.log(`✅ Pending consistency check PASSED: Captured=${runStats.counts.pendingCountCaptured}, Visible=${runStats.counts.pendingCountVisible}`);
+                                logDevDebug(`✅ Pending consistency check PASSED: Captured=${runStats.counts.pendingCountCaptured}, Visible=${runStats.counts.pendingCountVisible}`);
                             }
                         } else if (shouldIncludePendingPreset && runStats.counts.pendingCountVisible == null) {
                             // Could not estimate visible pending count, but pending section exists
                             if (pendingCount > 0) {
                                 runStats.validation.pendingConsistencyCheck = 'PASS'; // Assume OK if we captured some pending
-                                console.log(`✅ Pending consistency check: Captured ${pendingCount} pending transactions (visible count not available)`);
+                                logDevDebug(`✅ Pending consistency check: Captured ${pendingCount} pending transactions (visible count not available)`);
                             }
                         }
 

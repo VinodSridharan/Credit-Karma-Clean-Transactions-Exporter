@@ -423,6 +423,131 @@ All exit points have been validated and confirmed to check `foundRangeIsNewerTha
 
 ---
 
+## Validation Run – 2025-11-29 (Logging Cleanup)
+
+**Date**: 2025-11-29  
+**Commit**: `84ffe63277f3d3cbd1c1f90514a571f3e236f47b` (updated)  
+**Status**: ✅ **LOGGING CLEANUP COMPLETE**
+
+### Problem
+
+End users were seeing internal diagnostic messages in Chrome Extensions error view, such as:
+- "Excluding transaction #9: [object Object]"
+- Per-transaction include/exclude decisions
+- Detailed boundary/range check logs
+
+These dev-oriented logs were confusing and noisy for normal users, even though exports completed successfully.
+
+### Solution: Centralized Logging System
+
+#### 1. Added Logging Helpers ✅
+
+**Location**: `TxVault/content.js` lines ~79-120
+
+**New Functions**:
+- `logDevDebug(...args)`: Development debug logging, only visible when `window.__txVaultDevDebug = true` is set in console
+- `logUserWarning(message, details?)`: User-facing warnings that appear in popup/notifications and runStats
+- `logUserError(message, error?)`: User-facing errors for critical issues requiring re-running or support
+
+**Usage**:
+- Per-transaction decisions → `logDevDebug()`
+- High-level validation warnings → `logUserWarning()`
+- Critical extraction errors → `logUserError()`
+
+#### 2. Reclassified Internal Logs ✅
+
+**Downgraded to Dev Debug** (lines updated):
+- Per-transaction exclusion messages (lines ~5818, 5822, 5824, 5840-5850)
+- "Including pending transaction" details (lines ~5785, 5793)
+- "Excluding transaction #X" with object details (line ~5840)
+- DATE MATCHING ISSUE diagnostics (lines ~3044-3053)
+- Detailed export validation logging (lines ~5936-5970)
+- Boundary detection details (lines ~5809-5814)
+
+**Result**: These logs no longer appear in Chrome Extensions error pane for normal users. They are only visible when dev debug is enabled.
+
+#### 3. Updated User-Facing Warnings ✅
+
+**Validation Warnings** (lines ~7207-7247):
+- Newest boundary failures → `logUserWarning()` with clear message: "Export complete with warnings: some newest transactions may be missing..."
+- Pending consistency mismatches → `logUserWarning()` with clear message: "Export complete with warnings: pending vs posted counts don't match..."
+- Boundary detection failures → `logUserWarning()` with actionable message
+- Missing transactions warnings → `logUserWarning()` for incomplete exports
+
+**Export Validation Warnings** (lines ~5950-5970):
+- Missing transactions before/after → `logUserWarning()` for user visibility
+- Boundary status → `logUserWarning()` if boundaries not found
+- Only pending transactions → `logUserWarning()` for month/custom presets
+
+**Result**: Users now see clear, actionable warnings instead of technical diagnostic spam.
+
+#### 4. Preserved Rich Diagnostics for Developers ✅
+
+**Still Available**:
+- All detailed logs via `console.debug` when `window.__txVaultDevDebug = true`
+- Complete runStats object with validation details (JSON/Markdown sidecar files)
+- Aggregated validation results in popup UI
+- Export status system (PRISTINE, COMPLETE_WITH_WARNINGS, etc.)
+
+### How to Enable Dev Debug Logging
+
+For developers diagnosing issues:
+
+1. Open Chrome DevTools (F12) on the Credit Karma transactions page
+2. In the Console tab, run:
+   ```javascript
+   window.__txVaultDevDebug = true;
+   ```
+3. Run the extension export
+4. All detailed per-transaction logs will appear in console with `[TxVault Dev]` prefix
+5. To disable:
+   ```javascript
+   window.__txVaultDevDebug = false;
+   ```
+
+### End-User Experience
+
+**Before**:
+- Chrome Extensions error pane filled with per-transaction exclusion messages
+- Confusing "[object Object]" errors
+- Technical diagnostic spam
+
+**After**:
+- Clean Extensions error pane (no per-transaction spam)
+- Clear popup status: "Export complete" or "Export complete with warnings"
+- High-level warnings only when data quality is affected
+- Detailed diagnostics available via dev debug flag or runStats sidecar files
+
+### Testing Required
+
+**Manual Testing Needed**:
+1. Run "This Year" preset and verify:
+   - Chrome Extensions "Errors" view is clean (no per-transaction error cards)
+   - Popup shows clear status + optional warning summary
+   - Validation warnings appear only when relevant (newest boundary, pending mismatch)
+
+2. Run "Last Month" preset and verify:
+   - No dev-level logs in error pane
+   - Success message is clear and concise
+
+3. Enable dev debug (`window.__txVaultDevDebug = true`) and verify:
+   - All detailed logs appear in console
+   - Per-transaction decisions are visible for debugging
+
+### Known Limitations
+
+- Dev debug flag must be set manually in console (not exposed in UI)
+- Some legacy console.log statements may still exist (non-critical, informational only)
+- runStats sidecar files contain full diagnostic details regardless of logging level
+
+---
+
+**Validated By**: AI Assistant  
+**Validation Date**: 2025-11-29  
+**Status**: ✅ **LOGGING CLEANUP COMPLETE - MANUAL TESTING REQUIRED**
+
+---
+
 ## Validation Run – 2025-11-29
 
 **Date**: 2025-11-29  
