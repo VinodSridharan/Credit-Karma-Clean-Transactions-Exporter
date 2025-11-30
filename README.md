@@ -8,6 +8,8 @@
 
 > **Transform your financial data into actionable insights. Export Credit Karma transactions to clean, analysis-ready CSV files with one click. Built with pure JavaScript, zero dependencies, and production-proven reliability.**
 
+For a simple tour of how this repo is organized, see [ABOUT_THIS_REPOSITORY.md](./ABOUT_THIS_REPOSITORY.md).
+
 ---
 
 ## 🚀 About TxVault Exporter
@@ -436,6 +438,19 @@ TxVault offers three extraction methods, organized by priority and innovation:
 
 ---
 
+### Lessons learned: browser blockers
+
+Some browser privacy tools and ad blockers can silently block key scripts on the Credit Karma site.  
+When that happens, long TxVault exports may stall, show confusing internal errors, or stop early without a clean finish.  
+
+To avoid this:
+
+- Open your browser's privacy, shield, or ad‑block settings.  
+- Add the Credit Karma site to the "ignore", "allowlist", or "trusted sites" list so scripts are not blocked there.  
+- Then rerun TxVault; long exports are much less likely to hit random internal errors or timeouts.
+
+---
+
 ## 📊 Statistics & Performance
 
 ### Innovative Mode Performance
@@ -640,19 +655,6 @@ The project is organized into branches based on extraction methods:
 - Original inspiration: [Credit Karma Transaction Extractor by Chirag Bangera](https://github.com/chiragbangera/credit-karma-transaction-exporter)
 - Major enhancements, redesign, and compliance by [Vinod Sridharan](https://www.linkedin.com/in/vinod-s-6a565b1b8/)
 - Powered by Chrome Extensions API and the open-source community
-
----
-
-## 🔧 For Maintainers
-
-Internal documentation for project maintenance and development:
-
-- **Branch Structure** → [docs/internal/BRANCH_STRUCTURE.md](docs/internal/BRANCH_STRUCTURE.md)
-- **Changelog** → [docs/internal/CHANGELOG_EXPORT_FILTERING.md](docs/internal/CHANGELOG_EXPORT_FILTERING.md)
-- **Publication Guide** → [docs/internal/GITHUB_PUBLICATION_GUIDE.md](docs/internal/GITHUB_PUBLICATION_GUIDE.md)
-- **Publication Readiness** → [docs/internal/PUBLICATION_READY.md](docs/internal/PUBLICATION_READY.md)
-- **Workflow Activation** → [docs/internal/WORKFLOW_ACTIVATION.md](docs/internal/WORKFLOW_ACTIVATION.md)
-- **Workflow Policy** → [docs/internal/WORKFLOW_POLICY.md](docs/internal/WORKFLOW_POLICY.md)
 
 ---
 
