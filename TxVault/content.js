@@ -511,7 +511,7 @@ function initializeRunStats(presetName, startDateObj, endDateObj) {
         validation: {
             newestBoundaryCheck: null,  // 'PASS' | 'FAIL' | null
             pendingConsistencyCheck: null,  // 'PASS' | 'WARN' | 'FAIL' | null
-            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH' | 'INCOMPLETE_ROW_COUNT_MISMATCH' | 'INCOMPLETE_REFERENCE_MISMATCH'
+            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH' | 'INCOMPLETE_ROW_COUNT_MISMATCH' | 'INCOMPLETE_REFERENCE_MISMATCH' | 'INCOMPLETE_NEWER_RANGE_ONLY'
         },
         alerts: [],
         notes: []
@@ -2716,6 +2716,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
         window.addEventListener('scroll', throttledScrollHandler, { passive: true });
         console.log(`✅ Manual scroll detection enabled. Will detect and extract transactions when user scrolls manually.`);
         
+        // CRITICAL: Loop condition - block exit if foundRangeIsNewerThanTarget is true
+        // This ensures we continue scrolling DOWN even if other conditions would allow exit
         while (!stopScrolling && scrollAttempts < dynamicMaxScrollAttempts) {
             // ============================================================================
             // MINIMAL LOOP ENTRY LOGGING: Only log first few scrolls
@@ -3126,25 +3128,33 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                                                     consecutiveNoProgressOscillations = 0;
                                                 }
                                             } else {
-                                                // Boundary-aware stagnation policy for historical presets
-                                                const presetNameForStagnation = request && request.preset ? request.preset : '';
-                                                const requiresFullOscillationPresets = ['last-year', 'last-5-years', 'this-year'];
-                                                const requiresFullOscillation = requiresFullOscillationPresets.includes(presetNameForStagnation);
-                                                const boundariesConfirmed = startBoundaryFound && endBoundaryFound;
-                                                const oscillationComplete = oscillationCount >= 8; // require at least 8 passes for large ranges
-                                                
-                                                let canExitOnStagnation = true;
-                                                if (requiresFullOscillation) {
-                                                    // For historical presets, only exit on stagnation AFTER boundaries + full oscillation
-                                                    canExitOnStagnation = boundariesConfirmed && oscillationComplete;
-                                                }
-                                                
-                                                if (!canExitOnStagnation) {
-                                                    console.log(`🚫 [STAGNATION EXIT BLOCKED] Preset "${presetNameForStagnation}" requires full oscillation before exit. oscillationCount=${oscillationCount}, boundariesConfirmed=${boundariesConfirmed}`);
-                                                    stagnationScrolls = 0; // Reset and continue scrolling / oscillating
+                                                // CRITICAL: Final check - NEVER exit if found range is newer than target
+                                                // This must be checked AFTER all other conditions to prevent premature exit
+                                                if (foundRangeIsNewerThanTarget || recalculatedFoundRangeIsNewerThanTarget) {
+                                                    console.error(`🚨 [GUARD] BLOCKING STAGNATION EXIT - foundRangeIsNewerThanTarget is TRUE! Must continue scrolling DOWN.`);
+                                                    console.error(`   🔍 Debug: foundRangeIsNewerThanTarget=${foundRangeIsNewerThanTarget}, recalculatedFoundRangeIsNewerThanTarget=${recalculatedFoundRangeIsNewerThanTarget}, foundDateRange=${foundDateRange}`);
+                                                    stagnationScrolls = 0; // Reset counter, keep searching DOWN
                                                 } else {
-                                                    console.error(`✅ [EXIT] Stagnation exit approved (preset=${presetNameForStagnation}, oscillationCount=${oscillationCount}, boundariesConfirmed=${boundariesConfirmed})`);
-                                                    break;
+                                                    // Boundary-aware stagnation policy for historical presets
+                                                    const presetNameForStagnation = request && request.preset ? request.preset : '';
+                                                    const requiresFullOscillationPresets = ['last-year', 'last-5-years', 'this-year'];
+                                                    const requiresFullOscillation = requiresFullOscillationPresets.includes(presetNameForStagnation);
+                                                    const boundariesConfirmed = startBoundaryFound && endBoundaryFound;
+                                                    const oscillationComplete = oscillationCount >= 8; // require at least 8 passes for large ranges
+                                                    
+                                                    let canExitOnStagnation = true;
+                                                    if (requiresFullOscillation) {
+                                                        // For historical presets, only exit on stagnation AFTER boundaries + full oscillation
+                                                        canExitOnStagnation = boundariesConfirmed && oscillationComplete;
+                                                    }
+                                                    
+                                                    if (!canExitOnStagnation) {
+                                                        console.log(`🚫 [STAGNATION EXIT BLOCKED] Preset "${presetNameForStagnation}" requires full oscillation before exit. oscillationCount=${oscillationCount}, boundariesConfirmed=${boundariesConfirmed}`);
+                                                        stagnationScrolls = 0; // Reset and continue scrolling / oscillating
+                                                    } else {
+                                                        console.error(`✅ [EXIT] Stagnation exit approved (preset=${presetNameForStagnation}, oscillationCount=${oscillationCount}, boundariesConfirmed=${boundariesConfirmed})`);
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
@@ -7678,6 +7688,52 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                             })();
                         }
 
+                        // ============================================================================
+                        // VALIDATION: Check if found range is newer than target (for Last Year preset)
+                        // ============================================================================
+                        // This check happens after the loop exits to detect if we couldn't reach the target range
+                        // We need to check this here because finalFoundRangeIsNewerThanTarget is calculated after the loop
+                        // For Last Year preset, if we only found 2025 data and couldn't reach 2024, set appropriate status
+                        if (request && request.preset === 'last-year') {
+                            // Check if we have any transactions in the target range (2024)
+                            const transactionsIn2024 = preparedTransactions.filter(t => {
+                                if (!t.date) return false;
+                                const txDate = parseTransactionDate(t.date);
+                                if (!txDate) return false;
+                                return txDate.getFullYear() === 2024;
+                            });
+                            
+                            // If we have no transactions in 2024, check if we have transactions from 2025
+                            if (transactionsIn2024.length === 0) {
+                                const transactionsIn2025 = preparedTransactions.filter(t => {
+                                    if (!t.date) return false;
+                                    const txDate = parseTransactionDate(t.date);
+                                    if (!txDate) return false;
+                                    return txDate.getFullYear() === 2025;
+                                });
+                                
+                                // If we have 2025 transactions but no 2024 transactions, we couldn't reach 2024
+                                if (transactionsIn2025.length > 0) {
+                                    runStats.validation.exportStatus = 'INCOMPLETE_NEWER_RANGE_ONLY';
+                                    runStats.alerts = runStats.alerts || [];
+                                    if (!runStats.alerts.includes('NEWER_RANGE_ONLY_2025')) {
+                                        runStats.alerts.push('NEWER_RANGE_ONLY_2025');
+                                    }
+                                    
+                                    const warningMsg = `Export incomplete: Could not reach target range (2024). Only found transactions from 2025 (${transactionsIn2025.length} rows). The extension scrolled ${scrollAttempts} times but could not reach older transactions. Please try Scroll & Capture mode or check if 2024 data is available on Credit Karma.`;
+                                    logUserWarning(warningMsg, {
+                                        targetYear: 2024,
+                                        foundYear: 2025,
+                                        foundCount: transactionsIn2025.length,
+                                        scrollAttempts: scrollAttempts
+                                    });
+                                    
+                                    runStats.notes = runStats.notes || [];
+                                    runStats.notes.push(`Could not reach 2024: Only found ${transactionsIn2025.length} transactions from 2025 after ${scrollAttempts} scrolls`);
+                                }
+                            }
+                        }
+                        
                         // Set final export status if not already set
                         if (!runStats.validation.exportStatus) {
                             // Check if there are any warnings
