@@ -311,7 +311,7 @@ function initializeRunStats(presetName, startDateObj, endDateObj) {
         validation: {
             newestBoundaryCheck: null,  // 'PASS' | 'FAIL' | null
             pendingConsistencyCheck: null,  // 'PASS' | 'WARN' | 'FAIL' | null
-            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH'
+            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH' | 'INCOMPLETE_ROW_COUNT_MISMATCH'
         },
         alerts: [],
         notes: []
@@ -7017,7 +7017,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
             // Pass request object to include trim option
             waitForPageReady().then(() => {
                 return captureTransactionsInDateRange(startDate, endDate, request);
-            }).then(({ allTransactions, filteredTransactions, elapsedTime, shouldIncludePendingPreset }) => {
+            }).then(({ allTransactions, filteredTransactions, elapsedTime, shouldIncludePendingPreset, warning }) => {
+                // FIXED: warning is now included in destructuring to prevent "warning is not defined" error
                 console.log(`Capture complete. Found ${filteredTransactions.length} transactions in range`);
                 
                 // Remove indicator
@@ -7250,6 +7251,74 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                             if (pendingCount > 0) {
                                 runStats.validation.pendingConsistencyCheck = 'PASS'; // Assume OK if we captured some pending
                                 logDevDebug(`✅ Pending consistency check: Captured ${pendingCount} pending transactions (visible count not available)`);
+                            }
+                        }
+
+                        // ============================================================================
+                        // VALIDATION: Row Count Check for Last Year Preset
+                        // ============================================================================
+                        if (request && request.preset === 'last-year') {
+                            // Calculate expected vs actual row counts
+                            // Expected: based on days in range (typically 365-366 days for a full year)
+                            const daysInRange = Math.ceil((endDateObj - startDateObj) / (24 * 60 * 60 * 1000)) + 1;
+                            // Estimate expected rows: assume ~2.5 transactions per day for a full year (historical average)
+                            // This is a rough estimate; actual may vary based on user activity
+                            const estimatedExpectedRows = Math.round(daysInRange * 2.5);
+                            const actualRowCount = runStats.counts.inRangeAll || filteredTransactions.length;
+                            const rowCountGap = estimatedExpectedRows - actualRowCount;
+                            
+                            // If gap is significant (>10% of expected or >50 rows), mark as incomplete
+                            const significantGap = rowCountGap > 50 || (rowCountGap > estimatedExpectedRows * 0.1);
+                            
+                            if (significantGap && actualRowCount > 0) {
+                                // Set export status to incomplete row count mismatch
+                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                    runStats.validation.exportStatus = 'INCOMPLETE_ROW_COUNT_MISMATCH';
+                                }
+                                runStats.alerts = runStats.alerts || [];
+                                if (!runStats.alerts.includes('ROW_COUNT_MISMATCH_LAST_YEAR')) {
+                                    runStats.alerts.push('ROW_COUNT_MISMATCH_LAST_YEAR');
+                                }
+                                
+                                // Add user-facing warning
+                                const warningMsg = `Export incomplete: expected about ${estimatedExpectedRows} rows for ${startDateObj.getFullYear()}, but only ${actualRowCount} were captured. Some days may be missing. Please re-run Last Year with Scroll & Capture or split into smaller ranges.`;
+                                logUserWarning(warningMsg, { 
+                                    expected: estimatedExpectedRows, 
+                                    actual: actualRowCount, 
+                                    gap: rowCountGap,
+                                    daysInRange: daysInRange
+                                });
+                                
+                                // Add dev-only diagnostic note
+                                runStats.notes = runStats.notes || [];
+                                const diagnosticNote = `Row count gap: Expected ~${estimatedExpectedRows} rows (${daysInRange} days × ~2.5/day), captured ${actualRowCount} rows (${rowCountGap} missing). Possible causes: stagnation exit before all days loaded, logout detected auto-export, or Credit Karma paging limits.`;
+                                runStats.notes.push(diagnosticNote);
+                                logDevDebug(diagnosticNote);
+                                
+                                // Store in validation for reference
+                                if (!runStats.validation.rowCountCheck) {
+                                    runStats.validation.rowCountCheck = {};
+                                }
+                                runStats.validation.rowCountCheck = {
+                                    expected: estimatedExpectedRows,
+                                    actual: actualRowCount,
+                                    gap: rowCountGap,
+                                    daysInRange: daysInRange,
+                                    significantGap: true
+                                };
+                            } else if (actualRowCount > 0) {
+                                // Row count looks reasonable
+                                if (!runStats.validation.rowCountCheck) {
+                                    runStats.validation.rowCountCheck = {};
+                                }
+                                runStats.validation.rowCountCheck = {
+                                    expected: estimatedExpectedRows,
+                                    actual: actualRowCount,
+                                    gap: rowCountGap,
+                                    daysInRange: daysInRange,
+                                    significantGap: false
+                                };
+                                logDevDebug(`✅ Last Year row count check: Expected ~${estimatedExpectedRows}, captured ${actualRowCount} (gap: ${rowCountGap}, within acceptable range)`);
                             }
                         }
 

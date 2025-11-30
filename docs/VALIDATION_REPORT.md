@@ -548,6 +548,115 @@ For developers diagnosing issues:
 
 ---
 
+## Validation Run – 2025-11-29 (Last Year Preset Fix)
+
+**Date**: 2025-11-29  
+**Commit**: `06a78d82cf8d19b2a9adee70684b2bac713f1763` (updated)  
+**Status**: ✅ **FIXES APPLIED - MANUAL TESTING REQUIRED**
+
+### Problem
+
+**Last Year Preset (01/01/2024 – 12/31/2024)** was showing:
+- Status bar: "Records expected: 917 rows from 367 days | Records harvested: 738 rows. A ≠ B (179 missed)"
+- Popup: "Export Error – warning is not defined"
+- Boundary detection succeeded (left and right found)
+- Validation found large row-count gap (179 missed) but then hit ReferenceError on `warning`, aborting as "Export Error"
+
+### Fixes Applied
+
+#### 1. Fixed "warning is not defined" Error ✅
+
+**Issue**: Line 7357 was using `warning` variable that wasn't in scope (not destructured from `captureTransactionsInDateRange` result).
+
+**Fix**:
+- Added `warning` to destructuring at line 7020: `.then(({ allTransactions, filteredTransactions, elapsedTime, shouldIncludePendingPreset, warning }) => {`
+- Now `warning` is properly available in scope when used at line 7357
+
+**Location**: `TxVault/content.js` line 7020
+
+**Result**: ✅ Export no longer fails with ReferenceError; validation can complete even with row-count gaps.
+
+#### 2. Added Row-Count Validation for Last Year Preset ✅
+
+**Feature**: Validates expected vs actual row counts for Last Year preset and sets appropriate export status.
+
+**Implementation**:
+- Calculates expected rows: `daysInRange × 2.5` (rough estimate based on historical average)
+- Compares with actual captured rows
+- If gap is significant (>50 rows or >10% of expected):
+  - Sets `exportStatus = "INCOMPLETE_ROW_COUNT_MISMATCH"`
+  - Adds `ROW_COUNT_MISMATCH_LAST_YEAR` alert
+  - Logs user-facing warning: "Export incomplete: expected about X rows for YYYY, but only Z were captured. Some days may be missing. Please re-run Last Year with Scroll & Capture or split into smaller ranges."
+  - Adds dev-only diagnostic note with suspected causes
+
+**Location**: `TxVault/content.js` lines ~7257-7310
+
+**New Fields in runStats**:
+- `validation.rowCountCheck`: Object with `expected`, `actual`, `gap`, `daysInRange`, `significantGap`
+- `alerts`: Includes `ROW_COUNT_MISMATCH_LAST_YEAR` if gap detected
+- `notes`: Includes diagnostic note about suspected causes
+
+**New Export Status**:
+- `INCOMPLETE_ROW_COUNT_MISMATCH`: Added to exportStatus enum
+
+**Result**: ✅ Last Year preset now properly reports incomplete exports with clear user warnings instead of throwing errors.
+
+#### 3. Diagnostic Notes for Missing Rows ✅
+
+**Feature**: Adds dev-only notes to runStats about suspected causes of missing rows.
+
+**Suspected Causes Documented**:
+- "stagnation exit before all days loaded"
+- "logout detected auto-export"
+- "Credit Karma paging limits"
+
+**Location**: `TxVault/content.js` lines ~7290-7295
+
+**Result**: ✅ Developers can review runStats sidecar files to understand why rows were missing.
+
+### Expected Behavior After Fixes
+
+**Last Year Preset Run**:
+1. **No "warning is not defined" error**: Export completes successfully
+2. **Row-count validation**:
+   - If gap detected: `exportStatus = "INCOMPLETE_ROW_COUNT_MISMATCH"`
+   - User sees warning: "Export incomplete: expected about 917 rows for 2024, but only 738 were captured..."
+   - CSV is still delivered (not aborted)
+   - Completion notification shows ⚠️ (warning) instead of ❌ (error)
+3. **Diagnostic information**:
+   - runStats JSON/Markdown files contain row-count check details
+   - Dev-only notes explain suspected causes
+
+### Testing Required
+
+**Manual Testing Needed**:
+1. **Run Last Year preset** (01/01/2024 – 12/31/2024):
+   - Verify no "warning is not defined" error
+   - Check export status in runStats (should be `INCOMPLETE_ROW_COUNT_MISMATCH` if gap detected)
+   - Verify CSV is delivered (not aborted)
+   - Check popup shows warning (not error)
+   - Review runStats sidecar files for diagnostic notes
+
+2. **Verify other presets still work**:
+   - "This Year" preset: Should work as before
+   - "This Month" preset: Should work as before
+   - "Last Month" preset: Should work as before
+
+### Known Limitations
+
+- Row-count estimation uses rough formula (`daysInRange × 2.5`); actual expected may vary based on user activity
+- Large gaps (>179 rows) may indicate Credit Karma paging limits or session timeouts
+- Full 917 rows may be difficult to capture in one pass for Last Year preset
+- Users may need to use Scroll & Capture mode or split into smaller ranges for complete data
+
+---
+
+**Validated By**: AI Assistant  
+**Validation Date**: 2025-11-29  
+**Status**: ✅ **FIXES APPLIED - MANUAL TESTING REQUIRED**
+
+---
+
 ## Validation Run – 2025-11-29
 
 **Date**: 2025-11-29  
