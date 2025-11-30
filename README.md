@@ -70,7 +70,7 @@ The extension UI below shows the date-range preset selector in action:
 
 ### Verified Results
 
-- ✅ **100% Accuracy** for Last Year (2024): Perfect match - 738 transactions
+- ✅ **100% Accuracy** for Last Year (2024): 738 transactions exported in ~11 minutes, validated PRISTINE against authoritative reference data
 - ✅ **100% Accuracy** for Last Month (October 2025): Perfect match - 133 transactions
 - ✅ **101.4% Accuracy** vs 3-Year Reference: 2,440 transactions captured
 - ✅ **107.6% Accuracy** vs 2-Year Reference: Comprehensive coverage
