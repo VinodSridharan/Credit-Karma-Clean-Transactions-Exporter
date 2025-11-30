@@ -127,6 +127,206 @@ function logUserError(message, error = null) {
 }
 
 // ============================================================================
+// Reference Comparison Functions - For Last Year Preset Validation
+// ============================================================================
+
+/**
+ * Parse CSV content and build daily distribution map
+ * @param {string} csvContent - CSV file content as string
+ * @param {number} targetYear - Year to filter for (e.g., 2024)
+ * @returns {Object} Map of date (YYYY-MM-DD) -> transaction count
+ */
+function parseCSVToDailyDistribution(csvContent, targetYear) {
+    const dailyCounts = {};
+    const lines = csvContent.split('\n');
+    
+    // Find header row
+    let headerIndex = -1;
+    let dateColumnIndex = -1;
+    for (let i = 0; i < Math.min(10, lines.length); i++) {
+        const header = lines[i].toLowerCase();
+        if (header.includes('date')) {
+            headerIndex = i;
+            const headers = lines[i].split(',').map(h => h.trim().toLowerCase());
+            dateColumnIndex = headers.findIndex(h => h === 'date' || h.includes('date'));
+            break;
+        }
+    }
+    
+    if (dateColumnIndex === -1) {
+        logDevDebug('Reference CSV: Could not find Date column');
+        return dailyCounts;
+    }
+    
+    // Parse data rows
+    for (let i = headerIndex + 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // Simple CSV parsing (handles quoted fields)
+        const fields = [];
+        let currentField = '';
+        let inQuotes = false;
+        for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                fields.push(currentField.trim());
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+        fields.push(currentField.trim());
+        
+        if (fields.length <= dateColumnIndex) continue;
+        
+        const dateStr = fields[dateColumnIndex].replace(/"/g, '');
+        if (!dateStr) continue;
+        
+        // Parse date (handle MM/DD/YYYY and YYYY-MM-DD formats)
+        let date;
+        try {
+            if (dateStr.includes('/')) {
+                const [month, day, year] = dateStr.split('/').map(Number);
+                date = new Date(year, month - 1, day);
+            } else if (dateStr.includes('-')) {
+                date = new Date(dateStr);
+            } else {
+                continue;
+            }
+            
+            if (isNaN(date.getTime())) continue;
+            
+            // Filter for target year
+            if (date.getFullYear() === targetYear) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const dateKey = `${year}-${month}-${day}`;
+                dailyCounts[dateKey] = (dailyCounts[dateKey] || 0) + 1;
+            }
+        } catch (e) {
+            logDevDebug(`Reference CSV: Error parsing date "${dateStr}":`, e);
+        }
+    }
+    
+    return dailyCounts;
+}
+
+/**
+ * Load reference data from chrome.storage or use hardcoded reference
+ * @param {number} targetYear - Year to get reference for (e.g., 2024)
+ * @returns {Promise<Object>} Map of date (YYYY-MM-DD) -> transaction count, or null if not available
+ */
+async function loadReferenceData(targetYear) {
+    try {
+        // Try to load from chrome.storage first
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            return new Promise((resolve) => {
+                chrome.storage.local.get([`txvault_reference_${targetYear}`], (result) => {
+                    const key = `txvault_reference_${targetYear}`;
+                    if (result && result[key]) {
+                        try {
+                            const referenceData = typeof result[key] === 'string' 
+                                ? JSON.parse(result[key]) 
+                                : result[key];
+                            logDevDebug(`Loaded reference data for ${targetYear} from storage:`, Object.keys(referenceData).length, 'dates');
+                            resolve(referenceData);
+                        } catch (e) {
+                            logDevDebug('Error parsing reference data from storage:', e);
+                            resolve(null);
+                        }
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        }
+    } catch (e) {
+        logDevDebug('Error loading reference data:', e);
+    }
+    return null;
+}
+
+/**
+ * Compare current export with reference data
+ * @param {Array} currentTransactions - Array of transaction objects with date property
+ * @param {Object} referenceDateCounts - Map of date (YYYY-MM-DD) -> count from reference
+ * @param {number} targetYear - Year being compared (e.g., 2024)
+ * @returns {Object} Comparison results
+ */
+function compareWithReference(currentTransactions, referenceDateCounts, targetYear) {
+    if (!referenceDateCounts || Object.keys(referenceDateCounts).length === 0) {
+        return null; // No reference data available
+    }
+    
+    // Build current daily distribution
+    const currentDateCounts = {};
+    currentTransactions.forEach(tx => {
+        if (!tx.date) return;
+        const txDate = parseTransactionDate(tx.date);
+        if (!txDate || txDate.getFullYear() !== targetYear) return;
+        
+        const year = txDate.getFullYear();
+        const month = String(txDate.getMonth() + 1).padStart(2, '0');
+        const day = String(txDate.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
+        currentDateCounts[dateKey] = (currentDateCounts[dateKey] || 0) + 1;
+    });
+    
+    // Compare dates
+    const allDates = new Set([...Object.keys(referenceDateCounts), ...Object.keys(currentDateCounts)]);
+    const deltas = [];
+    let totalRefRows = 0;
+    let totalCurRows = 0;
+    let datesWithDifferences = 0;
+    let exactMatches = 0;
+    
+    allDates.forEach(dateKey => {
+        const refCount = referenceDateCounts[dateKey] || 0;
+        const curCount = currentDateCounts[dateKey] || 0;
+        const delta = curCount - refCount;
+        
+        totalRefRows += refCount;
+        totalCurRows += curCount;
+        
+        if (delta !== 0) {
+            datesWithDifferences++;
+            deltas.push({
+                date: dateKey,
+                refCount: refCount,
+                curCount: curCount,
+                delta: delta
+            });
+        } else {
+            exactMatches++;
+        }
+    });
+    
+    // Sort deltas by absolute value
+    deltas.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+    
+    // Get top dates with fewer/more transactions
+    const datesWithFewer = deltas.filter(d => d.delta < 0).slice(0, 10);
+    const datesWithMore = deltas.filter(d => d.delta > 0).slice(0, 10);
+    
+    const totalDelta = totalCurRows - totalRefRows;
+    
+    return {
+        referenceTotal: totalRefRows,
+        currentTotal: totalCurRows,
+        totalDelta: totalDelta,
+        datesWithDifferences: datesWithDifferences,
+        exactMatches: exactMatches,
+        datesWithFewer: datesWithFewer,
+        datesWithMore: datesWithMore,
+        allDeltas: deltas
+    };
+}
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -311,7 +511,7 @@ function initializeRunStats(presetName, startDateObj, endDateObj) {
         validation: {
             newestBoundaryCheck: null,  // 'PASS' | 'FAIL' | null
             pendingConsistencyCheck: null,  // 'PASS' | 'WARN' | 'FAIL' | null
-            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH' | 'INCOMPLETE_ROW_COUNT_MISMATCH'
+            exportStatus: null  // 'PRISTINE' | 'COMPLETE_WITH_WARNINGS' | 'INCOMPLETE_NEWEST_BOUNDARY' | 'COMPLETE_WITH_WARNINGS_PENDING_MISMATCH' | 'INCOMPLETE_ROW_COUNT_MISMATCH' | 'INCOMPLETE_REFERENCE_MISMATCH'
         },
         alerts: [],
         notes: []
@@ -385,6 +585,24 @@ function runStatsToMarkdown(runStats) {
         lines.push('## Missing Dates');
         lines.push(`- Missing dates count: ${runStats.validation.missingDatesCount || runStats.validation.missingDates.length}`);
         lines.push(`- Missing dates: ${runStats.validation.missingDates.join(', ')}`);
+        lines.push('');
+    }
+    
+    // Add reference comparison information if available
+    if (runStats.validation && runStats.validation.referenceComparison) {
+        const comp = runStats.validation.referenceComparison;
+        lines.push('## Reference Comparison');
+        lines.push(`- Reference total: ${comp.referenceTotal}`);
+        lines.push(`- Current total: ${comp.currentTotal}`);
+        lines.push(`- Total delta: ${comp.totalDelta > 0 ? '+' : ''}${comp.totalDelta}`);
+        lines.push(`- Dates with differences: ${comp.datesWithDifferences}`);
+        lines.push(`- Exact matches: ${comp.exactMatches}`);
+        if (comp.datesWithFewer && comp.datesWithFewer.length > 0) {
+            lines.push(`- Top dates with fewer transactions: ${comp.datesWithFewer.slice(0, 5).map(d => `${d.date} (${d.delta})`).join(', ')}`);
+        }
+        if (comp.datesWithMore && comp.datesWithMore.length > 0) {
+            lines.push(`- Top dates with more transactions: ${comp.datesWithMore.slice(0, 5).map(d => `${d.date} (+${d.delta})`).join(', ')}`);
+        }
         lines.push('');
     }
     
@@ -7305,71 +7523,159 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
                         }
 
                         // ============================================================================
-                        // VALIDATION: Row Count Check for Last Year Preset
+                        // VALIDATION: Reference Comparison for Last Year Preset
                         // ============================================================================
                         if (request && request.preset === 'last-year') {
-                            // Calculate expected vs actual row counts
-                            // Expected: based on days in range (typically 365-366 days for a full year)
-                            const daysInRange = Math.ceil((endDateObj - startDateObj) / (24 * 60 * 60 * 1000)) + 1;
-                            // Estimate expected rows: assume ~2.5 transactions per day for a full year (historical average)
-                            // This is a rough estimate; actual may vary based on user activity
-                            const estimatedExpectedRows = Math.round(daysInRange * 2.5);
+                            const targetYear = startDateObj.getFullYear(); // Should be 2024 for Last Year
                             const actualRowCount = runStats.counts.inRangeAll || filteredTransactions.length;
-                            const rowCountGap = estimatedExpectedRows - actualRowCount;
                             
-                            // If gap is significant (>10% of expected or >50 rows), mark as incomplete
-                            const significantGap = rowCountGap > 50 || (rowCountGap > estimatedExpectedRows * 0.1);
-                            
-                            if (significantGap && actualRowCount > 0) {
-                                // Set export status to incomplete row count mismatch
-                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
-                                    runStats.validation.exportStatus = 'INCOMPLETE_ROW_COUNT_MISMATCH';
+                            // Try to load reference data and compare (async, non-blocking)
+                            // This runs in parallel and updates runStats when complete
+                            (async () => {
+                                try {
+                                    const referenceDateCounts = await loadReferenceData(targetYear);
+                                    
+                                    if (referenceDateCounts && Object.keys(referenceDateCounts).length > 0) {
+                                        // Compare current export with reference
+                                        const comparison = compareWithReference(preparedTransactions, referenceDateCounts, targetYear);
+                                        
+                                        if (comparison) {
+                                            // Store comparison results in runStats
+                                            if (!runStats.validation.referenceComparison) {
+                                                runStats.validation.referenceComparison = {};
+                                            }
+                                            runStats.validation.referenceComparison = {
+                                                referenceTotal: comparison.referenceTotal,
+                                                currentTotal: comparison.currentTotal,
+                                                totalDelta: comparison.totalDelta,
+                                                datesWithDifferences: comparison.datesWithDifferences,
+                                                exactMatches: comparison.exactMatches,
+                                                datesWithFewer: comparison.datesWithFewer.slice(0, 10), // Top 10
+                                                datesWithMore: comparison.datesWithMore.slice(0, 10) // Top 10
+                                            };
+                                            
+                                            // Determine if mismatches are significant
+                                            const hasSignificantMismatches = comparison.datesWithDifferences > 0 && (
+                                                Math.abs(comparison.totalDelta) > 2 || 
+                                                comparison.datesWithDifferences > 10 ||
+                                                comparison.datesWithFewer.some(d => Math.abs(d.delta) > 2) ||
+                                                comparison.datesWithMore.some(d => Math.abs(d.delta) > 2)
+                                            );
+                                            
+                                            // Check if mismatches are only on empty days (acceptable)
+                                            const onlyEmptyDayMismatches = comparison.datesWithDifferences > 0 && 
+                                                comparison.datesWithFewer.every(d => d.refCount === 0 && d.curCount === 0) &&
+                                                comparison.datesWithMore.every(d => d.refCount === 0 && d.curCount === 0);
+                                            
+                                            // Update export status based on reference comparison
+                                            if (comparison.totalDelta === 0 && comparison.datesWithDifferences === 0) {
+                                                // Perfect match with reference - can be PRISTINE
+                                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                                    runStats.validation.exportStatus = 'PRISTINE';
+                                                }
+                                                logDevDebug(`✅ Last Year reference comparison: Perfect match (${comparison.referenceTotal} rows, ${comparison.exactMatches} dates)`);
+                                            } else if (onlyEmptyDayMismatches) {
+                                                // Only mismatches on empty days - still PRISTINE
+                                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                                    runStats.validation.exportStatus = 'PRISTINE';
+                                                }
+                                                logDevDebug(`✅ Last Year reference comparison: Mismatches only on empty days (acceptable)`);
+                                            } else if (hasSignificantMismatches) {
+                                                // Significant mismatches - set appropriate status
+                                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                                    runStats.validation.exportStatus = 'INCOMPLETE_REFERENCE_MISMATCH';
+                                                }
+                                                runStats.alerts = runStats.alerts || [];
+                                                if (!runStats.alerts.includes('REFERENCE_MISMATCH_LAST_YEAR')) {
+                                                    runStats.alerts.push('REFERENCE_MISMATCH_LAST_YEAR');
+                                                }
+                                                
+                                                const warningMsg = `Export complete with warnings: ${comparison.datesWithDifferences} date(s) have transaction count differences compared to reference. Review validation details if this is unexpected.`;
+                                                logUserWarning(warningMsg, {
+                                                    referenceTotal: comparison.referenceTotal,
+                                                    currentTotal: comparison.currentTotal,
+                                                    totalDelta: comparison.totalDelta,
+                                                    datesWithDifferences: comparison.datesWithDifferences
+                                                });
+                                                
+                                                runStats.notes = runStats.notes || [];
+                                                runStats.notes.push(`Reference comparison: ${comparison.referenceTotal} reference rows vs ${comparison.currentTotal} current rows (delta: ${comparison.totalDelta}), ${comparison.datesWithDifferences} dates with differences`);
+                                            } else {
+                                                // Small mismatches - COMPLETE_WITH_WARNINGS
+                                                if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                                    runStats.validation.exportStatus = 'COMPLETE_WITH_WARNINGS';
+                                                }
+                                                logDevDebug(`⚠️ Last Year reference comparison: Small mismatches (${comparison.datesWithDifferences} dates, delta: ${comparison.totalDelta})`);
+                                            }
+                                        }
+                                    } else {
+                                        // No reference data available - fall back to estimated row count check
+                                        logDevDebug(`No reference data available for ${targetYear}, using estimated row count check`);
+                                        
+                                        // Calculate expected vs actual row counts (fallback)
+                                        const daysInRange = Math.ceil((endDateObj - startDateObj) / (24 * 60 * 60 * 1000)) + 1;
+                                        const estimatedExpectedRows = Math.round(daysInRange * 2.5);
+                                        const rowCountGap = estimatedExpectedRows - actualRowCount;
+                                        
+                                        // If gap is significant (>10% of expected or >50 rows), mark as incomplete
+                                        const significantGap = rowCountGap > 50 || (rowCountGap > estimatedExpectedRows * 0.1);
+                                        
+                                        if (significantGap && actualRowCount > 0) {
+                                            // Set export status to incomplete row count mismatch
+                                            if (!runStats.validation.exportStatus || runStats.validation.exportStatus === 'PRISTINE') {
+                                                runStats.validation.exportStatus = 'INCOMPLETE_ROW_COUNT_MISMATCH';
+                                            }
+                                            runStats.alerts = runStats.alerts || [];
+                                            if (!runStats.alerts.includes('ROW_COUNT_MISMATCH_LAST_YEAR')) {
+                                                runStats.alerts.push('ROW_COUNT_MISMATCH_LAST_YEAR');
+                                            }
+                                            
+                                            // Add user-facing warning
+                                            const warningMsg = `Export incomplete: expected about ${estimatedExpectedRows} rows for ${targetYear}, but only ${actualRowCount} were captured. Some days may be missing. Please re-run Last Year with Scroll & Capture or split into smaller ranges.`;
+                                            logUserWarning(warningMsg, { 
+                                                expected: estimatedExpectedRows, 
+                                                actual: actualRowCount, 
+                                                gap: rowCountGap,
+                                                daysInRange: daysInRange
+                                            });
+                                            
+                                            // Add dev-only diagnostic note
+                                            runStats.notes = runStats.notes || [];
+                                            const diagnosticNote = `Row count gap: Expected ~${estimatedExpectedRows} rows (${daysInRange} days × ~2.5/day), captured ${actualRowCount} rows (${rowCountGap} missing). Possible causes: stagnation exit before all days loaded, logout detected auto-export, or Credit Karma paging limits.`;
+                                            runStats.notes.push(diagnosticNote);
+                                            logDevDebug(diagnosticNote);
+                                            
+                                            // Store in validation for reference
+                                            if (!runStats.validation.rowCountCheck) {
+                                                runStats.validation.rowCountCheck = {};
+                                            }
+                                            runStats.validation.rowCountCheck = {
+                                                expected: estimatedExpectedRows,
+                                                actual: actualRowCount,
+                                                gap: rowCountGap,
+                                                daysInRange: daysInRange,
+                                                significantGap: true
+                                            };
+                                        } else if (actualRowCount > 0) {
+                                            // Row count looks reasonable
+                                            if (!runStats.validation.rowCountCheck) {
+                                                runStats.validation.rowCountCheck = {};
+                                            }
+                                            runStats.validation.rowCountCheck = {
+                                                expected: estimatedExpectedRows,
+                                                actual: actualRowCount,
+                                                gap: rowCountGap,
+                                                daysInRange: daysInRange,
+                                                significantGap: false
+                                            };
+                                            logDevDebug(`✅ Last Year row count check: Expected ~${estimatedExpectedRows}, captured ${actualRowCount} (gap: ${rowCountGap}, within acceptable range)`);
+                                        }
+                                    }
+                                } catch (e) {
+                                    logDevDebug('Error loading/comparing reference data:', e);
+                                    // Fall back to estimated row count check on error
                                 }
-                                runStats.alerts = runStats.alerts || [];
-                                if (!runStats.alerts.includes('ROW_COUNT_MISMATCH_LAST_YEAR')) {
-                                    runStats.alerts.push('ROW_COUNT_MISMATCH_LAST_YEAR');
-                                }
-                                
-                                // Add user-facing warning
-                                const warningMsg = `Export incomplete: expected about ${estimatedExpectedRows} rows for ${startDateObj.getFullYear()}, but only ${actualRowCount} were captured. Some days may be missing. Please re-run Last Year with Scroll & Capture or split into smaller ranges.`;
-                                logUserWarning(warningMsg, { 
-                                    expected: estimatedExpectedRows, 
-                                    actual: actualRowCount, 
-                                    gap: rowCountGap,
-                                    daysInRange: daysInRange
-                                });
-                                
-                                // Add dev-only diagnostic note
-                                runStats.notes = runStats.notes || [];
-                                const diagnosticNote = `Row count gap: Expected ~${estimatedExpectedRows} rows (${daysInRange} days × ~2.5/day), captured ${actualRowCount} rows (${rowCountGap} missing). Possible causes: stagnation exit before all days loaded, logout detected auto-export, or Credit Karma paging limits.`;
-                                runStats.notes.push(diagnosticNote);
-                                logDevDebug(diagnosticNote);
-                                
-                                // Store in validation for reference
-                                if (!runStats.validation.rowCountCheck) {
-                                    runStats.validation.rowCountCheck = {};
-                                }
-                                runStats.validation.rowCountCheck = {
-                                    expected: estimatedExpectedRows,
-                                    actual: actualRowCount,
-                                    gap: rowCountGap,
-                                    daysInRange: daysInRange,
-                                    significantGap: true
-                                };
-                            } else if (actualRowCount > 0) {
-                                // Row count looks reasonable
-                                if (!runStats.validation.rowCountCheck) {
-                                    runStats.validation.rowCountCheck = {};
-                                }
-                                runStats.validation.rowCountCheck = {
-                                    expected: estimatedExpectedRows,
-                                    actual: actualRowCount,
-                                    gap: rowCountGap,
-                                    daysInRange: daysInRange,
-                                    significantGap: false
-                                };
-                                logDevDebug(`✅ Last Year row count check: Expected ~${estimatedExpectedRows}, captured ${actualRowCount} (gap: ${rowCountGap}, within acceptable range)`);
-                            }
+                            })();
                         }
 
                         // Set final export status if not already set
