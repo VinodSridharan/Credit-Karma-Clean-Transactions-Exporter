@@ -10,6 +10,8 @@
 
 For a simple tour of how this repo is organized, see [ABOUT_THIS_REPOSITORY.md](./ABOUT_THIS_REPOSITORY.md).
 
+For a deeper view of latest changes, lessons learned, and major themes in this project, see the [TxVault project review](./TxVault/Documentation/PROJECT_REVIEW.md).
+
 ---
 
 ## 🚀 About TxVault Exporter
@@ -677,3 +679,4 @@ Free to use, modify, and distribute. Perfect for personal projects, startups, an
 </div>
 
 ---
+
