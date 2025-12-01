@@ -44,10 +44,23 @@ This repo is split into a few main areas:
 
 These folders hold the actual manifest, content scripts, popup UI, and the screenshots that appear in the main README.
 
+### Project review
+
+For a deeper narrative of how this project was designed, tested, and refined, see:
+
+- [TxVault project review](./TxVault/Documentation/PROJECT_REVIEW.md)
+
+This document is written for reviewers, hiring managers, and collaborators. It summarizes:
+
+- The latest changes and why they were made.
+- Key lessons learned during development and validation.
+- Major themes such as reliability, data quality, browser constraints, and QC standards.
+
 ### Documentation folder
 
 - `docs/SUCCESS_STORIES.md` – short stories that show how TxVault helped in real cases.  
 - `docs/VALIDATION_REPORT.md` – high‑level notes on how key presets were tested and what results they produced.  
+- `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md` – analysis of SonarCloud integration issues and resolution steps.  
 - `docs/internal/` – many deeper internal notes and process documents. This folder is private and ignored in the public view.
 
 ---
@@ -70,6 +83,25 @@ This split keeps the GitHub view clean for reviewers and recruiters, while still
 
 ---
 
+## Code Quality and Security
+
+### SonarCloud Integration
+
+This repository uses SonarCloud for automated code quality and security analysis:
+
+- **Workflow:** `.github/workflows/sonarcloud.yml` runs analysis on every push to `main` and on pull requests
+- **Configuration:** `sonar-project.properties` defines source directories (`TxVault/`, `TxVault-Basic/`) and exclusions
+- **Status:** Workflow runs successfully, but SonarCloud dashboard currently shows 0 Lines of Code
+- **Resolution:** Project recreated in SonarCloud, configuration simplified, and support ticket filed
+- **Details:** See `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md` for complete analysis
+
+### Security Documentation
+
+- **Security Notes:** See `SECURITY_NOTES.md` for permissions analysis, data handling, and security controls
+- **Privacy:** See `PRIVACY.md` for data privacy details
+
+---
+
 ## How to read this repository
 
 If you are new here and just want the basics:
@@ -83,5 +115,28 @@ If you are a developer, you can then:
 
 - Load `TxVault/` as an unpacked extension in Chrome.  
 - Use `CONTRIBUTING.md` for testing steps and basic guidance.  
+- Review `SECURITY_NOTES.md` for security and permissions information.  
 - Follow the normal Git workflow against this cleaned, public‑ready layout.
+
+---
+
+## Lessons Learned and Process Improvements
+
+### SonarCloud Integration Experience
+
+During the integration of SonarCloud code quality analysis, several process improvements were identified:
+
+**Key Learnings:**
+- Start with minimal configuration (`sonar.sources=.`) before adding exclusions
+- Make incremental changes and verify each step with workflow logs
+- Know when to stop tweaking configs and escalate to vendor support
+- Document all configuration attempts and evidence before contacting support
+
+**Proposed Improvements:**
+- Create quality-tool onboarding checklist template
+- Develop standard SonarCloud configuration template for JavaScript projects
+- Establish process for documenting and tracking support tickets
+- Add automated verification to ensure analysis produces results
+
+For detailed root cause analysis, see `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md`.
 

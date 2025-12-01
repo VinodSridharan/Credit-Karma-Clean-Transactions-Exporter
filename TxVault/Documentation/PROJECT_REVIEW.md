@@ -1,8 +1,8 @@
 # 📋 TxVault Exporter - Project Review
 
-**Last Updated:** 2025-11-22 21:15:00  
-**Version:** 3.0.4 (Enhanced)  
-**Status:** ✅ Production Ready  
+**Last Updated:** 2025-11-27 00:00:00  
+**Version:** 4.2.2 (Last Month QC Vaulted)  
+**Status:** ✅ Last Month QC’d & Vaulted • Other presets under active enhancement  
 **Document Owner:** Project Plan & Review Resource
 
 ---
@@ -212,6 +212,31 @@ This section documents major capabilities added throughout the project lifecycle
 
 ---
 
+### 2025-11-26: Survey Scan Strategy & LastMonth‑Pristine Direction
+
+**Context:** A later Last Month run reached the expected **133 posted October transactions** but required **21 minutes and 247 scrolls**, overshooting into July 2023 and then returning to November 2025 before finally stopping at the September boundary. This validated the robustness of the stop criteria but exposed logout‑risk and unnecessary deep scrolling for a single‑month preset.
+
+**Key Decisions:**
+- Treat any very deep first pass as a **survey scan**, not the standard Last Month path:
+  - Harvest **all transactions** encountered as fast as possible, without per‑scroll in‑range/out‑of‑range decisions.
+  - Build a `survey_statistics` CSV that aggregates **per‑date** and **per‑month** record counts (posted vs pending) so later passes can see how additional scrolls changed coverage.
+- Keep the **MVP preset output** focused and pristine:
+  - LastMonth‑Pristine export remains **posted‑only**, exact month range (e.g., Oct 1–31), with duplicate removal and strict date validation applied **at export time**.
+  - Pending transactions in the band immediately preceding the first posted date are still harvested during the scan but excluded from the Last Month CSV.
+- Introduce a **post‑survey upsell popup** in the UI:
+  - After the MVP run completes, show: “Survey has observed X records up to boundary date Y. Do you want Last 3 Months / Last 6 Months / Last Year / Last 2 Years?” with clickable buttons.
+  - Stay within the **already reached boundaries** where possible; show an explicit **logout‑risk warning** for long ranges (especially Last 2 Years).
+
+**LastMonth‑Pristine Direction (Priority 1):**
+- Design a **tight, single‑month scroll strategy** that:
+  - Reaches the previous‑month band quickly and **does not drift** far beyond it (no mid‑August or 2023 excursions for an October target).
+  - Continues to harvest everything it passes (including pending), but defers **all range filtering and posted‑only logic** to the export/filter phase.
+  - Uses posted‑only coverage, complete date coverage, and a limited buffer below the month as stop criteria, with hard guards that block dangerously deep scrolling.
+
+**Impact:** Aligns the project toward a **safe, fast LastMonth‑Pristine preset** and promotes the long 21‑minute scroll runs into a structured **survey + upsell** workflow instead of letting them be the default behavior.
+
+---
+
 ## 🔧 Technical Architecture
 
 ### Core Components
@@ -369,7 +394,42 @@ Code is **production-ready** from functional and syntax perspective. Demonstrate
 
 ---
 
-**Document Version:** 1.3  
-**Last Review:** 2025-11-22 21:15:00  
-**Next Review:** After LastMonth preset test validation
+## 🔍 Code Quality Tools Integration
+
+### SonarCloud Integration (2025-12-01)
+
+**Status:** Configured, analysis running via GitHub Actions
+
+**Implementation:**
+- GitHub Actions workflow (`.github/workflows/sonarcloud.yml`) runs on every push to `main` and pull requests
+- Configuration file (`sonar-project.properties`) defines source directories and exclusions
+- Project key: `VinodSridharan_Credit-Karma-Clean-Transactions-Exporter`
+- Organization: `vinodsridharan`
+
+**Current Issue:**
+- Workflow runs successfully and uploads analysis to SonarCloud
+- SonarCloud dashboard shows 0 Lines of Code despite successful runs
+- Project recreated in SonarCloud, configuration simplified
+- Support ticket filed with SonarCloud
+
+**Resolution Steps Taken:**
+1. Multiple configuration iterations (source directories, inclusions, exclusions)
+2. Project deletion and re-import from GitHub
+3. Configuration simplification to minimal viable setup
+4. Support ticket filed with detailed evidence
+
+**Documentation:**
+- Root cause analysis: `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md`
+- Security notes: `SECURITY_NOTES.md` (includes SonarCloud status)
+
+**Next Steps:**
+- Await SonarCloud support response
+- Update configuration based on support recommendations
+- Verify analysis produces non-zero LOC and file listings
+
+---
+
+**Document Version:** 1.4  
+**Last Review:** 2025-12-01  
+**Next Review:** After SonarCloud integration resolution
 
