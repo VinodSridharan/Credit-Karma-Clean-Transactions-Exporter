@@ -1,0 +1,29 @@
+{
+  "name": "october-133-version-polished",
+  "version": "1.0.0",
+  "description": "[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)\r [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)\r [![Version](https://img.shields.io/badge/version-4.2.1-blue.svg)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)\r [![Technology](https://img.shields.io/badge/Technology-JavaScript-yellow)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)\r [![Status](https://img.shields.io/badge/status-Production%20Ready-brightgreen.svg)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)",
+  "main": "MANUAL_RECOVERY_SCRIPT.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint \"TxVault/**/*.js\" \"TxVault-Basic/**/*.js\"",
+    "lint:fix": "eslint \"TxVault/**/*.js\" \"TxVault-Basic/**/*.js\" --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/issues"
+  },
+  "homepage": "https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter#readme",
+  "devDependencies": {
+    "eslint": "^9.39.1"
+  }
+}

@@ -23,12 +23,64 @@ function showStatus(message, type = 'info') {
     statusEl.textContent = message;
     statusEl.className = `status-message ${type}`;
     statusEl.style.display = 'block';
-    
+
     // Auto-hide after 5 seconds for success/info, 10 seconds for errors
     const timeout = type === 'error' ? 10000 : 5000;
     setTimeout(() => {
         statusEl.style.display = 'none';
     }, timeout);
+}
+
+/**
+ * Enable/disable Export button with optional reason tooltip
+ */
+function setExportEnabled(enabled, reason) {
+    const exportBtn = document.getElementById('export-btn');
+    if (!exportBtn) return;
+    exportBtn.disabled = !enabled;
+    if (!enabled && reason) {
+        exportBtn.title = reason;
+    } else {
+        exportBtn.removeAttribute('title');
+    }
+}
+
+/**
+ * Initialize first-run legal notice and consent
+ */
+function initializeFirstRunNotice() {
+    const panel = document.getElementById('first-run-panel');
+    const checkbox = document.getElementById('first-run-checkbox');
+    const acceptBtn = document.getElementById('first-run-accept-btn');
+    const STORAGE_KEY = 'txvault_hasAcceptedNotice';
+
+    if (!panel || !checkbox || !acceptBtn || !chrome || !chrome.storage || !chrome.storage.local) {
+        return;
+    }
+
+    // Check stored consent flag
+    chrome.storage.local.get([STORAGE_KEY], (result) => {
+        const hasAccepted = result && result[STORAGE_KEY] === true;
+        if (hasAccepted) {
+            panel.style.display = 'none';
+            setExportEnabled(true);
+        } else {
+            panel.style.display = 'block';
+            setExportEnabled(false, 'Please review and accept the first-time notice before exporting.');
+        }
+    });
+
+    acceptBtn.addEventListener('click', () => {
+        if (!checkbox.checked) {
+            showStatus('Please confirm that you understand the notice before continuing.', 'error');
+            return;
+        }
+        chrome.storage.local.set({ [STORAGE_KEY]: true }, () => {
+            panel.style.display = 'none';
+            setExportEnabled(true);
+            showStatus('Thank you. You can now use TxVault Exporter.', 'success');
+        });
+    });
 }
 
 /**
@@ -39,34 +91,34 @@ function validateDateRange(startDate, endDate) {
         showStatus('Please select both start and end dates.', 'error');
         return false;
     }
-    
+
     const start = new Date(startDate);
     const end = new Date(endDate);
     const today = new Date();
     today.setHours(23, 59, 59, 999); // End of today
-    
+
     // Allow up to 2 days in the future for pending transactions (This Month preset)
     const maxFutureDate = new Date(today);
     maxFutureDate.setDate(maxFutureDate.getDate() + 2);
     maxFutureDate.setHours(23, 59, 59, 999);
-    
+
     if (start > end) {
         showStatus('Start date must be before or equal to end date.', 'error');
         return false;
     }
-    
+
     if (end > maxFutureDate) {
         showStatus('End date cannot be more than 2 days in the future (for pending transactions).', 'error');
         return false;
     }
-    
+
     // Check if range is too large (more than 5 years)
     const yearsDiff = (end - start) / (1000 * 60 * 60 * 24 * 365);
     if (yearsDiff > 5) {
         showStatus('Date range cannot exceed 5 years. Please select a smaller range.', 'error');
         return false;
     }
-    
+
     return true;
 }
 
@@ -77,12 +129,12 @@ function validateCSVTypes() {
     const allTransactionsChecked = document.getElementById('allTransactionsCheckbox').checked;
     const incomeChecked = document.getElementById('incomeCheckbox').checked;
     const expensesChecked = document.getElementById('expensesCheckbox').checked;
-    
+
     if (!allTransactionsChecked && !incomeChecked && !expensesChecked) {
         showStatus('Please select at least one CSV type to export.', 'error');
         return false;
     }
-    
+
     return true;
 }
 
@@ -94,54 +146,108 @@ function setDatePreset(preset) {
     document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Add active class to clicked button
     const clickedBtn = document.querySelector(`[data-preset="${preset}"]`);
     if (clickedBtn) {
         clickedBtn.classList.add('active');
     }
-    
+
     const today = new Date();
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
-    
+
     let startDate, endDate;
-    
-    switch(preset) {
-        case 'scroll-capture':
-            // Scroll & Capture mode: Captures everything visible as you scroll
-            // Dates don't matter - no filtering, but set to current month for display
-            startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month
+
+    switch (preset) {
+        case 'scroll-capture': {
+            // Scroll & Capture mode: Captures everything visible as you scroll.
+            // Dates don't matter for filtering, but set current month for display.
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
             endDate = new Date(today);
-            endDate.setHours(23, 59, 59, 999); // End of today
+            endDate.setHours(23, 59, 59, 999);
             break;
-            
-        case 'last-month':
-            // Last month: First day to last day (exact month boundaries)
+        }
+        case 'last-month': {
+            // Last Month: First day to last day of the previous calendar month.
             const lastMonth = today.getMonth() - 1;
             const lastMonthYear = lastMonth < 0 ? today.getFullYear() - 1 : today.getFullYear();
-            const lastDayOfLastMonth = new Date(lastMonthYear, lastMonth + 1, 0); // Last day of last month
-            
-            startDate = new Date(lastMonthYear, lastMonth, 1);
+            const monthIndex = lastMonth < 0 ? 11 : lastMonth;
+            const lastDayOfLastMonth = new Date(lastMonthYear, monthIndex + 1, 0);
+
+            startDate = new Date(lastMonthYear, monthIndex, 1);
             endDate = new Date(lastDayOfLastMonth);
-            endDate.setHours(23, 59, 59, 999); // End of last day
+            endDate.setHours(23, 59, 59, 999);
             break;
-            
-        default:
+        }
+        case 'this-week': {
+            // This Week: Sunday–Saturday of the current week.
+            // Use system locale's notion of Sunday as day 0.
+            const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+            const sunday = new Date(today);
+            sunday.setDate(today.getDate() - dayOfWeek);
+            sunday.setHours(0, 0, 0, 0);
+
+            const saturday = new Date(sunday);
+            saturday.setDate(sunday.getDate() + 6);
+            saturday.setHours(23, 59, 59, 999);
+
+            startDate = sunday;
+            endDate = saturday;
+            break;
+        }
+        case 'this-month': {
+            // This Month: First day of current month through today.
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+        }
+        case 'this-year': {
+            // This Year: January 1 of current year through today.
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+        }
+        case 'last-year': {
+            // Last Year: Full previous calendar year, Jan 1 – Dec 31.
+            const lastYear = today.getFullYear() - 1;
+            startDate = new Date(lastYear, 0, 1);
+            endDate = new Date(lastYear, 11, 31);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+        }
+        case 'last-5-years': {
+            // Last 5 Years: From Jan 1 of (currentYear - 5) through Dec 31 of (currentYear - 1).
+            const currentYear = today.getFullYear();
+            const startYear = currentYear - 5;
+            const endYear = currentYear - 1;
+
+            startDate = new Date(startYear, 0, 1);
+            endDate = new Date(endYear, 11, 31);
+            endDate.setHours(23, 59, 59, 999);
+            break;
+        }
+        default: {
             return;
+        }
     }
-    
+
     startDateInput.value = formatDateForInput(startDate);
     endDateInput.value = formatDateForInput(endDate);
-    
-    // Store selected preset
+
+    // Store selected preset (used by content script via request.preset)
     window.selectedPreset = preset;
-    
-    showStatus(`Date range set to ${preset.replace(/-/g, ' ')} (exact month boundaries).`, 'success');
+
+    showStatus(`Date range set to ${preset.replace(/-/g, ' ')}.`, 'success');
 }
 
 // Event Listeners
 // ============================================================================
+
+// Initialize first-run notice and export gating
+initializeFirstRunNotice();
 
 // Date preset buttons
 document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -153,35 +259,35 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 
 // Export button
 document.getElementById('export-btn').addEventListener('click', () => {
-    let startDate = document.getElementById('start-date').value;
-    let endDate = document.getElementById('end-date').value;
-    
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+
     // Validate inputs
     if (!validateDateRange(startDate, endDate)) {
         return;
     }
-    
+
     if (!validateCSVTypes()) {
         return;
     }
-    
+
     // Calculate original date range (remove buffer if it was added by preset)
     // For presets, we need to extract the original range before buffer
     // But for manual dates, use as-is
     // Note: The buffer helps with scrolling, but we'll filter to exact range in content.js
-    
+
     // Get checkbox states
     const allTransactionsChecked = document.getElementById('allTransactionsCheckbox').checked;
     const incomeChecked = document.getElementById('incomeCheckbox').checked;
     const expensesChecked = document.getElementById('expensesCheckbox').checked;
-    
+
     // Show loading state
     const exportBtn = document.getElementById('export-btn');
     const originalText = exportBtn.textContent;
     exportBtn.textContent = 'Processing...';
     exportBtn.disabled = true;
     showStatus('Starting export... This may take a few minutes.', 'info');
-    
+
     // Check if we're on the Credit Karma transactions page
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         if (!tabs[0]) {
@@ -190,19 +296,19 @@ document.getElementById('export-btn').addEventListener('click', () => {
             exportBtn.disabled = false;
             return;
         }
-        
+
         const url = tabs[0].url;
         // More flexible check - also check if it's any creditkarma.com page
         const isOnCreditKarma = url && url.includes('creditkarma.com');
         const isOnTransactionsPage = url && (url.includes('/networth/transactions') || url.includes('/transactions'));
-        
+
         if (!isOnCreditKarma) {
             showStatus('Please navigate to Credit Karma first, then try exporting again.', 'error');
             exportBtn.textContent = originalText;
             exportBtn.disabled = false;
             return;
         }
-        
+
         if (!isOnTransactionsPage) {
             // Navigate to transactions page in the same tab
             chrome.tabs.update(tabs[0].id, {
@@ -214,15 +320,15 @@ document.getElementById('export-btn').addEventListener('click', () => {
             });
             return;
         }
-        
+
         // Get trim option
         const trimToExactMonth = document.getElementById('trimToExactMonth').checked;
-        
+
         // IMPROVED: Function to ensure content script is loaded before sending message
         const ensureContentScriptAndSend = async (retryCount = 0) => {
             const maxRetries = 2; // Quick retry - only 2 attempts max
             const baseDelay = 300; // Quick base delay
-            
+
             try {
                 // IMPROVED: Better injection and verification mechanism
                 // Step 1: Check if script is already loaded by checking for global marker
@@ -250,7 +356,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     console.log('Could not check if script is loaded:', checkError.message);
                     // Continue anyway - might still be loading via manifest
                 }
-                
+
                 // Step 2: Inject script if not already loaded
                 if (!scriptReady) {
                     try {
@@ -261,7 +367,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
                         console.log('Content script injection attempted');
                         // Wait a bit for injection to complete
                         await new Promise(resolve => setTimeout(resolve, 500));
-                        
+
                         // Verify script was injected by checking again
                         try {
                             const verifyResult = await chrome.scripting.executeScript({
@@ -291,21 +397,21 @@ document.getElementById('export-btn').addEventListener('click', () => {
                         }
                     }
                 }
-                
+
                 // Step 3: Wait for script to fully initialize (quick wait)
-                const waitTime = scriptReady 
+                const waitTime = scriptReady
                     ? baseDelay + (retryCount * 100)  // Quick wait if already loaded
                     : baseDelay + (retryCount * 200) + 500; // Quick wait if just injected
                 console.log(`Waiting ${waitTime}ms for content script to initialize (ready: ${scriptReady})...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
-                
+
                 // Step 4: Final verification before sending message
                 // FIXED: Don't block on verification - manifest script might be ready even if check fails
                 try {
                     const finalCheck = await chrome.scripting.executeScript({
                         target: { tabId: tabs[0].id },
                         func: () => {
-                            return typeof window.__ckExportListenerAttached !== 'undefined' || 
+                            return typeof window.__ckExportListenerAttached !== 'undefined' ||
                                    typeof window.__ckExportScriptLoaded !== 'undefined';
                         }
                     });
@@ -324,14 +430,14 @@ document.getElementById('export-btn').addEventListener('click', () => {
                         scriptReady = true; // Assume ready after multiple attempts
                     }
                 }
-                
+
                 // Get selected preset
                 const selectedPreset = window.selectedPreset || null;
-                
+
                 // Now try to send the message
                 chrome.tabs.sendMessage(tabs[0].id, {
-                    action: 'captureTransactions', 
-                    startDate, 
+                    action: 'captureTransactions',
+                    startDate,
                     endDate,
                     preset: selectedPreset, // Pass preset to content script
                     trimToExactMonth: trimToExactMonth,
@@ -341,58 +447,61 @@ document.getElementById('export-btn').addEventListener('click', () => {
                         expenses: expensesChecked
                     }
                 }, (response) => {
-                // Reset button after a delay
-                setTimeout(() => {
-                    exportBtn.textContent = originalText;
-                    exportBtn.disabled = false;
-                }, 2000);
-                
-                // Check for Chrome runtime errors first
-                if (chrome.runtime.lastError) {
-                    console.error('Chrome runtime error:', chrome.runtime.lastError);
-                    
-                    // Safely extract error message
-                    let errorMsg = 'Unknown error';
-                    if (typeof chrome.runtime.lastError === 'string') {
-                        errorMsg = chrome.runtime.lastError;
-                    } else if (chrome.runtime.lastError.message) {
-                        errorMsg = chrome.runtime.lastError.message;
-                    } else if (typeof chrome.runtime.lastError === 'object') {
-                        // Try to stringify if it's an object
-                        try {
-                            errorMsg = JSON.stringify(chrome.runtime.lastError);
-                        } catch (e) {
-                            errorMsg = 'Chrome runtime error occurred';
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        exportBtn.textContent = originalText;
+                        exportBtn.disabled = false;
+                    }, 2000);
+
+                    // Check for Chrome runtime errors first
+                    if (chrome.runtime.lastError) {
+                        console.error('[EXPORT START ERROR] Chrome runtime error while sending captureTransactions:', chrome.runtime.lastError);
+
+                        // Safely extract error message
+                        let errorMsg = 'Unknown error';
+                        if (typeof chrome.runtime.lastError === 'string') {
+                            errorMsg = chrome.runtime.lastError;
+                        } else if (chrome.runtime.lastError.message) {
+                            errorMsg = chrome.runtime.lastError.message;
+                        } else if (typeof chrome.runtime.lastError === 'object') {
+                            // Try to stringify if it's an object
+                            try {
+                                errorMsg = JSON.stringify(chrome.runtime.lastError);
+                            } catch (e) {
+                                errorMsg = 'Chrome runtime error occurred';
+                            }
                         }
-                    }
-                    
-                    // Check if it's a "receiving end doesn't exist" error (content script not loaded)
-                        if (errorMsg.includes("receiving end") || errorMsg.includes("Could not establish") || errorMsg.includes("message port closed") || errorMsg.includes("Extension context invalidated")) {
+
+                        // Check if it's a "receiving end doesn't exist" error (content script not loaded)
+                        if (errorMsg.includes('receiving end') || errorMsg.includes('Could not establish') || errorMsg.includes('message port closed') || errorMsg.includes('Extension context invalidated')) {
                             // Retry if we haven't exceeded max retries (quick retry)
                             if (retryCount < maxRetries) {
                                 const nextRetry = retryCount + 1;
                                 const retryWaitTime = baseDelay + (nextRetry * 200);
                                 console.log(`Content script not ready (attempt ${nextRetry}/${maxRetries}), retrying in ${retryWaitTime}ms...`);
                                 showStatus(`Loading... (${nextRetry}/${maxRetries})`, 'info');
-                                
+
                                 // Update button to show it's retrying (simpler message)
-                                exportBtn.textContent = `Loading...`;
-                                
+                                exportBtn.textContent = 'Loading...';
+
                                 setTimeout(() => {
                                     ensureContentScriptAndSend(nextRetry);
                                 }, retryWaitTime);
                                 return;
                             } else {
-                                showStatus('Error: Content script could not load. Please refresh the page (Ctrl+F5) and try again.', 'error');
+                                showStatus(
+                                    'TxVault isn\'t connected to the transactions page. Click "Open Credit Karma Transactions Page", wait for it to load, then reopen the popup and try Export again.',
+                                    'error'
+                                );
                                 exportBtn.textContent = originalText;
                                 exportBtn.disabled = false;
                             }
-                    } else {
-                        showStatus(`Error: ${errorMsg}`, 'error');
+                        } else {
+                            showStatus(`Export could not start: ${errorMsg}`, 'error');
+                        }
+                        return;
                     }
-                    return;
-                }
-                
+
                 // Check response
                 if (response) {
                     if (response.status === 'started') {
@@ -404,34 +513,37 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     }
                 } else {
                     // No response - might be async, show info message
-                    showStatus('Export initiated. Check the page for progress updates.', 'info');
+                    showStatus('Export initiated. Check the transactions page for progress updates.', 'info');
                 }
                 });
             } catch (error) {
-                console.error('Error in ensureContentScriptAndSend:', error);
-                
+                console.error('[EXPORT START ERROR] Unexpected error in ensureContentScriptAndSend:', error);
+
                 // Retry if we haven't exceeded max retries (quick retry)
                 if (retryCount < maxRetries) {
                     const nextRetry = retryCount + 1;
                     const retryWaitTime = baseDelay + (nextRetry * 200);
                     console.log(`Error occurred (attempt ${nextRetry}/${maxRetries}), retrying in ${retryWaitTime}ms...`);
                     showStatus(`Loading... (${nextRetry}/${maxRetries})`, 'info');
-                    
+
                     // Update button to show it's retrying (simpler message)
-                    exportBtn.textContent = `Loading...`;
-                    
+                    exportBtn.textContent = 'Loading...';
+
                     setTimeout(() => {
                         ensureContentScriptAndSend(nextRetry);
                     }, retryWaitTime);
                 } else {
-                const errorMsg = error?.message || error?.toString() || 'Failed to start export';
-                    showStatus(`Error: ${errorMsg}. Please refresh the page (Ctrl+F5) and try again.`, 'error');
-                exportBtn.textContent = originalText;
-                exportBtn.disabled = false;
-            }
+                    const errorMsg = error?.message || error?.toString() || 'Failed to start export';
+                    showStatus(
+                        `TxVault couldn't start the export: ${errorMsg}. Click "Open Credit Karma Transactions Page", wait for it to load, then reopen the popup and try Export again.`,
+                        'error'
+                    );
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                }
             }
         };
-        
+
         // Start the process quickly
         showStatus('Starting export...', 'info');
         setTimeout(() => {
@@ -467,14 +579,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First of current month (no subtraction)
     const endDate = new Date(today);
     endDate.setDate(endDate.getDate() + 2); // Add 2 days for pending transactions
-    
+
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
     startDateInput.value = formatDateForInput(startDate);
     endDateInput.value = formatDateForInput(endDate);
-    
+
     // Don't mark any button as active by default - only when user clicks
-    
+
     // Show notice if on CK transactions page
     function updateCKPageNotice() {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -482,19 +594,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('TxVault: No active tab found');
                 return;
             }
-            
+
             const successNotice = document.getElementById('ck-page-notice');
             const warningNotice = document.getElementById('ck-transactions-notice');
             const currentUrl = tabs[0].url || '';
-            
+
             // More flexible URL matching - check for transactions page
-            const isOnTransactionsPage = currentUrl && 
-                (currentUrl.includes('creditkarma.com/networth/transactions') || 
+            const isOnTransactionsPage = currentUrl &&
+                (currentUrl.includes('creditkarma.com/networth/transactions') ||
                  currentUrl.includes('creditkarma.com/transactions') ||
                  currentUrl.includes('/transactions'));
-            
+
             console.log(`TxVault: Checking page notice. URL: ${currentUrl}, Is on transactions: ${isOnTransactionsPage}`);
-            
+
             if (successNotice) {
                 successNotice.style.display = isOnTransactionsPage ? 'block' : 'none';
             }
@@ -503,13 +615,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Update scrolling status in popup notice
     function updateScrollingStatus(scrollProgress) {
         const successNotice = document.getElementById('ck-page-notice');
         const noticeTitle = document.getElementById('ck-page-notice-title');
         const noticeText = document.getElementById('ck-page-notice-text');
-        
+
         if (successNotice && noticeTitle && noticeText) {
             if (scrollProgress && scrollProgress.isScrolling) {
                 // Show scrolling status
@@ -517,14 +629,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 successNotice.style.borderColor = '#2196f3';
                 successNotice.style.color = '#1565c0';
                 noticeTitle.textContent = '🔄 Now Scrolling';
-                
+
                 // OPTIMIZED DISPLAY: Show meaningful status without scroll counts
                 let statusText = '';
-                
+
                 // Show status based on phase
                 if (scrollProgress.searchingForBoundary && scrollProgress.searchProgress) {
                     // Fetching boundaries phase
-                    statusText = `🔍 Fetching boundaries...`;
+                    statusText = '🔍 Fetching boundaries...';
                     if (scrollProgress.expectedRange) {
                         statusText += `\nDate range expected: ${scrollProgress.expectedRange}`;
                     }
@@ -536,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (scrollProgress.boundaryReached) {
                         statusText = `✅ ${scrollProgress.boundaryReached}`;
                     } else {
-                        statusText = `✅ Found right of range`;
+                        statusText = '✅ Found right of range';
                     }
                     if (scrollProgress.expectedRange) {
                         statusText += `\n🔍 Finding left of range... Date range expected: ${scrollProgress.expectedRange}`;
@@ -549,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (scrollProgress.boundaryReached) {
                         statusText = `✅ ${scrollProgress.boundaryReached}`;
                     } else {
-                        statusText = `✅ Found left of range | ✅ Found right of range`;
+                        statusText = '✅ Found left of range | ✅ Found right of range';
                     }
                     if (scrollProgress.expectedRange) {
                         statusText += `\n🌾 Harvesting between range: ${scrollProgress.expectedRange}`;
@@ -560,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         statusText = `Date range expected: ${scrollProgress.expectedRange}`;
                     }
                 }
-                
+
                 // Add records and time information
                 if (scrollProgress.inRangeCount !== undefined) {
                     statusText += `\nRecords harvested: ${scrollProgress.inRangeCount}`;
@@ -568,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (scrollProgress.timeElapsed) {
                     statusText += ` | Time: ${scrollProgress.timeElapsed}`;
                 }
-                
+
                 noticeText.textContent = statusText;
                 successNotice.style.display = 'block';
             } else {
@@ -581,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     // Listen for scroll progress messages from content script
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'scrollProgress') {
@@ -589,17 +701,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return true;
     });
-    
+
     // Check on load
     updateCKPageNotice();
-    
+
     // Check when tab updates
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if (changeInfo.status === 'complete' && tab.active) {
             updateCKPageNotice();
         }
     });
-    
+
     // Auto-open transactions page if not already there (removes redundant step)
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         if (tabs[0] && tabs[0].url && tabs[0].url.includes('creditkarma.com/networth/transactions')) {
@@ -621,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================================
     // LEGAL COMPLIANCE: First-Use Disclaimer Dialog
     // ============================================================================
-    
+
     // Check if user has accepted disclaimer
     chrome.storage.local.get(['disclaimerAccepted'], function(result) {
         if (!result.disclaimerAccepted) {
@@ -644,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
             justify-content: center;
             z-index: 100000;
         `;
-        
+
         dialog.innerHTML = `
             <div style="background: white; padding: 24px; border-radius: 8px; max-width: 450px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
                 <h3 style="margin-top: 0; color: #ff6b00; font-size: 18px;">⚠️ Important Legal Notice</h3>
@@ -672,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(dialog);
         document.getElementById('accept-disclaimer').addEventListener('click', function() {
             chrome.storage.local.set({ disclaimerAccepted: true });
@@ -683,25 +795,25 @@ document.addEventListener('DOMContentLoaded', () => {
             window.close(); // Close the popup
         });
     }
-    
+
     // ============================================================================
     // END LEGAL COMPLIANCE CODE
     // ============================================================================
     // Handle Credit Karma button click - navigate to transactions page in current or new tab
     document.getElementById('ck-transactions-link').addEventListener('click', () => {
         const transactionsUrl = 'https://www.creditkarma.com/networth/transactions';
-        
+
         // Check if we're already on a Credit Karma page
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             if (tabs[0]) {
                 const currentUrl = tabs[0].url || '';
-                
+
                 // If already on transactions page, just show success
                 if (currentUrl.includes('/networth/transactions')) {
                     showStatus('✓ You are already on the transactions page. Ready to export!', 'success');
                     return;
                 }
-                
+
                 // If on Credit Karma but different page, navigate in same tab
                 if (currentUrl.includes('creditkarma.com')) {
                     chrome.tabs.update(tabs[0].id, {
@@ -715,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     return;
                 }
-                
+
                 // Not on Credit Karma - create new tab
                 chrome.tabs.create({
                     url: transactionsUrl,

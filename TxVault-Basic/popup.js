@@ -1,23 +1,23 @@
 document.getElementById('export-btn').addEventListener('click', () => {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
-    
+
     // Get checkbox states
     const allTransactionsChecked = document.getElementById('allTransactionsCheckbox').checked;
     const incomeChecked = document.getElementById('incomeCheckbox').checked;
     const expensesChecked = document.getElementById('expensesCheckbox').checked;
-    
+
     if (startDate && endDate) {
         // Show loading indicator
         const exportBtn = document.getElementById('export-btn');
         const originalText = exportBtn.textContent;
         exportBtn.textContent = 'Processing...';
         exportBtn.disabled = true;
-        
+
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             chrome.tabs.sendMessage(tabs[0].id, {
-                action: 'captureTransactions', 
-                startDate, 
+                action: 'captureTransactions',
+                startDate,
                 endDate,
                 csvTypes: {
                     allTransactions: allTransactionsChecked,
@@ -30,7 +30,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
                     exportBtn.textContent = originalText;
                     exportBtn.disabled = false;
                 }, 3000);
-                
+
                 if (response) {
                     console.log(response.status);
                 } else {

@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     }
-    
+
     if (request.action === 'captureTransactions') {
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             chrome.scripting.executeScript({
