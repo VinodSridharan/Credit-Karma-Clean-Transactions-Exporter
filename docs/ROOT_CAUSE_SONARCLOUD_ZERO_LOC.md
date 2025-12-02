@@ -251,3 +251,27 @@ sonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/docs/**,**/Documen
 **Document Status:** Complete - Awaiting SonarCloud support resolution  
 **Last Updated:** 2025-12-01
 
+---
+
+## Local Quality Workflow
+
+While SonarCloud integration is being resolved, developers should follow the standard developer workflow documented in `ABOUT_THIS_REPOSITORY.md#standard-developer-workflow`.
+
+**Quick Summary:**
+1. **Run ESLint locally** - Use `npm run lint` to catch code quality and security issues before committing
+   - Fix errors manually or use `npm run lint:fix` for auto-fixable issues
+   - **Requirement**: ESLint must pass (0 errors) before merging to `main`
+
+2. **Use SonarLint in editor** - SonarLint IDE extension provides real-time security and bug detection
+   - Catches issues as you code
+   - Aligns with SonarCloud rules for consistency
+
+3. **Rely on SonarCloud for branch/PR analysis** - Once the 0-LOC issue is resolved, SonarCloud will provide:
+   - Automated analysis on every push to `main` and pull requests
+   - Security hotspot detection
+   - Code quality metrics and trends
+
+This layered approach ensures issues are caught early (ESLint), validated in real-time (SonarLint), and tracked at the branch level (SonarCloud).
+
+For the complete development workflow including branching strategy and required checks, see `ABOUT_THIS_REPOSITORY.md#standard-developer-workflow`.
+

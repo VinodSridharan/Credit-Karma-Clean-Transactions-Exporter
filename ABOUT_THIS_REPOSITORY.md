@@ -85,6 +85,18 @@ This split keeps the GitHub view clean for reviewers and recruiters, while still
 
 ## Code Quality and Security
 
+### ESLint
+
+This repository uses ESLint for local code quality and security checks:
+
+- **Configuration:** `eslint.config.js` at repository root
+- **Scope:** All JavaScript files in `TxVault/` and `TxVault-Basic/` directories
+- **Run locally:**
+  - `npm run lint` - Check for issues
+  - `npm run lint:fix` - Auto-fix issues where possible
+- **Requirement:** ESLint must pass (0 errors) before merging changes to `main`
+- **Current rules:** Security-focused rules (`no-eval`, `no-implied-eval`, `eqeqeq`) and code quality rules
+
 ### SonarCloud Integration
 
 This repository uses SonarCloud for automated code quality and security analysis:
@@ -139,4 +151,84 @@ During the integration of SonarCloud code quality analysis, several process impr
 - Add automated verification to ensure analysis produces results
 
 For detailed root cause analysis, see `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md`.
+
+## Standard Developer Workflow
+
+This repository follows a structured, auditable development workflow designed to ensure code quality and security at every step. The workflow is repeatable and documented to support both individual contributors and team collaboration.
+
+### Workflow Overview
+
+The development process follows this sequence:
+
+1. **Create or update a feature branch** from `main`
+   - Use descriptive branch names (e.g., `feature/date-validation`, `bugfix/message-handler`)
+   - Keep branches focused on a single change or feature
+
+2. **Implement changes**
+   - Write code following existing patterns and style
+   - Update documentation if behavior or APIs change
+
+3. **Run ESLint locally** - **Required before committing**
+   - Run `npm run lint` to check for code quality and security issues
+   - Fix errors manually or use `npm run lint:fix` for auto-fixable issues
+   - **ESLint must pass with 0 errors before merging to `main`**
+
+4. **Run manual tests**
+   - Test changes with at least one preset (e.g., Last Month, Last Year)
+   - Verify the extension loads and functions correctly in Chrome
+   - Check that exported CSV files are valid and complete
+
+5. **Commit with clear messages**
+   - Use descriptive commit messages that explain what changed and why
+   - Reference related issues when applicable (e.g., "Fixes #12")
+
+6. **Open a Pull Request**
+   - Target the `main` branch
+   - Include a clear description of changes
+   - Reference any related issues or discussions
+
+7. **Let CI run and address findings**
+   - GitHub Actions will run SonarCloud analysis (once the 0-LOC issue is resolved)
+   - Review any security hotspots or code quality issues reported
+   - Address critical findings before requesting review
+
+8. **Code review and merge**
+   - Address reviewer feedback
+   - Ensure all checks pass before merging
+
+### Quality Toolchain
+
+The workflow uses a layered approach to catch issues at different stages:
+
+- **ESLint (Local)** - Catches code quality and security issues before committing
+  - Run: `npm run lint` or `npm run lint:fix`
+  - **Requirement**: Must pass (0 errors) before merging
+
+- **SonarLint (Editor)** - Real-time security and bug detection as you code
+  - IDE extension provides immediate feedback
+  - Aligns with SonarCloud rules for consistency
+
+- **SonarCloud (CI/CD)** - Automated analysis on every push and PR
+  - Runs via GitHub Actions workflow
+  - Provides security hotspot detection and code quality metrics
+  - **Note**: Currently experiencing a 0-LOC indexing issue (see `docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md`)
+
+This layered approach ensures issues are caught early (ESLint), validated in real-time (SonarLint), and tracked at the branch level (SonarCloud).
+
+### Branching Strategy
+
+- **`main`** - Production-ready code, always deployable
+- **Feature branches** - Named `feature/description` for new functionality
+- **Bugfix branches** - Named `bugfix/description` for bug fixes
+- All changes merge to `main` via Pull Request
+
+### Required Checks Before Merge
+
+- ✅ ESLint passes with 0 errors
+- ✅ Manual testing completed (at least one preset verified)
+- ✅ Documentation updated if behavior changed
+- ✅ Commit messages are clear and descriptive
+- ✅ PR description explains changes and rationale
+
+For detailed testing procedures, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 

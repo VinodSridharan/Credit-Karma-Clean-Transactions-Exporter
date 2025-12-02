@@ -433,3 +433,16 @@ Code is **production-ready** from functional and syntax perspective. Demonstrate
 **Last Review:** 2025-12-01  
 **Next Review:** After SonarCloud integration resolution
 
+---
+
+## Development Workflow
+
+This project follows a structured, auditable development workflow designed to ensure code quality and security. The workflow is documented in `ABOUT_THIS_REPOSITORY.md#standard-developer-workflow` and includes:
+
+- **Branching strategy**: Feature/bugfix branches merged to `main` via Pull Request
+- **Required checks**: ESLint (0 errors required), manual testing, documentation updates
+- **Quality toolchain**: ESLint (local) → SonarLint (editor) → SonarCloud (CI/CD)
+- **Repeatable process**: All steps are documented and verifiable
+
+For complete workflow details, see `ABOUT_THIS_REPOSITORY.md#standard-developer-workflow`.
+

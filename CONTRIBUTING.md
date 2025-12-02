@@ -49,6 +49,19 @@ Please do **not** share real account numbers, full names, or any sensitive perso
 
 ---
 
+## Standard Developer Workflow
+
+This project follows a structured development workflow to ensure code quality and security. For the complete workflow, see [ABOUT_THIS_REPOSITORY.md](./ABOUT_THIS_REPOSITORY.md#standard-developer-workflow).
+
+**Quick Checklist:**
+1. Create a feature branch from `main`
+2. Implement your changes
+3. **Run `npm run lint`** - Must pass with 0 errors
+4. Test manually with at least one preset
+5. Commit with clear messages
+6. Open a Pull Request targeting `main`
+7. Address any CI findings (SonarCloud analysis)
+
 ## Code and pull requests
 
 Small pull requests are welcome, especially if they:
@@ -59,9 +72,17 @@ Small pull requests are welcome, especially if they:
 
 Before opening a pull request:
 
-1. Run your changes against at least one preset.  
-2. Update documentation if behavior or messages change.  
-3. Keep changes focused and easy to review.
+1. **Run ESLint** - Execute `npm run lint` and ensure 0 errors (required)
+2. **Test your changes** - Run against at least one preset (e.g., Last Month, Last Year)
+3. **Update documentation** - If behavior or messages change, update relevant docs
+4. **Keep changes focused** - Small, reviewable PRs are preferred
+
+### Quality Requirements
+
+- **ESLint**: Must pass with 0 errors before merging (run `npm run lint`)
+- **Testing**: Manual verification with at least one preset required
+- **Documentation**: Update docs if APIs or behavior change
+- **Security**: All message handlers must validate sender origin and inputs (see `SECURITY_NOTES.md`)
 
 ---
 
