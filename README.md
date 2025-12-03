@@ -248,20 +248,30 @@ This project demonstrates advanced skills in:
 - **Production Quality**: PRISTINE verification, comprehensive testing, user-first design
 - **Documentation Excellence**: Clear, comprehensive, recruiter-friendly documentation
 
-### Private Repository Access
+### Portfolio & Interview Access
 
-For recruiters and hiring managers who want to review the private repository:
+This repository and its documentation are intentionally public so hiring teams can review the TxVault Exporter implementation, architecture, and quality controls as part of my portfolio.
 
 | Contact Method | Information |
-|----------------|-------------|
+|---|---|
 | 📧 **Email** | [vinod.sridharan@txvault.app](mailto:vinod.sridharan@txvault.app) |
 | 💼 **LinkedIn** | [Vinod Sridharan](https://www.linkedin.com/in/vinod-s-6a565b1b8/) |
 
-**What to Include in Your Request:**
+**What This Repository Offers:**
+
+- Full codebase access for technical review
+- Comprehensive documentation and project reviews
+- Production-ready code with quality controls (ESLint, SonarCloud)
+- Real-world problem-solving demonstration
+
+**For Technical Discussions:**
+
+If you'd like to discuss implementation details, architecture decisions, or have questions about the project:
+
 - Your name and company
 - Your role/title
 - Brief description of the position or opportunity
-- Your GitHub username (for repository access)
+- Specific areas you'd like to discuss
 
 **Fast Response Guaranteed**: I typically respond within 24 hours to all professional inquiries.
 
