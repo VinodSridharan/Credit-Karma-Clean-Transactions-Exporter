@@ -111,9 +111,18 @@ Browser Download API (local file system)
   - Support ticket filed with SonarCloud
 - **Expected Coverage:** All JavaScript files in `TxVault/` and `TxVault-Basic/` directories
 
-#### ESLint / Formatting
-- **Status:** Not currently configured
-- **Recommendation:** Add ESLint configuration for consistent code style and potential security issue detection
+#### ESLint
+- **Status:** ✅ Configured and active
+- **Configuration:** `eslint.config.js` at repository root
+- **Scope:** All JavaScript files in `TxVault/` and `TxVault-Basic/` directories
+- **Current Rules:**
+  - Security-focused: `no-eval`, `no-implied-eval`, `eqeqeq` (strict equality)
+  - Code quality: `no-unused-vars`, `no-var`, `prefer-const`, formatting rules
+- **Usage:**
+  - Run locally: `npm run lint` (check for issues)
+  - Auto-fix: `npm run lint:fix` (fix auto-fixable issues)
+- **Requirement:** ESLint must pass (0 errors) before merging changes to `main`
+- **Workflow Integration:** Part of the standard developer workflow (see `ABOUT_THIS_REPOSITORY.md#standard-developer-workflow`)
 
 ### Code Security Practices
 
@@ -143,8 +152,9 @@ Browser Download API (local file system)
   - **Status:** Initial scan shows no `innerHTML` usage, verify with comprehensive code review
   - **Owner:** Development team
 
-- [ ] **Add ESLint configuration** - Implement ESLint with security-focused rules
-  - **Recommended plugins:** `eslint-plugin-security`, `eslint-plugin-no-unsanitized`
+- [x] **Add ESLint configuration** - ✅ Implemented ESLint with security-focused rules
+  - **Status:** ESLint configured with `no-eval`, `no-implied-eval`, `eqeqeq` rules
+  - **Future:** Consider adding `eslint-plugin-security` and `eslint-plugin-no-unsanitized` plugins
   - **Owner:** Development team
 
 - [ ] **Error handling audit** - Review all error handling to ensure no sensitive data leaks in console/logs
@@ -188,8 +198,8 @@ Browser Download API (local file system)
 ## Known Limitations
 
 ### Current Limitations
-- No automated security scanning beyond SonarCloud (when operational)
-- No ESLint configuration for code quality checks
+- No automated security scanning beyond SonarCloud (when operational) and ESLint
+- SonarCloud dashboard shows 0 LOC (support ticket in progress)
 - Manual security review process
 
 ### Mitigations

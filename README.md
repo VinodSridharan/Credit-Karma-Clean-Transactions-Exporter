@@ -53,6 +53,19 @@ The extension UI below shows the date-range preset selector in action:
 
 ---
 
+## 🌟 Why This Project Is Awesome
+
+TxVault isn’t just “yet another scraper.” It is a production‑ready, security‑aware data pipeline disguised as a Chrome extension:
+
+- 🧠 **Designed for analysts and engineers** – Outputs clean, analysis‑ready CSVs that drop directly into Excel, Python, or a BI tool without post‑processing.
+- 🧱 **Zero‑dependency, vanilla JavaScript** – No frameworks, no bundlers, no external libraries. Easier to audit, easier to trust, and unlikely to break when ecosystems shift.
+- 🔁 **Battle‑tested against real data** – Validated on multi‑year transaction histories with verified “Pristine” runs for key presets and documented edge cases.
+- 🧪 **AI‑assisted, human‑verified** – Many features were prototyped with AI, then iteratively hardened, tested, and documented by hand to meet reliability and security expectations.
+- 🧩 **Multiple extraction modes** – Scroll & Capture, Monthly, Yearly, and preset‑based flows support everything from one‑off exports to repeatable monthly reporting.
+- 🧭 **Transparency by design** – The repository includes full project reviews, root‑cause analyses, and security notes so maintainers and reviewers can see how decisions were made over time.
+
+---
+
 ## 📊 Proven Performance
 
 ### Date Range Presets
@@ -105,11 +118,27 @@ The extension UI below shows the date-range preset selector in action:
 - **Clean CSV Output**: Only valid, unique transactions with real dates are exported
 - **RFC 4180 Compliant**: Standard CSV format for easy import into Excel, Google Sheets, or analysis tools
 
-### Privacy & Security
-- **100% Local Processing**: All data stays in your browser
-- **No External Servers**: Zero data transmission
-- **No Tracking**: No analytics or telemetry
-- **Open Source**: Full code transparency
+
+## 🔒 Privacy & Security
+
+- **100% Local Processing** – All data stays in your browser
+- **No External Servers** – Zero data transmission
+- **No Tracking** – No analytics or telemetry
+- **Open Source** – Full code transparency
+- **MIT License** – Free to use and modify
+
+### Defense‑in‑Depth for Code Quality & Security
+
+This project treats security and correctness as first‑class features:
+
+- 🧹 **ESLint‑clean codebase** – The entire extension passes ESLint with 0 errors and 0 warnings using a security‑aware rule set (strict equality, no eval/implied eval, unused symbol cleanup, etc.).
+- 🛰️ **Static analysis pipeline** – SonarLint is wired into the editor and SonarCloud is integrated via GitHub Actions for deeper security and maintainability checks (a separate RCA documents a current SonarCloud LOC indexing issue).
+- 🛡️ **Hardened message handling** – All `chrome.runtime.onMessage` handlers validate the sender origin and strictly validate date parameters (format, validity, and reasonable range) before any work is performed.
+- 🧼 **Sanitized logging and alerts** – URLs are scrubbed before logging, and user‑facing error messages avoid exposing full URLs, tokens, or internal diagnostics.
+- 🧾 **Documented security posture** – See [`SECURITY_NOTES.md`](./SECURITY_NOTES.md) for permissions analysis, data‑handling guarantees, and quality tooling, and [`docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md`](./docs/ROOT_CAUSE_SONARCLOUD_ZERO_LOC.md) for the SonarCloud root‑cause analysis.
+
+These controls make TxVault suitable as a reference implementation for secure, auditable Chrome extensions that handle financial data.
+
 
 ---
 
@@ -636,6 +665,24 @@ The project is organized into branches based on extraction methods:
 - 🐛 Found a bug? [Open an issue](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/issues)
 - 💡 Have an idea? [Start a discussion](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter/discussions)
 - 🔧 Want to contribute? Fork the repo and submit a pull request
+
+**For developers:** This project follows a structured development workflow with required quality checks. See [CONTRIBUTING.md](./CONTRIBUTING.md) for testing procedures and [ABOUT_THIS_REPOSITORY.md](./ABOUT_THIS_REPOSITORY.md#standard-developer-workflow) for the complete developer workflow including ESLint requirements and branching strategy.
+
+---
+
+## 📌 Note to Hiring Managers & Collaborators
+
+If you’re reviewing this project as part of a hiring or collaboration process:
+
+- This repository was used as a **sandbox for disciplined, end‑to‑end engineering**:
+  - Problem discovery ➝ architecture ➝ implementation ➝ testing ➝ documentation ➝ security hardening.
+  - Includes a written project review, root‑cause analysis of a third‑party tool issue, and a security notes document.
+- The work here reflects how I like to build systems:
+  - **Observable** – metrics, logs, and limitations are documented, not hidden.
+  - **Tool‑assisted** – static analysis (ESLint, SonarLint/SonarCloud) is treated as part of the build, not an afterthought.
+  - **Security‑conscious** – especially around browser permissions, message boundaries, and data handling.
+
+If this way of working resonates with how your team approaches data and application engineering, I’d be happy to walk you through the code and design decisions in more detail.
 
 ---
 
