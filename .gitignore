@@ -195,8 +195,6 @@ LinkedIn-Manager/**/__pycache__/
 
 # WhisperingChunks (separate project - never track duplicates)
 /WhisperingChunks/
-# Allow legacy archive folder (historical documentation)
-!WhisperingChunks_legacy_overlap_chunks/
 
 # Build artifacts and temporary files
 *.tmp
