@@ -183,7 +183,10 @@ MANUAL_RECOVERY_SCRIPT.js
 # Development/Testing folders
 # screenshots/ - ALLOWED for root README images
 
-# LinkedIn Manager - Private activity logs (never sync to git)
+# Job search and LinkedIn artifacts (moved to Obsidian vault - never track)
+JobAgent/
+Applications/
+LinkedIn-Manager/
 LinkedIn-Manager/.activities/
 LinkedIn-Manager/**/.activities/
 LinkedIn-Manager/**/*.json
