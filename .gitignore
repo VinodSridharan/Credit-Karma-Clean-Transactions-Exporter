@@ -193,6 +193,9 @@ LinkedIn-Manager/**/*.json
 LinkedIn-Manager/__pycache__/
 LinkedIn-Manager/**/__pycache__/
 
+# WhisperingChunks (separate project - never track duplicates)
+WhisperingChunks/
+
 # Build artifacts and temporary files
 *.tmp
 *.temp
