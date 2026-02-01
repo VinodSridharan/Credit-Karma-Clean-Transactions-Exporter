@@ -19,6 +19,13 @@
 !README.md`n!LICENSE`n!PRIVACY.md
 !docs/
 !docs/*
+!tests/
+!tests/**
+!lib/
+!lib/**
+!jest.config.js
+!package.json
+!package-lock.json
 
 # Exclude Selenium-Version completely (Python version - separate repo)
 Selenium-Version/
@@ -89,6 +96,9 @@ CK_TX_Downloader_JavaScript/
 !GITHUB_PUBLICATION_GUIDE.md  # Publication guide
 !CHANGELOG_EXPORT_FILTERING.md  # Export filtering changelog
 !PUBLICATION_READY.md  # Publication readiness checklist
+!DOCS_STATUS.md  # v4.3.0 documentation status
+!EXTENSION_HEALTH_REPORT.md  # v4.3.0 health report
+!ANNEX-TxVault-Exporter-Technical-Documentation-v4.3.0.md  # v4.3.0 technical annex
 RISK_REGISTER.md
 
 # Analysis and comparison reports (generated files)
@@ -147,6 +157,7 @@ LOGOUT_*.md
 PENDING_*.md
 QUICK_*.md
 TESTING_*.md
+!TESTING.md  # v4.3.0 testing instructions
 VALIDATION_*.md
 IMPROVEMENTS_*.md
 FIXES_*.md

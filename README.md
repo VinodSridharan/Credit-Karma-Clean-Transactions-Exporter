@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
-[![Version](https://img.shields.io/badge/version-4.2.1-blue.svg)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
+[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
 [![Technology](https://img.shields.io/badge/Technology-JavaScript-yellow)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
 [![Status](https://img.shields.io/badge/status-Production%20Ready-brightgreen.svg)](https://github.com/VinodSridharan/Credit-Karma-Clean-Transactions-Exporter)
 
@@ -18,7 +18,9 @@ For a deeper view of latest changes, lessons learned, and major themes in this p
 
 **TxVault Exporter** is a powerful Chrome extension designed for users, analysts, and developers who demand precise, privacy-first extraction of financial transaction data. Whether you're tracking expenses, analyzing spending patterns, or building financial applications, TxVault transforms hours of manual work into seconds of automated extraction.
 
-**Version:** 4.2.1 | **Status:** ✅ Production Ready | **Last Updated:** 2025-11-30 01:44:38 UTC
+**Version:** 4.3.0 | **Status:** ✅ Production Ready | **Last Updated:** 2026-01-31
+
+For technical details (guards, safety caps, messaging, data handling, automated tests), see the [TxVault Annex v4.3.0](./ANNEX-TxVault-Exporter-Technical-Documentation-v4.3.0.md).
 
 ---
 
@@ -213,6 +215,7 @@ The extension evolved through multiple iterations:
 - **v3.0**: Intelligent oscillation and progress tracking
 - **v4.0**: Innovative Mode (Scroll & Capture) with real-time statistics
 - **v4.2.1**: Production-ready with PRISTINE verification
+- **v4.3.0**: Automated Jest tests (guards, safety caps, messaging, data handling), technical annex, health report
 
 Each iteration addressed real-world challenges discovered through extensive testing.
 
