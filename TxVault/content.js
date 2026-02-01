@@ -65,6 +65,9 @@ const CONFIG = {
         LAST_FIVE_YEARS_SECONDS: 1200,  // Hard cap: ~20 minutes for Last 5 Years deep archive
         DEFAULT_SECONDS: 1200           // Fallback cap: ~20 minutes for other presets
     },
+    // This Month: stop when scrolled past start date and this many consecutive days with no activity
+    THIS_MONTH_CONSECUTIVE_EMPTY_DAYS: 3,
+
     SCROLL_LIMITS: {
         LAST_MONTH_MAX_SCROLLS: 80,        // Hard cap: ~80 scrolls for Last Month preset
         THIS_MONTH_MAX_SCROLLS: 160,       // Hard cap: ~160 scrolls for This Month
@@ -931,10 +934,52 @@ function extractTransactionInfo(element) {
     return transactionInfo;
 }
 
+/**
+ * Get transaction row elements - URL-aware with fallbacks for new /networth/transactions UI
+ * @returns {NodeListOf<Element>|Element[]}
+ */
+function getTransactionElements() {
+    const url = (window.location && window.location.href) || '';
+    const isNetworthTransactions = url.includes('/networth/transactions');
+
+    // Primary: [data-index] - stable across many CK UI versions
+    let elements = document.querySelectorAll('[data-index]');
+    if (elements.length > 0) {
+        return elements;
+    }
+
+    // Fallbacks for new /networth/transactions UI when [data-index] is absent
+    if (isNetworthTransactions) {
+        const fallbackSelectors = [
+            '[data-testid*="transaction"]',
+            '[data-testid*="Transaction"]',
+            '[data-testid*="transaction-row"]',
+            'article[data-testid]',
+            '[role="row"][data-testid]',
+            'div[class*="transaction"][class*="row"]',
+            'li[class*="transaction"]',
+            '[class*="TransactionRow"]',
+            '[class*="transaction-row"]',
+            'div[class*="TransactionItem"]'
+        ];
+        for (const sel of fallbackSelectors) {
+            try {
+                elements = document.querySelectorAll(sel);
+                if (elements.length > 0) {
+                    console.log(`🔍 [SELECTOR] Fallback "${sel}" found ${elements.length} elements on /networth/transactions`);
+                    return elements;
+                }
+            } catch (e) {
+                /* selector invalid, skip */
+            }
+        }
+    }
+
+    return elements;
+}
+
 function extractAllTransactions() {
-    // CRITICAL: Primary selector for transactions - Credit Karma uses [data-index] attribute
-    // This selector is robust and should remain stable across UI updates
-    const transactionElements = document.querySelectorAll('[data-index]');
+    const transactionElements = getTransactionElements();
     const selectorCount = transactionElements.length;
 
     // Log selector performance for QA/auditability (every 10th call to avoid spam)
@@ -943,7 +988,7 @@ function extractAllTransactions() {
     }
     extractAllTransactions.callCount++;
     if (extractAllTransactions.callCount % 10 === 0) {
-        console.log(`🔍 [SELECTOR VALIDATION] Transaction extraction - Found ${selectorCount} elements with [data-index] selector`);
+        console.log(`🔍 [SELECTOR VALIDATION] Transaction extraction - Found ${selectorCount} elements`);
     }
 
     const transactions = Array.from(transactionElements, element => extractTransactionInfo(element));
@@ -2509,8 +2554,9 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
                     return true;
                 }
 
-                const transactionElements = document.querySelectorAll('[data-index]');
-                if (scrollAttempts > 5 && transactionElements.length === 0) {
+                const transactionElements = typeof getTransactionElements === 'function' ? getTransactionElements() : document.querySelectorAll('[data-index]');
+                const txCount = transactionElements ? transactionElements.length : 0;
+                if (scrollAttempts > 5 && txCount === 0) {
                     console.log('🔴 LOGOUT DETECTED: No transaction elements after 5+ scrolls');
                     return true;
                 }
@@ -2633,8 +2679,8 @@ async function captureTransactionsInDateRange(startDate, endDate, request = {}) 
 
             // Show alert
             const logoutMsg = removedCount > 0
-                ? `🚨 Credit Karma logged out during extraction!\n\n✅ Exported ${filteredForExport.length} transaction(s) to CSV file.\n\n⚠️ Removed ${removedCount} (Pending dates or duplicates)\n\nFile: ${fileName}\n\nTotal transactions captured: ${capturedTransactions.length}\nDate range: ${startDate} to ${endDate}\n\n⚠️ Extraction was incomplete due to logout.`
-                : `🚨 Credit Karma logged out during extraction!\n\n✅ Exported ${filteredForExport.length} transaction(s) to CSV file.\n\nFile: ${fileName}\n\nTotal transactions captured: ${capturedTransactions.length}\nDate range: ${startDate} to ${endDate}\n\n⚠️ Extraction was incomplete due to logout.`;
+                ? `🚨 Session ended during run; exported partial data.\n\n✅ Exported ${filteredForExport.length} transaction(s) to CSV file.\n\n⚠️ Removed ${removedCount} (Pending dates or duplicates)\n\nFile: ${fileName}\n\nTotal transactions captured: ${capturedTransactions.length}\nDate range: ${startDate} to ${endDate}`
+                : `🚨 Session ended during run; exported partial data.\n\n✅ Exported ${filteredForExport.length} transaction(s) to CSV file.\n\nFile: ${fileName}\n\nTotal transactions captured: ${capturedTransactions.length}\nDate range: ${startDate} to ${endDate}`;
             alert(logoutMsg);
             console.log(`✅ CSV exported successfully: ${fileName}`);
             console.log(`   Transactions exported: ${filteredForExport.length} (out of ${capturedTransactions.length} total captured)`);
@@ -6357,6 +6403,7 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
         }
 
         // Log date distribution to help debug missing dates
+        // Include BOTH posted and pending transactions - days with only pending count as "covered"
         const dateDistribution = {};
         const pendingCount = { count: 0 };
         filteredTransactions.forEach(t => {
@@ -6364,12 +6411,12 @@ ${allTransactions.slice(0, 10).map((t, i) => `     ${i + 1}. ${t.date || 'No dat
 
             if (isPendingStatus) {
                 pendingCount.count++;
-            } else {
-                const txDate = parseTransactionDate(t.date);
-                if (txDate) {
-                    const dateKey = txDate.toLocaleDateString();
-                    dateDistribution[dateKey] = (dateDistribution[dateKey] || 0) + 1;
-                }
+            }
+            // Count BOTH posted and pending for date coverage (pending with valid date counts)
+            const txDate = parseTransactionDate(t.date);
+            if (txDate) {
+                const dateKey = txDate.toLocaleDateString();
+                dateDistribution[dateKey] = (dateDistribution[dateKey] || 0) + 1;
             }
         });
         console.log('Date distribution of exported transactions:', dateDistribution);
@@ -7016,10 +7063,11 @@ if (!window.__ckExportListenerAttached) {
                 console.warn(`TxVault: Current URL: ${currentUrl}`);
                 console.warn(`TxVault: URL Path: ${urlPath}`);
             } else {
-                const txCount = document.querySelectorAll('[data-index]').length;
+                const txEls = typeof getTransactionElements === 'function' ? getTransactionElements() : document.querySelectorAll('[data-index]');
+                const txCount = txEls ? txEls.length : 0;
                 console.log(`TxVault: Transaction elements found: ${txCount}`);
                 if (txCount === 0 && currentUrl.includes('creditkarma.com')) {
-                    console.warn('TxVault: ⚠️ No transaction elements found - page may still be loading or selectors may have changed');
+                    console.warn('TxVault: ⚠️ No transaction elements found – page may still be loading or selectors may have changed. If on /networth/transactions, CK may have updated their UI.');
                 }
             }
         }, 1000);
@@ -7072,13 +7120,14 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
             // CRITICAL: Exclude auth/update/redirect pages
             const currentUrl = window.location.href;
             const currentUrlLower = currentUrl.toLowerCase();
-            const hasTransactionElements = document.querySelectorAll('[data-index]').length > 0;
+            const txElements = typeof getTransactionElements === 'function' ? getTransactionElements() : document.querySelectorAll('[data-index]');
+            const hasTransactionElements = txElements && txElements.length > 0;
 
             // DEBUG: Log current page state
             console.log('TxVault: Page detection check:');
             console.log(`  Current URL: ${currentUrl}`);
             console.log(`  Transaction elements found: ${hasTransactionElements}`);
-            console.log(`  Transaction count: ${document.querySelectorAll('[data-index]').length}`);
+            console.log(`  Transaction count: ${txElements ? txElements.length : 0}`);
 
             // CRITICAL: Exclude auth/update/redirect pages - check URL PATH, not query parameters
             // Only check for /auth/ in the actual path, not in redirectUrl query parameters
@@ -7122,7 +7171,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
    • Is Auth Page: YES
    • Is Transactions Page: NO
    • Has Transaction Elements: ${hasTransactionElements}
-   • Transaction Element Count: ${document.querySelectorAll('[data-index]').length}
+   • Transaction Element Count: ${txElements ? txElements.length : 0}
 
 🔍 DETECTION DETAILS:
    • URL Path Contains /auth/: ${urlPath.includes('/auth/')}
@@ -7171,7 +7220,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage)
    • Is Auth Page: ${isAuthPage}
    • Is Transactions Page: NO
    • Has Transaction Elements: ${hasTransactionElements}
-   • Transaction Element Count: ${document.querySelectorAll('[data-index]').length}
+   • Transaction Element Count: ${txElements ? txElements.length : 0}
 
 🔍 PAGE DETECTION RESULTS:
    • URL Contains /transactions: ${hasTransactionsUrl}

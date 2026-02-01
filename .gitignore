@@ -26,6 +26,8 @@
 !jest.config.js
 !package.json
 !package-lock.json
+TxVault/Documentation/Internal/
+
 
 # Exclude Selenium-Version completely (Python version - separate repo)
 Selenium-Version/
